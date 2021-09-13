@@ -21,7 +21,7 @@ This is a transaction that contains adjustable parameters which will be executed
 
 Note, art can also be uploaded as free to download art on through the platform, however, this can only be done by contributors to the platform. Some parameters transaction parameters include: 
 
-+ Uniquesness of the nft
++ Uniqueness of the nft
     + basically the number of nft contracts that should be created
 + Price 
     + how is an nft valued ? are there any methods for valueing digital art ?
@@ -201,7 +201,7 @@ Some workflows that describe (as much as i can for now) what the ux would feel l
     + exchange contract then sends portion of proceeds to administration reserve, rewards reserve
     + exchange store collected fee's in fees reserve
 
-* Downloading free nft's 
+* Downloading free art
     + user clicks on freemiums
     + a list page is presented to user with sort and search options
     + user clicks on art for download
