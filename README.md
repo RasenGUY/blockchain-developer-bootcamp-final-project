@@ -75,6 +75,7 @@ the smart contract(s) will handle the adminstrative tasks of the platform which 
         + stake percentage limit - maximum stake a creator can have in relation to total tokens staked 
         + contribution limit - number of contributions a creator can have in a given timeline
         + contribution limit timeline 
+        + limit for proposal experiation - if proposed request reach a certain timelimit and if people have not voted, then the votes will be tallied based on the amount of people that have voted (responsiblity in this system should be encouraged, after all creators are the owners of the platform)
         
 + distribution of rewards
     + distribute governance tokens to creators
@@ -113,3 +114,101 @@ users are the costumers that will make use of the products avaiable on the platf
 * users can:
     +  become contributors in the collective (see creator roles)
     +  can trade premium digital art 
+
+
+
+## workflows
+Some workflows that describe (as much as i can for now) what the ux would feel like
+
+### creators
+* Creating an account (register):
+    + creator surfs to the platform
+    + creator logs in with metamask or other service
+    + creator creates platform identity
+        + profile photo
+        + some links associtated to portofolio
+        + userName
+
+* creator login: 
+    + creators clicks on login with metamask or other service 
+    + app checks wheter creator account belongs to blacklist 
+    + if creator is not in blacklist then dissalow login and is on creators list allow login as creator
+    + if creator is not in blacklist and is not creator list then allow login. 
+
+* Making an 'create nft request' (before creating a request, a creator should discuss with other creator on the discord channel about the request, this way he can increase the chances that his propsal will pass and also fix issues, if there are, and also discuss variables - price, discount price etc.)
+    + creator clicks on proposals on nav
+    + on the proposal page creator clicks on create proposal
+    + creator can select (from a selection box what kind of proposal to create)
+        + system proposal
+        + create nft proposal 
+        + accountability proposal
+    + creator clicks on the create nft proposal, a modal pops up/creator is director to page for 'create nft request'
+    + creator then proceeds to upload files and fill in the variable data
+    + creator then clicks on create proposal
+    + a transaction is created and waiting to be executed on vote pass
+    + proposal then appears on the proposal page (nft requests section)
+    + other creators have to respond before voting time expires
+    + if proposal passes then create nft premium and publish on the website art else then create art and published on the website
+        + also distribute governance and utility tokens to the transaction creator
+
+* Staking (how exactly does staking work) - will work on this once i understand a bit more about staking -
+    + 
+
+* Making a system update request
+    + creator clicks on proposals on nav 
+    + on the proposal page creator clicks on create proposal
+    + creator can select (from a selection box what kind of proposal to create)
+        + system proposal
+        + create nft proposal 
+        + accountability proposal
+    + creator selects system update
+    + a modal pops up/creator is director to page for 'system update'
+    + creator fills in variables
+    + proposal appears on proposal page under section system updates
+    + creators vote on proposal
+    + if propsal passeses, updates are passed to a variables contract with which the main contract interacts
+        + note that only the main contract can interact with the system variables contract, so updates can only be executed by a main smart contract instead of directly buy creator accounts
+
+* Making an accountability proposal
+    + creator clicks on proposals on nav 
+    + on the proposal page creator clicks on create proposal
+    + creator can select (from a selection box what kind of proposal to create)
+        + system proposal
+        + create nft proposal 
+        + accountability proposal
+    + creator selects accountability proposal 
+    + a modal pops up/creator is director to page for 'accountability proposal'
+    + creator fills in variables
+        + target account (who will be held accountable)
+        + amount of governance tokens to slash 
+        + amount utility tokens to slash 
+    + proposal appears on proposal page under section accountability proposals
+    + creators vote on proposal
+    + if propsal passeses, target account is then added to the blacklist (don't know if this should be a contract or not?) and the main contract revokes (takes away) the amount of governance tokens, and cp tokens staked by the creator account
+        + governance tokens should not be held by individual wallets, instead the smart contract should keep a registry of the accounts that have or don't have governance tokens
+
+
+### users
+* follow creator login process
+* Buying premium nft's
+    + user clicks on shop (exchange)
+    + a list page is presented to user with sort and search options
+    + user clicks on art 
+    + user the log's in with metamask or other service 
+    + user selects unit for payment 
+    + user submits payment
+    + exchange contract then sends contract to nft to user wallet
+    + exchange contract then sends portion of proceeds to administration reserve, rewards reserve
+    + exchange store collected fee's in fees reserve
+
+* Downloading free nft's 
+    + user clicks on freemiums
+    + a list page is presented to user with sort and search options
+    + user clicks on art for download
+    + user selects format
+    + user downloads art
+    
+
+
+
+
