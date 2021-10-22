@@ -4,5 +4,8 @@
     "chai": "^4.3.4",
     "chai-as-promised": "^7.1.1",
     "create-gitignore": "^0.1.0"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts-upgradeable": "^4.3.2"
   }
 }

@@ -1,13 +1,13 @@
-# Icon collective 
+# icon DAO collective -IDAO- token (IDAO) - contribution token (IDAOC, IDAOG) 
 A distributed collective for icons, vector graphics, animated svg's etc.  
 
 ## A platform where users can create and curate icons and vector art (like) (what ?)
 A platform that enables cooperative contributions from digital art creatives and fascilitates the (automatic) administration of the rewards attributed to their contributions.
 
 ## Why ?
-For millinia the hirachic economic model of extraction, production and mainatnes the commons and its stakeholders, has been dominated by a centralized hierarchical model of control. The system supposedly rewards meritorious behavior, but instead ends up favoring nepotism, excessive control and the unqual distribution of value. 
+For millinia the hierarchic economic model of extraction, production and mainatnes the commons and its stakeholders, has been dominated by a centralized hierarchical models of control. The system supposedly rewards meritorious behavior based on hard work, preserverence and integrity. However, it instead ends up favoring nepotism, excessive control, corruptive and amoral behaviour, and the unqual distribution of value. 
 
-The icon collective provides an alternative (digitalized and open) model to the organizational zeitgeist of digital creative art. It provides a system, where collaboration is honoured, where merit is rewarded and where accountability and inclusion through democratic governance form an integral part of decision making within the organization. 
+IDAO (icon-dao) collective provides an alternative (digitalized and open) model to the organizational zeitgeist of digital creative art. It provides a system, where collaboration is honoured, where merit is rewarded and where accountability and inclusion through democratic governance form an integral part of decision making within the organization. 
 
 ## how does it work ?
 Digital art creators (can be anyone) create digital art (according to community set guidelines) and publish them through the platform dashboard as a request to create nft's out of the art. The community votes on the proposed request. If the vote passes, the art will be automatically 'nftified' and appear as premium (to pay for) art on the platform. If the vote does not pass, the art becomes available as a freemium on the platform. 
