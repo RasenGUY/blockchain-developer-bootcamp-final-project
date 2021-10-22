@@ -208,7 +208,3 @@ Some workflows that describe (as much as i can for now) what the ux would feel l
     + user selects format
     + user downloads art
     
-
-
-
-

@@ -1,0 +1,49 @@
+fungibleDao
+"collective of digital artists for digital art"
+
+- smart contract components 
+    - Proxy - delegate calls to the implementation contracts below
+    - IAvatar ()
+        - holds balances
+        - owns all the contracts which provide functionality to the dao (finance, governance, market e.g. the modules of the application)
+        - connects to finance module → executes the function contained in the finance module
+        - connects to governance module (minion)  → executes the functions contained in the governance module
+        - connects to staking module (minion) → executes the functions contained in the staking module
+        - connects to NFTFactory (minion) → executes the functions contained in nftFactory
+    - Governance
+        - Voting → the logic will go into a voting contract
+        - Proposals → the logic for creating proposals (this just calls the functions on the necessary contracts it relays the calls to the necessary contracts
+            - change roles
+            - system update
+            - arbitrary monetary transaction
+                - to make a transaction like this, users will have to lock their tokens as collateral
+                - collateral can be released after proposal to release collateral
+        - libraries
+            - seele
+    - Finance
+        - distribute utility tokens
+        - distribute governance tokens
+        - execute a generic transaction
+            - money from one address to another
+        - libraries
+            - exit module, gnosis zodiac (for redeeming of tokens, change it so that it can only be called by the dao)
+                - provides ragequit funciontaliity for users
+                - can also be used to change the utility token to another one
+                - 
+    - Staker
+        - handles staking
+        - handles locking
+    - FlatIconState (contains the state for the app)
+        - what state ?
+        - accounts (creator accounts, dao (reserve) accounts)
+        - NftMetadata
+            - mapping (address -> metadata )
+    - NftFactory -> OpenSea 
+        - creates nft's    
+            - returns address to nft 
+            - returns metadata to nft
+            - question ? will nft be stored on ipfs ?
+    
+    - Governance Token (ERC20, ERC20Votes, ERC20Wrapper, Pausable)
+    - Dao Utility Token (ERC20, ERC20Capped - OpenZeppelin)
+    - Non-fungible tokens (ERC721, Pausable - OpenZeppelin)
