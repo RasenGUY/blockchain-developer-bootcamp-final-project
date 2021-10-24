@@ -6,6 +6,7 @@
     "create-gitignore": "^0.1.0"
   },
   "dependencies": {
-    "@openzeppelin/contracts-upgradeable": "^4.3.2"
+    "@openzeppelin/contracts-upgradeable": "^4.3.2",
+    "truffle-contract-size": "^2.0.1"
   }
 }

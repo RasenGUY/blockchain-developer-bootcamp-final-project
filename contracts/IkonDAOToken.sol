@@ -18,7 +18,7 @@ contract IkonDAOToken is ERC20, ERC20Burnable, ERC20Snapshot, AccessControl, ERC
     bytes32 public constant SNAPSHOT_ROLE = keccak256("SNAPSHOT_ROLE");
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
-    constructor() ERC20("IkonDAOToken", "IKD") ERC20Permit("IkonDAOToken") {
+    constructor() ERC20("IkonDAO Token", "IKD") ERC20Permit("IkonDAO Token") {
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(SNAPSHOT_ROLE, msg.sender);
         _mint(msg.sender, 1000000 * 10 ** decimals());

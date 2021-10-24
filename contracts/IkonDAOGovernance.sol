@@ -7,18 +7,14 @@ pragma solidity ^0.8.2;
 /// @notice this contract is an experimental contract and should not be used to initiate project that will hold real value
 /// @dev functions currently implemented (other then imported library) functions could contain side-effects
 
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.2;
-
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Snapshot.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
 
 /// @custom:security-contact ftrouw@protonmail.com
-contract IkonDAOGovernance is ERC20, ERC20Snapshot, Ownable, Pausable, ERC20Permit, ERC20Votes {
+contract IkonDAOGovernance is ERC20, ERC20Snapshot, Ownable, Pausable, ERC20Votes {
     constructor()
         ERC20("IkonDAOGovernance", "IKD")
         ERC20Permit("IkonDAOGovernance")
