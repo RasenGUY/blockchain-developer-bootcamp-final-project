@@ -14,7 +14,7 @@ import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
 
 /// @custom:security-contact ftrouw@protonmail.com
-contract IkonDAOGovernance is ERC20, ERC20Snapshot, Ownable, Pausable, ERC20Votes {
+contract IkonDAOGovernanceToken is ERC20, ERC20Snapshot, Ownable, Pausable, ERC20Votes {
     constructor()
         ERC20("IkonDAOGovernance", "IKD")
         ERC20Permit("IkonDAOGovernance")
