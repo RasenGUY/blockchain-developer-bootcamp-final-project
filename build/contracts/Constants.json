@@ -1,7 +1,7 @@
 {
   "contractName": "Constants",
   "abi": [],
-  "metadata": "{\"compiler\":{\"version\":\"0.8.9+commit.e5eed63a\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"title\":\"contains contsants to be used in the IkonDAO\",\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/Constants.sol\":\"Constants\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"project:/contracts/Constants.sol\":{\"keccak256\":\"0x35453a0a71810d616b45f19916a2b8fe6869543da3abd64fd03cca65def70655\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://d76ec7a59c535fa6b70f09e2db56a769fbe973b53b0ea89be949183145c7e373\",\"dweb:/ipfs/QmVy7uWGnK3dJ3ssfSzWdbHRf4oejFDtJJMevWh4qUzMR9\"]}},\"version\":1}",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.9+commit.e5eed63a\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"title\":\"contains contsants to be used in the IkonDAO\",\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/Constants.sol\":\"Constants\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"project:/contracts/Constants.sol\":{\"keccak256\":\"0x7071223d37a5f9e7ce26832bfd9f71d00e45371d3f42929490bd249aadef74ca\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://92e3eeb5a173ccbcf5171256a89f54abab1eaccc40dae5db5a7210b7a9944480\",\"dweb:/ipfs/QmRHZ7fGoxHHFu8KCH9XyQ9uM3sbcp4o7SjWPpniBmRCu1\"]}},\"version\":1}",
   "bytecode": "0x",
   "deployedBytecode": "0x",
   "immutableReferences": {},
@@ -9,21 +9,21 @@
   "deployedGeneratedSources": [],
   "sourceMap": "",
   "deployedSourceMap": "",
-  "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.2;\n\n/// @title contains contsants to be used in the IkonDAO\nabstract contract Constants {\n\n    /// @notice ACCESS CONTROL CONSTANTS\n    bytes32 internal constant ADMIN_ROLE = keccak256(\"IKONDAO_ADMIN_ROLE\");\n    bytes32 internal constant MEMBER_ROLE = keccak256(\"IKONDAO_MEMBER_ROLE\");\n    bytes32 internal constant BANNED_ROLE = keccak256(\"IKONDAO_BANNED_ROLE\");\n    bytes32 internal constant CONTROLLER_ROLE = keccak256(\"IKONDAO_CONTROLLER_ROLE\");\n    \n\n    /// @notice ERROR MESSAGES \n    string internal constant revertModuleExists = \"revert:error:module already exists\";  \n    string internal constant revertModuleIsRegistered = \"revert:error:module already registered\";  \n    string internal constant revertModuleNotRegistered = \"revert:error:module not registered\";  \n\n\n    /// @notice module names\n    bytes32 internal constant GOVERNOR_MODULE = keccak256(\"IKONDAO_GOVERNOR_MODULE\");\n    bytes32 internal constant GOVERNOR_COUNT_MODULE = keccak256(\"IKONDAO_GOVERNOR_COUNT_MODULE\");\n    // bytes32 internal constant BANNED_ROLE = keccak256(\"IKONDAO_BANNED_ROLE\");\n    // bytes32 internal constant CONTROLLER_ROLE = keccak256(\"IKONDAO_CONTROLLER_ROLE\");\n\n}",
+  "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.2;\n\n/// @title contains contsants to be used in the IkonDAO\n\nabstract contract Constants  {\n\n    /// @notice ACCESS CONTROL CONSTANTS\n    bytes32 internal constant ADMIN_ROLE = keccak256(\"IKONDAO_ADMIN_ROLE\");\n    bytes32 internal constant MEMBER_ROLE = keccak256(\"IKONDAO_MEMBER_ROLE\");\n    bytes32 internal constant BANNED_ROLE = keccak256(\"IKONDAO_BANNED_ROLE\");\n    \n    /// @notice module names\n    bytes32 internal constant GOVERNOR_MODULE = keccak256(\"IKONDAO_GOVERNOR_MODULE\");\n    bytes32 internal constant GOVERNOR_COUNT_MODULE = keccak256(\"IKONDAO_GOVERNOR_COUNT_MODULE\");\n\n}",
   "sourcePath": "/run/media/rasguy92/SDD (windows)/projectIdeas/iconify/contracts/Constants.sol",
   "ast": {
     "absolutePath": "project:/contracts/Constants.sol",
     "exportedSymbols": {
       "Constants": [
-        7658
+        8374
       ]
     },
-    "id": 7659,
+    "id": 8375,
     "license": "MIT",
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 7614,
+        "id": 8345,
         "literals": [
           "solidity",
           "^",
@@ -31,7 +31,7 @@
           ".2"
         ],
         "nodeType": "PragmaDirective",
-        "src": "32:23:38"
+        "src": "32:23:44"
       },
       {
         "abstract": true,
@@ -40,35 +40,35 @@
         "contractDependencies": [],
         "contractKind": "contract",
         "documentation": {
-          "id": 7615,
+          "id": 8346,
           "nodeType": "StructuredDocumentation",
-          "src": "57:56:38",
+          "src": "57:56:44",
           "text": "@title contains contsants to be used in the IkonDAO"
         },
         "fullyImplemented": true,
-        "id": 7658,
+        "id": 8374,
         "linearizedBaseContracts": [
-          7658
+          8374
         ],
         "name": "Constants",
-        "nameLocation": "131:9:38",
+        "nameLocation": "132:9:44",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "constant": true,
             "documentation": {
-              "id": 7616,
+              "id": 8347,
               "nodeType": "StructuredDocumentation",
-              "src": "148:36:38",
+              "src": "150:36:44",
               "text": "@notice ACCESS CONTROL CONSTANTS"
             },
-            "id": 7621,
+            "id": 8352,
             "mutability": "constant",
             "name": "ADMIN_ROLE",
-            "nameLocation": "215:10:38",
+            "nameLocation": "217:10:44",
             "nodeType": "VariableDeclaration",
-            "scope": 7658,
-            "src": "189:70:38",
+            "scope": 8374,
+            "src": "191:70:44",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -76,10 +76,10 @@
               "typeString": "bytes32"
             },
             "typeName": {
-              "id": 7617,
+              "id": 8348,
               "name": "bytes32",
               "nodeType": "ElementaryTypeName",
-              "src": "189:7:38",
+              "src": "191:7:44",
               "typeDescriptions": {
                 "typeIdentifier": "t_bytes32",
                 "typeString": "bytes32"
@@ -89,14 +89,14 @@
               "arguments": [
                 {
                   "hexValue": "494b4f4e44414f5f41444d494e5f524f4c45",
-                  "id": 7619,
+                  "id": 8350,
                   "isConstant": false,
                   "isLValue": false,
                   "isPure": true,
                   "kind": "string",
                   "lValueRequested": false,
                   "nodeType": "Literal",
-                  "src": "238:20:38",
+                  "src": "240:20:44",
                   "typeDescriptions": {
                     "typeIdentifier": "t_stringliteral_0454d691b20de09c741657b57037379cb9a924a8d5d937a8aedf7cda4a999407",
                     "typeString": "literal_string \"IKONDAO_ADMIN_ROLE\""
@@ -111,18 +111,18 @@
                     "typeString": "literal_string \"IKONDAO_ADMIN_ROLE\""
                   }
                 ],
-                "id": 7618,
+                "id": 8349,
                 "name": "keccak256",
                 "nodeType": "Identifier",
                 "overloadedDeclarations": [],
                 "referencedDeclaration": 4294967288,
-                "src": "228:9:38",
+                "src": "230:9:44",
                 "typeDescriptions": {
                   "typeIdentifier": "t_function_keccak256_pure$_t_bytes_memory_ptr_$returns$_t_bytes32_$",
                   "typeString": "function (bytes memory) pure returns (bytes32)"
                 }
               },
-              "id": 7620,
+              "id": 8351,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -130,7 +130,7 @@
               "lValueRequested": false,
               "names": [],
               "nodeType": "FunctionCall",
-              "src": "228:31:38",
+              "src": "230:31:44",
               "tryCall": false,
               "typeDescriptions": {
                 "typeIdentifier": "t_bytes32",
@@ -141,13 +141,13 @@
           },
           {
             "constant": true,
-            "id": 7626,
+            "id": 8357,
             "mutability": "constant",
             "name": "MEMBER_ROLE",
-            "nameLocation": "291:11:38",
+            "nameLocation": "293:11:44",
             "nodeType": "VariableDeclaration",
-            "scope": 7658,
-            "src": "265:72:38",
+            "scope": 8374,
+            "src": "267:72:44",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -155,10 +155,10 @@
               "typeString": "bytes32"
             },
             "typeName": {
-              "id": 7622,
+              "id": 8353,
               "name": "bytes32",
               "nodeType": "ElementaryTypeName",
-              "src": "265:7:38",
+              "src": "267:7:44",
               "typeDescriptions": {
                 "typeIdentifier": "t_bytes32",
                 "typeString": "bytes32"
@@ -168,14 +168,14 @@
               "arguments": [
                 {
                   "hexValue": "494b4f4e44414f5f4d454d4245525f524f4c45",
-                  "id": 7624,
+                  "id": 8355,
                   "isConstant": false,
                   "isLValue": false,
                   "isPure": true,
                   "kind": "string",
                   "lValueRequested": false,
                   "nodeType": "Literal",
-                  "src": "315:21:38",
+                  "src": "317:21:44",
                   "typeDescriptions": {
                     "typeIdentifier": "t_stringliteral_904cf93ea7789378fd50994f44a6b8ab6b4ef94f4df88df8f6fbb08758019972",
                     "typeString": "literal_string \"IKONDAO_MEMBER_ROLE\""
@@ -190,18 +190,18 @@
                     "typeString": "literal_string \"IKONDAO_MEMBER_ROLE\""
                   }
                 ],
-                "id": 7623,
+                "id": 8354,
                 "name": "keccak256",
                 "nodeType": "Identifier",
                 "overloadedDeclarations": [],
                 "referencedDeclaration": 4294967288,
-                "src": "305:9:38",
+                "src": "307:9:44",
                 "typeDescriptions": {
                   "typeIdentifier": "t_function_keccak256_pure$_t_bytes_memory_ptr_$returns$_t_bytes32_$",
                   "typeString": "function (bytes memory) pure returns (bytes32)"
                 }
               },
-              "id": 7625,
+              "id": 8356,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -209,7 +209,7 @@
               "lValueRequested": false,
               "names": [],
               "nodeType": "FunctionCall",
-              "src": "305:32:38",
+              "src": "307:32:44",
               "tryCall": false,
               "typeDescriptions": {
                 "typeIdentifier": "t_bytes32",
@@ -220,13 +220,13 @@
           },
           {
             "constant": true,
-            "id": 7631,
+            "id": 8362,
             "mutability": "constant",
             "name": "BANNED_ROLE",
-            "nameLocation": "369:11:38",
+            "nameLocation": "371:11:44",
             "nodeType": "VariableDeclaration",
-            "scope": 7658,
-            "src": "343:72:38",
+            "scope": 8374,
+            "src": "345:72:44",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -234,10 +234,10 @@
               "typeString": "bytes32"
             },
             "typeName": {
-              "id": 7627,
+              "id": 8358,
               "name": "bytes32",
               "nodeType": "ElementaryTypeName",
-              "src": "343:7:38",
+              "src": "345:7:44",
               "typeDescriptions": {
                 "typeIdentifier": "t_bytes32",
                 "typeString": "bytes32"
@@ -247,14 +247,14 @@
               "arguments": [
                 {
                   "hexValue": "494b4f4e44414f5f42414e4e45445f524f4c45",
-                  "id": 7629,
+                  "id": 8360,
                   "isConstant": false,
                   "isLValue": false,
                   "isPure": true,
                   "kind": "string",
                   "lValueRequested": false,
                   "nodeType": "Literal",
-                  "src": "393:21:38",
+                  "src": "395:21:44",
                   "typeDescriptions": {
                     "typeIdentifier": "t_stringliteral_b9ed84f36f908de1c681f1312e8dd20c4c5a485b54305055813d28e3b79bb624",
                     "typeString": "literal_string \"IKONDAO_BANNED_ROLE\""
@@ -269,18 +269,18 @@
                     "typeString": "literal_string \"IKONDAO_BANNED_ROLE\""
                   }
                 ],
-                "id": 7628,
+                "id": 8359,
                 "name": "keccak256",
                 "nodeType": "Identifier",
                 "overloadedDeclarations": [],
                 "referencedDeclaration": 4294967288,
-                "src": "383:9:38",
+                "src": "385:9:44",
                 "typeDescriptions": {
                   "typeIdentifier": "t_function_keccak256_pure$_t_bytes_memory_ptr_$returns$_t_bytes32_$",
                   "typeString": "function (bytes memory) pure returns (bytes32)"
                 }
               },
-              "id": 7630,
+              "id": 8361,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -288,86 +288,7 @@
               "lValueRequested": false,
               "names": [],
               "nodeType": "FunctionCall",
-              "src": "383:32:38",
-              "tryCall": false,
-              "typeDescriptions": {
-                "typeIdentifier": "t_bytes32",
-                "typeString": "bytes32"
-              }
-            },
-            "visibility": "internal"
-          },
-          {
-            "constant": true,
-            "id": 7636,
-            "mutability": "constant",
-            "name": "CONTROLLER_ROLE",
-            "nameLocation": "447:15:38",
-            "nodeType": "VariableDeclaration",
-            "scope": 7658,
-            "src": "421:80:38",
-            "stateVariable": true,
-            "storageLocation": "default",
-            "typeDescriptions": {
-              "typeIdentifier": "t_bytes32",
-              "typeString": "bytes32"
-            },
-            "typeName": {
-              "id": 7632,
-              "name": "bytes32",
-              "nodeType": "ElementaryTypeName",
-              "src": "421:7:38",
-              "typeDescriptions": {
-                "typeIdentifier": "t_bytes32",
-                "typeString": "bytes32"
-              }
-            },
-            "value": {
-              "arguments": [
-                {
-                  "hexValue": "494b4f4e44414f5f434f4e54524f4c4c45525f524f4c45",
-                  "id": 7634,
-                  "isConstant": false,
-                  "isLValue": false,
-                  "isPure": true,
-                  "kind": "string",
-                  "lValueRequested": false,
-                  "nodeType": "Literal",
-                  "src": "475:25:38",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_stringliteral_1e65e989c4cd3886ce3187559c8df3d86518b730771844719bf0f2a5495efa1b",
-                    "typeString": "literal_string \"IKONDAO_CONTROLLER_ROLE\""
-                  },
-                  "value": "IKONDAO_CONTROLLER_ROLE"
-                }
-              ],
-              "expression": {
-                "argumentTypes": [
-                  {
-                    "typeIdentifier": "t_stringliteral_1e65e989c4cd3886ce3187559c8df3d86518b730771844719bf0f2a5495efa1b",
-                    "typeString": "literal_string \"IKONDAO_CONTROLLER_ROLE\""
-                  }
-                ],
-                "id": 7633,
-                "name": "keccak256",
-                "nodeType": "Identifier",
-                "overloadedDeclarations": [],
-                "referencedDeclaration": 4294967288,
-                "src": "465:9:38",
-                "typeDescriptions": {
-                  "typeIdentifier": "t_function_keccak256_pure$_t_bytes_memory_ptr_$returns$_t_bytes32_$",
-                  "typeString": "function (bytes memory) pure returns (bytes32)"
-                }
-              },
-              "id": 7635,
-              "isConstant": false,
-              "isLValue": false,
-              "isPure": true,
-              "kind": "functionCall",
-              "lValueRequested": false,
-              "names": [],
-              "nodeType": "FunctionCall",
-              "src": "465:36:38",
+              "src": "385:32:44",
               "tryCall": false,
               "typeDescriptions": {
                 "typeIdentifier": "t_bytes32",
@@ -379,153 +300,18 @@
           {
             "constant": true,
             "documentation": {
-              "id": 7637,
+              "id": 8363,
               "nodeType": "StructuredDocumentation",
-              "src": "513:27:38",
-              "text": "@notice ERROR MESSAGES "
-            },
-            "id": 7640,
-            "mutability": "constant",
-            "name": "revertModuleExists",
-            "nameLocation": "570:18:38",
-            "nodeType": "VariableDeclaration",
-            "scope": 7658,
-            "src": "545:82:38",
-            "stateVariable": true,
-            "storageLocation": "default",
-            "typeDescriptions": {
-              "typeIdentifier": "t_string_memory_ptr",
-              "typeString": "string"
-            },
-            "typeName": {
-              "id": 7638,
-              "name": "string",
-              "nodeType": "ElementaryTypeName",
-              "src": "545:6:38",
-              "typeDescriptions": {
-                "typeIdentifier": "t_string_storage_ptr",
-                "typeString": "string"
-              }
-            },
-            "value": {
-              "hexValue": "7265766572743a6572726f723a6d6f64756c6520616c726561647920657869737473",
-              "id": 7639,
-              "isConstant": false,
-              "isLValue": false,
-              "isPure": true,
-              "kind": "string",
-              "lValueRequested": false,
-              "nodeType": "Literal",
-              "src": "591:36:38",
-              "typeDescriptions": {
-                "typeIdentifier": "t_stringliteral_08a632e4d4aa1204ae9976d36c8873ccfdab752dc654c31f4d9538a03a715f47",
-                "typeString": "literal_string \"revert:error:module already exists\""
-              },
-              "value": "revert:error:module already exists"
-            },
-            "visibility": "internal"
-          },
-          {
-            "constant": true,
-            "id": 7643,
-            "mutability": "constant",
-            "name": "revertModuleIsRegistered",
-            "nameLocation": "660:24:38",
-            "nodeType": "VariableDeclaration",
-            "scope": 7658,
-            "src": "635:92:38",
-            "stateVariable": true,
-            "storageLocation": "default",
-            "typeDescriptions": {
-              "typeIdentifier": "t_string_memory_ptr",
-              "typeString": "string"
-            },
-            "typeName": {
-              "id": 7641,
-              "name": "string",
-              "nodeType": "ElementaryTypeName",
-              "src": "635:6:38",
-              "typeDescriptions": {
-                "typeIdentifier": "t_string_storage_ptr",
-                "typeString": "string"
-              }
-            },
-            "value": {
-              "hexValue": "7265766572743a6572726f723a6d6f64756c6520616c72656164792072656769737465726564",
-              "id": 7642,
-              "isConstant": false,
-              "isLValue": false,
-              "isPure": true,
-              "kind": "string",
-              "lValueRequested": false,
-              "nodeType": "Literal",
-              "src": "687:40:38",
-              "typeDescriptions": {
-                "typeIdentifier": "t_stringliteral_697caf7fda429786dee85082d4fcf3e61302a7b3078204b60da239def24403a2",
-                "typeString": "literal_string \"revert:error:module already registered\""
-              },
-              "value": "revert:error:module already registered"
-            },
-            "visibility": "internal"
-          },
-          {
-            "constant": true,
-            "id": 7646,
-            "mutability": "constant",
-            "name": "revertModuleNotRegistered",
-            "nameLocation": "760:25:38",
-            "nodeType": "VariableDeclaration",
-            "scope": 7658,
-            "src": "735:89:38",
-            "stateVariable": true,
-            "storageLocation": "default",
-            "typeDescriptions": {
-              "typeIdentifier": "t_string_memory_ptr",
-              "typeString": "string"
-            },
-            "typeName": {
-              "id": 7644,
-              "name": "string",
-              "nodeType": "ElementaryTypeName",
-              "src": "735:6:38",
-              "typeDescriptions": {
-                "typeIdentifier": "t_string_storage_ptr",
-                "typeString": "string"
-              }
-            },
-            "value": {
-              "hexValue": "7265766572743a6572726f723a6d6f64756c65206e6f742072656769737465726564",
-              "id": 7645,
-              "isConstant": false,
-              "isLValue": false,
-              "isPure": true,
-              "kind": "string",
-              "lValueRequested": false,
-              "nodeType": "Literal",
-              "src": "788:36:38",
-              "typeDescriptions": {
-                "typeIdentifier": "t_stringliteral_98153db4420c4da185abe423bdaded5d4c8f4045c4368784606ea8da91eeb98b",
-                "typeString": "literal_string \"revert:error:module not registered\""
-              },
-              "value": "revert:error:module not registered"
-            },
-            "visibility": "internal"
-          },
-          {
-            "constant": true,
-            "documentation": {
-              "id": 7647,
-              "nodeType": "StructuredDocumentation",
-              "src": "834:24:38",
+              "src": "428:24:44",
               "text": "@notice module names"
             },
-            "id": 7652,
+            "id": 8368,
             "mutability": "constant",
             "name": "GOVERNOR_MODULE",
-            "nameLocation": "889:15:38",
+            "nameLocation": "483:15:44",
             "nodeType": "VariableDeclaration",
-            "scope": 7658,
-            "src": "863:80:38",
+            "scope": 8374,
+            "src": "457:80:44",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -533,10 +319,10 @@
               "typeString": "bytes32"
             },
             "typeName": {
-              "id": 7648,
+              "id": 8364,
               "name": "bytes32",
               "nodeType": "ElementaryTypeName",
-              "src": "863:7:38",
+              "src": "457:7:44",
               "typeDescriptions": {
                 "typeIdentifier": "t_bytes32",
                 "typeString": "bytes32"
@@ -546,14 +332,14 @@
               "arguments": [
                 {
                   "hexValue": "494b4f4e44414f5f474f5645524e4f525f4d4f44554c45",
-                  "id": 7650,
+                  "id": 8366,
                   "isConstant": false,
                   "isLValue": false,
                   "isPure": true,
                   "kind": "string",
                   "lValueRequested": false,
                   "nodeType": "Literal",
-                  "src": "917:25:38",
+                  "src": "511:25:44",
                   "typeDescriptions": {
                     "typeIdentifier": "t_stringliteral_d1cfa20a770fcd5700296a6769a579c4055b0f34271ae765c4017bb3b0cf9297",
                     "typeString": "literal_string \"IKONDAO_GOVERNOR_MODULE\""
@@ -568,18 +354,18 @@
                     "typeString": "literal_string \"IKONDAO_GOVERNOR_MODULE\""
                   }
                 ],
-                "id": 7649,
+                "id": 8365,
                 "name": "keccak256",
                 "nodeType": "Identifier",
                 "overloadedDeclarations": [],
                 "referencedDeclaration": 4294967288,
-                "src": "907:9:38",
+                "src": "501:9:44",
                 "typeDescriptions": {
                   "typeIdentifier": "t_function_keccak256_pure$_t_bytes_memory_ptr_$returns$_t_bytes32_$",
                   "typeString": "function (bytes memory) pure returns (bytes32)"
                 }
               },
-              "id": 7651,
+              "id": 8367,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -587,7 +373,7 @@
               "lValueRequested": false,
               "names": [],
               "nodeType": "FunctionCall",
-              "src": "907:36:38",
+              "src": "501:36:44",
               "tryCall": false,
               "typeDescriptions": {
                 "typeIdentifier": "t_bytes32",
@@ -598,13 +384,13 @@
           },
           {
             "constant": true,
-            "id": 7657,
+            "id": 8373,
             "mutability": "constant",
             "name": "GOVERNOR_COUNT_MODULE",
-            "nameLocation": "975:21:38",
+            "nameLocation": "569:21:44",
             "nodeType": "VariableDeclaration",
-            "scope": 7658,
-            "src": "949:92:38",
+            "scope": 8374,
+            "src": "543:92:44",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -612,10 +398,10 @@
               "typeString": "bytes32"
             },
             "typeName": {
-              "id": 7653,
+              "id": 8369,
               "name": "bytes32",
               "nodeType": "ElementaryTypeName",
-              "src": "949:7:38",
+              "src": "543:7:44",
               "typeDescriptions": {
                 "typeIdentifier": "t_bytes32",
                 "typeString": "bytes32"
@@ -625,14 +411,14 @@
               "arguments": [
                 {
                   "hexValue": "494b4f4e44414f5f474f5645524e4f525f434f554e545f4d4f44554c45",
-                  "id": 7655,
+                  "id": 8371,
                   "isConstant": false,
                   "isLValue": false,
                   "isPure": true,
                   "kind": "string",
                   "lValueRequested": false,
                   "nodeType": "Literal",
-                  "src": "1009:31:38",
+                  "src": "603:31:44",
                   "typeDescriptions": {
                     "typeIdentifier": "t_stringliteral_8b39d36f601e277e1928fa93dda97b4591b98912d3e8da3370e86f44babf7ace",
                     "typeString": "literal_string \"IKONDAO_GOVERNOR_COUNT_MODULE\""
@@ -647,18 +433,18 @@
                     "typeString": "literal_string \"IKONDAO_GOVERNOR_COUNT_MODULE\""
                   }
                 ],
-                "id": 7654,
+                "id": 8370,
                 "name": "keccak256",
                 "nodeType": "Identifier",
                 "overloadedDeclarations": [],
                 "referencedDeclaration": 4294967288,
-                "src": "999:9:38",
+                "src": "593:9:44",
                 "typeDescriptions": {
                   "typeIdentifier": "t_function_keccak256_pure$_t_bytes_memory_ptr_$returns$_t_bytes32_$",
                   "typeString": "function (bytes memory) pure returns (bytes32)"
                 }
               },
-              "id": 7656,
+              "id": 8372,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -666,7 +452,7 @@
               "lValueRequested": false,
               "names": [],
               "nodeType": "FunctionCall",
-              "src": "999:42:38",
+              "src": "593:42:44",
               "tryCall": false,
               "typeDescriptions": {
                 "typeIdentifier": "t_bytes32",
@@ -676,26 +462,26 @@
             "visibility": "internal"
           }
         ],
-        "scope": 7659,
-        "src": "113:1102:38",
+        "scope": 8375,
+        "src": "114:525:44",
         "usedErrors": []
       }
     ],
-    "src": "32:1183:38"
+    "src": "32:607:44"
   },
   "legacyAST": {
     "absolutePath": "project:/contracts/Constants.sol",
     "exportedSymbols": {
       "Constants": [
-        7658
+        8374
       ]
     },
-    "id": 7659,
+    "id": 8375,
     "license": "MIT",
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 7614,
+        "id": 8345,
         "literals": [
           "solidity",
           "^",
@@ -703,7 +489,7 @@
           ".2"
         ],
         "nodeType": "PragmaDirective",
-        "src": "32:23:38"
+        "src": "32:23:44"
       },
       {
         "abstract": true,
@@ -712,35 +498,35 @@
         "contractDependencies": [],
         "contractKind": "contract",
         "documentation": {
-          "id": 7615,
+          "id": 8346,
           "nodeType": "StructuredDocumentation",
-          "src": "57:56:38",
+          "src": "57:56:44",
           "text": "@title contains contsants to be used in the IkonDAO"
         },
         "fullyImplemented": true,
-        "id": 7658,
+        "id": 8374,
         "linearizedBaseContracts": [
-          7658
+          8374
         ],
         "name": "Constants",
-        "nameLocation": "131:9:38",
+        "nameLocation": "132:9:44",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "constant": true,
             "documentation": {
-              "id": 7616,
+              "id": 8347,
               "nodeType": "StructuredDocumentation",
-              "src": "148:36:38",
+              "src": "150:36:44",
               "text": "@notice ACCESS CONTROL CONSTANTS"
             },
-            "id": 7621,
+            "id": 8352,
             "mutability": "constant",
             "name": "ADMIN_ROLE",
-            "nameLocation": "215:10:38",
+            "nameLocation": "217:10:44",
             "nodeType": "VariableDeclaration",
-            "scope": 7658,
-            "src": "189:70:38",
+            "scope": 8374,
+            "src": "191:70:44",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -748,10 +534,10 @@
               "typeString": "bytes32"
             },
             "typeName": {
-              "id": 7617,
+              "id": 8348,
               "name": "bytes32",
               "nodeType": "ElementaryTypeName",
-              "src": "189:7:38",
+              "src": "191:7:44",
               "typeDescriptions": {
                 "typeIdentifier": "t_bytes32",
                 "typeString": "bytes32"
@@ -761,14 +547,14 @@
               "arguments": [
                 {
                   "hexValue": "494b4f4e44414f5f41444d494e5f524f4c45",
-                  "id": 7619,
+                  "id": 8350,
                   "isConstant": false,
                   "isLValue": false,
                   "isPure": true,
                   "kind": "string",
                   "lValueRequested": false,
                   "nodeType": "Literal",
-                  "src": "238:20:38",
+                  "src": "240:20:44",
                   "typeDescriptions": {
                     "typeIdentifier": "t_stringliteral_0454d691b20de09c741657b57037379cb9a924a8d5d937a8aedf7cda4a999407",
                     "typeString": "literal_string \"IKONDAO_ADMIN_ROLE\""
@@ -783,18 +569,18 @@
                     "typeString": "literal_string \"IKONDAO_ADMIN_ROLE\""
                   }
                 ],
-                "id": 7618,
+                "id": 8349,
                 "name": "keccak256",
                 "nodeType": "Identifier",
                 "overloadedDeclarations": [],
                 "referencedDeclaration": 4294967288,
-                "src": "228:9:38",
+                "src": "230:9:44",
                 "typeDescriptions": {
                   "typeIdentifier": "t_function_keccak256_pure$_t_bytes_memory_ptr_$returns$_t_bytes32_$",
                   "typeString": "function (bytes memory) pure returns (bytes32)"
                 }
               },
-              "id": 7620,
+              "id": 8351,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -802,7 +588,7 @@
               "lValueRequested": false,
               "names": [],
               "nodeType": "FunctionCall",
-              "src": "228:31:38",
+              "src": "230:31:44",
               "tryCall": false,
               "typeDescriptions": {
                 "typeIdentifier": "t_bytes32",
@@ -813,13 +599,13 @@
           },
           {
             "constant": true,
-            "id": 7626,
+            "id": 8357,
             "mutability": "constant",
             "name": "MEMBER_ROLE",
-            "nameLocation": "291:11:38",
+            "nameLocation": "293:11:44",
             "nodeType": "VariableDeclaration",
-            "scope": 7658,
-            "src": "265:72:38",
+            "scope": 8374,
+            "src": "267:72:44",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -827,10 +613,10 @@
               "typeString": "bytes32"
             },
             "typeName": {
-              "id": 7622,
+              "id": 8353,
               "name": "bytes32",
               "nodeType": "ElementaryTypeName",
-              "src": "265:7:38",
+              "src": "267:7:44",
               "typeDescriptions": {
                 "typeIdentifier": "t_bytes32",
                 "typeString": "bytes32"
@@ -840,14 +626,14 @@
               "arguments": [
                 {
                   "hexValue": "494b4f4e44414f5f4d454d4245525f524f4c45",
-                  "id": 7624,
+                  "id": 8355,
                   "isConstant": false,
                   "isLValue": false,
                   "isPure": true,
                   "kind": "string",
                   "lValueRequested": false,
                   "nodeType": "Literal",
-                  "src": "315:21:38",
+                  "src": "317:21:44",
                   "typeDescriptions": {
                     "typeIdentifier": "t_stringliteral_904cf93ea7789378fd50994f44a6b8ab6b4ef94f4df88df8f6fbb08758019972",
                     "typeString": "literal_string \"IKONDAO_MEMBER_ROLE\""
@@ -862,18 +648,18 @@
                     "typeString": "literal_string \"IKONDAO_MEMBER_ROLE\""
                   }
                 ],
-                "id": 7623,
+                "id": 8354,
                 "name": "keccak256",
                 "nodeType": "Identifier",
                 "overloadedDeclarations": [],
                 "referencedDeclaration": 4294967288,
-                "src": "305:9:38",
+                "src": "307:9:44",
                 "typeDescriptions": {
                   "typeIdentifier": "t_function_keccak256_pure$_t_bytes_memory_ptr_$returns$_t_bytes32_$",
                   "typeString": "function (bytes memory) pure returns (bytes32)"
                 }
               },
-              "id": 7625,
+              "id": 8356,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -881,7 +667,7 @@
               "lValueRequested": false,
               "names": [],
               "nodeType": "FunctionCall",
-              "src": "305:32:38",
+              "src": "307:32:44",
               "tryCall": false,
               "typeDescriptions": {
                 "typeIdentifier": "t_bytes32",
@@ -892,13 +678,13 @@
           },
           {
             "constant": true,
-            "id": 7631,
+            "id": 8362,
             "mutability": "constant",
             "name": "BANNED_ROLE",
-            "nameLocation": "369:11:38",
+            "nameLocation": "371:11:44",
             "nodeType": "VariableDeclaration",
-            "scope": 7658,
-            "src": "343:72:38",
+            "scope": 8374,
+            "src": "345:72:44",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -906,10 +692,10 @@
               "typeString": "bytes32"
             },
             "typeName": {
-              "id": 7627,
+              "id": 8358,
               "name": "bytes32",
               "nodeType": "ElementaryTypeName",
-              "src": "343:7:38",
+              "src": "345:7:44",
               "typeDescriptions": {
                 "typeIdentifier": "t_bytes32",
                 "typeString": "bytes32"
@@ -919,14 +705,14 @@
               "arguments": [
                 {
                   "hexValue": "494b4f4e44414f5f42414e4e45445f524f4c45",
-                  "id": 7629,
+                  "id": 8360,
                   "isConstant": false,
                   "isLValue": false,
                   "isPure": true,
                   "kind": "string",
                   "lValueRequested": false,
                   "nodeType": "Literal",
-                  "src": "393:21:38",
+                  "src": "395:21:44",
                   "typeDescriptions": {
                     "typeIdentifier": "t_stringliteral_b9ed84f36f908de1c681f1312e8dd20c4c5a485b54305055813d28e3b79bb624",
                     "typeString": "literal_string \"IKONDAO_BANNED_ROLE\""
@@ -941,18 +727,18 @@
                     "typeString": "literal_string \"IKONDAO_BANNED_ROLE\""
                   }
                 ],
-                "id": 7628,
+                "id": 8359,
                 "name": "keccak256",
                 "nodeType": "Identifier",
                 "overloadedDeclarations": [],
                 "referencedDeclaration": 4294967288,
-                "src": "383:9:38",
+                "src": "385:9:44",
                 "typeDescriptions": {
                   "typeIdentifier": "t_function_keccak256_pure$_t_bytes_memory_ptr_$returns$_t_bytes32_$",
                   "typeString": "function (bytes memory) pure returns (bytes32)"
                 }
               },
-              "id": 7630,
+              "id": 8361,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -960,86 +746,7 @@
               "lValueRequested": false,
               "names": [],
               "nodeType": "FunctionCall",
-              "src": "383:32:38",
-              "tryCall": false,
-              "typeDescriptions": {
-                "typeIdentifier": "t_bytes32",
-                "typeString": "bytes32"
-              }
-            },
-            "visibility": "internal"
-          },
-          {
-            "constant": true,
-            "id": 7636,
-            "mutability": "constant",
-            "name": "CONTROLLER_ROLE",
-            "nameLocation": "447:15:38",
-            "nodeType": "VariableDeclaration",
-            "scope": 7658,
-            "src": "421:80:38",
-            "stateVariable": true,
-            "storageLocation": "default",
-            "typeDescriptions": {
-              "typeIdentifier": "t_bytes32",
-              "typeString": "bytes32"
-            },
-            "typeName": {
-              "id": 7632,
-              "name": "bytes32",
-              "nodeType": "ElementaryTypeName",
-              "src": "421:7:38",
-              "typeDescriptions": {
-                "typeIdentifier": "t_bytes32",
-                "typeString": "bytes32"
-              }
-            },
-            "value": {
-              "arguments": [
-                {
-                  "hexValue": "494b4f4e44414f5f434f4e54524f4c4c45525f524f4c45",
-                  "id": 7634,
-                  "isConstant": false,
-                  "isLValue": false,
-                  "isPure": true,
-                  "kind": "string",
-                  "lValueRequested": false,
-                  "nodeType": "Literal",
-                  "src": "475:25:38",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_stringliteral_1e65e989c4cd3886ce3187559c8df3d86518b730771844719bf0f2a5495efa1b",
-                    "typeString": "literal_string \"IKONDAO_CONTROLLER_ROLE\""
-                  },
-                  "value": "IKONDAO_CONTROLLER_ROLE"
-                }
-              ],
-              "expression": {
-                "argumentTypes": [
-                  {
-                    "typeIdentifier": "t_stringliteral_1e65e989c4cd3886ce3187559c8df3d86518b730771844719bf0f2a5495efa1b",
-                    "typeString": "literal_string \"IKONDAO_CONTROLLER_ROLE\""
-                  }
-                ],
-                "id": 7633,
-                "name": "keccak256",
-                "nodeType": "Identifier",
-                "overloadedDeclarations": [],
-                "referencedDeclaration": 4294967288,
-                "src": "465:9:38",
-                "typeDescriptions": {
-                  "typeIdentifier": "t_function_keccak256_pure$_t_bytes_memory_ptr_$returns$_t_bytes32_$",
-                  "typeString": "function (bytes memory) pure returns (bytes32)"
-                }
-              },
-              "id": 7635,
-              "isConstant": false,
-              "isLValue": false,
-              "isPure": true,
-              "kind": "functionCall",
-              "lValueRequested": false,
-              "names": [],
-              "nodeType": "FunctionCall",
-              "src": "465:36:38",
+              "src": "385:32:44",
               "tryCall": false,
               "typeDescriptions": {
                 "typeIdentifier": "t_bytes32",
@@ -1051,153 +758,18 @@
           {
             "constant": true,
             "documentation": {
-              "id": 7637,
+              "id": 8363,
               "nodeType": "StructuredDocumentation",
-              "src": "513:27:38",
-              "text": "@notice ERROR MESSAGES "
-            },
-            "id": 7640,
-            "mutability": "constant",
-            "name": "revertModuleExists",
-            "nameLocation": "570:18:38",
-            "nodeType": "VariableDeclaration",
-            "scope": 7658,
-            "src": "545:82:38",
-            "stateVariable": true,
-            "storageLocation": "default",
-            "typeDescriptions": {
-              "typeIdentifier": "t_string_memory_ptr",
-              "typeString": "string"
-            },
-            "typeName": {
-              "id": 7638,
-              "name": "string",
-              "nodeType": "ElementaryTypeName",
-              "src": "545:6:38",
-              "typeDescriptions": {
-                "typeIdentifier": "t_string_storage_ptr",
-                "typeString": "string"
-              }
-            },
-            "value": {
-              "hexValue": "7265766572743a6572726f723a6d6f64756c6520616c726561647920657869737473",
-              "id": 7639,
-              "isConstant": false,
-              "isLValue": false,
-              "isPure": true,
-              "kind": "string",
-              "lValueRequested": false,
-              "nodeType": "Literal",
-              "src": "591:36:38",
-              "typeDescriptions": {
-                "typeIdentifier": "t_stringliteral_08a632e4d4aa1204ae9976d36c8873ccfdab752dc654c31f4d9538a03a715f47",
-                "typeString": "literal_string \"revert:error:module already exists\""
-              },
-              "value": "revert:error:module already exists"
-            },
-            "visibility": "internal"
-          },
-          {
-            "constant": true,
-            "id": 7643,
-            "mutability": "constant",
-            "name": "revertModuleIsRegistered",
-            "nameLocation": "660:24:38",
-            "nodeType": "VariableDeclaration",
-            "scope": 7658,
-            "src": "635:92:38",
-            "stateVariable": true,
-            "storageLocation": "default",
-            "typeDescriptions": {
-              "typeIdentifier": "t_string_memory_ptr",
-              "typeString": "string"
-            },
-            "typeName": {
-              "id": 7641,
-              "name": "string",
-              "nodeType": "ElementaryTypeName",
-              "src": "635:6:38",
-              "typeDescriptions": {
-                "typeIdentifier": "t_string_storage_ptr",
-                "typeString": "string"
-              }
-            },
-            "value": {
-              "hexValue": "7265766572743a6572726f723a6d6f64756c6520616c72656164792072656769737465726564",
-              "id": 7642,
-              "isConstant": false,
-              "isLValue": false,
-              "isPure": true,
-              "kind": "string",
-              "lValueRequested": false,
-              "nodeType": "Literal",
-              "src": "687:40:38",
-              "typeDescriptions": {
-                "typeIdentifier": "t_stringliteral_697caf7fda429786dee85082d4fcf3e61302a7b3078204b60da239def24403a2",
-                "typeString": "literal_string \"revert:error:module already registered\""
-              },
-              "value": "revert:error:module already registered"
-            },
-            "visibility": "internal"
-          },
-          {
-            "constant": true,
-            "id": 7646,
-            "mutability": "constant",
-            "name": "revertModuleNotRegistered",
-            "nameLocation": "760:25:38",
-            "nodeType": "VariableDeclaration",
-            "scope": 7658,
-            "src": "735:89:38",
-            "stateVariable": true,
-            "storageLocation": "default",
-            "typeDescriptions": {
-              "typeIdentifier": "t_string_memory_ptr",
-              "typeString": "string"
-            },
-            "typeName": {
-              "id": 7644,
-              "name": "string",
-              "nodeType": "ElementaryTypeName",
-              "src": "735:6:38",
-              "typeDescriptions": {
-                "typeIdentifier": "t_string_storage_ptr",
-                "typeString": "string"
-              }
-            },
-            "value": {
-              "hexValue": "7265766572743a6572726f723a6d6f64756c65206e6f742072656769737465726564",
-              "id": 7645,
-              "isConstant": false,
-              "isLValue": false,
-              "isPure": true,
-              "kind": "string",
-              "lValueRequested": false,
-              "nodeType": "Literal",
-              "src": "788:36:38",
-              "typeDescriptions": {
-                "typeIdentifier": "t_stringliteral_98153db4420c4da185abe423bdaded5d4c8f4045c4368784606ea8da91eeb98b",
-                "typeString": "literal_string \"revert:error:module not registered\""
-              },
-              "value": "revert:error:module not registered"
-            },
-            "visibility": "internal"
-          },
-          {
-            "constant": true,
-            "documentation": {
-              "id": 7647,
-              "nodeType": "StructuredDocumentation",
-              "src": "834:24:38",
+              "src": "428:24:44",
               "text": "@notice module names"
             },
-            "id": 7652,
+            "id": 8368,
             "mutability": "constant",
             "name": "GOVERNOR_MODULE",
-            "nameLocation": "889:15:38",
+            "nameLocation": "483:15:44",
             "nodeType": "VariableDeclaration",
-            "scope": 7658,
-            "src": "863:80:38",
+            "scope": 8374,
+            "src": "457:80:44",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -1205,10 +777,10 @@
               "typeString": "bytes32"
             },
             "typeName": {
-              "id": 7648,
+              "id": 8364,
               "name": "bytes32",
               "nodeType": "ElementaryTypeName",
-              "src": "863:7:38",
+              "src": "457:7:44",
               "typeDescriptions": {
                 "typeIdentifier": "t_bytes32",
                 "typeString": "bytes32"
@@ -1218,14 +790,14 @@
               "arguments": [
                 {
                   "hexValue": "494b4f4e44414f5f474f5645524e4f525f4d4f44554c45",
-                  "id": 7650,
+                  "id": 8366,
                   "isConstant": false,
                   "isLValue": false,
                   "isPure": true,
                   "kind": "string",
                   "lValueRequested": false,
                   "nodeType": "Literal",
-                  "src": "917:25:38",
+                  "src": "511:25:44",
                   "typeDescriptions": {
                     "typeIdentifier": "t_stringliteral_d1cfa20a770fcd5700296a6769a579c4055b0f34271ae765c4017bb3b0cf9297",
                     "typeString": "literal_string \"IKONDAO_GOVERNOR_MODULE\""
@@ -1240,18 +812,18 @@
                     "typeString": "literal_string \"IKONDAO_GOVERNOR_MODULE\""
                   }
                 ],
-                "id": 7649,
+                "id": 8365,
                 "name": "keccak256",
                 "nodeType": "Identifier",
                 "overloadedDeclarations": [],
                 "referencedDeclaration": 4294967288,
-                "src": "907:9:38",
+                "src": "501:9:44",
                 "typeDescriptions": {
                   "typeIdentifier": "t_function_keccak256_pure$_t_bytes_memory_ptr_$returns$_t_bytes32_$",
                   "typeString": "function (bytes memory) pure returns (bytes32)"
                 }
               },
-              "id": 7651,
+              "id": 8367,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -1259,7 +831,7 @@
               "lValueRequested": false,
               "names": [],
               "nodeType": "FunctionCall",
-              "src": "907:36:38",
+              "src": "501:36:44",
               "tryCall": false,
               "typeDescriptions": {
                 "typeIdentifier": "t_bytes32",
@@ -1270,13 +842,13 @@
           },
           {
             "constant": true,
-            "id": 7657,
+            "id": 8373,
             "mutability": "constant",
             "name": "GOVERNOR_COUNT_MODULE",
-            "nameLocation": "975:21:38",
+            "nameLocation": "569:21:44",
             "nodeType": "VariableDeclaration",
-            "scope": 7658,
-            "src": "949:92:38",
+            "scope": 8374,
+            "src": "543:92:44",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -1284,10 +856,10 @@
               "typeString": "bytes32"
             },
             "typeName": {
-              "id": 7653,
+              "id": 8369,
               "name": "bytes32",
               "nodeType": "ElementaryTypeName",
-              "src": "949:7:38",
+              "src": "543:7:44",
               "typeDescriptions": {
                 "typeIdentifier": "t_bytes32",
                 "typeString": "bytes32"
@@ -1297,14 +869,14 @@
               "arguments": [
                 {
                   "hexValue": "494b4f4e44414f5f474f5645524e4f525f434f554e545f4d4f44554c45",
-                  "id": 7655,
+                  "id": 8371,
                   "isConstant": false,
                   "isLValue": false,
                   "isPure": true,
                   "kind": "string",
                   "lValueRequested": false,
                   "nodeType": "Literal",
-                  "src": "1009:31:38",
+                  "src": "603:31:44",
                   "typeDescriptions": {
                     "typeIdentifier": "t_stringliteral_8b39d36f601e277e1928fa93dda97b4591b98912d3e8da3370e86f44babf7ace",
                     "typeString": "literal_string \"IKONDAO_GOVERNOR_COUNT_MODULE\""
@@ -1319,18 +891,18 @@
                     "typeString": "literal_string \"IKONDAO_GOVERNOR_COUNT_MODULE\""
                   }
                 ],
-                "id": 7654,
+                "id": 8370,
                 "name": "keccak256",
                 "nodeType": "Identifier",
                 "overloadedDeclarations": [],
                 "referencedDeclaration": 4294967288,
-                "src": "999:9:38",
+                "src": "593:9:44",
                 "typeDescriptions": {
                   "typeIdentifier": "t_function_keccak256_pure$_t_bytes_memory_ptr_$returns$_t_bytes32_$",
                   "typeString": "function (bytes memory) pure returns (bytes32)"
                 }
               },
-              "id": 7656,
+              "id": 8372,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -1338,7 +910,7 @@
               "lValueRequested": false,
               "names": [],
               "nodeType": "FunctionCall",
-              "src": "999:42:38",
+              "src": "593:42:44",
               "tryCall": false,
               "typeDescriptions": {
                 "typeIdentifier": "t_bytes32",
@@ -1348,12 +920,12 @@
             "visibility": "internal"
           }
         ],
-        "scope": 7659,
-        "src": "113:1102:38",
+        "scope": 8375,
+        "src": "114:525:44",
         "usedErrors": []
       }
     ],
-    "src": "32:1183:38"
+    "src": "32:607:44"
   },
   "compiler": {
     "name": "solc",
@@ -1361,7 +933,7 @@
   },
   "networks": {},
   "schemaVersion": "3.4.3",
-  "updatedAt": "2021-10-25T09:59:15.404Z",
+  "updatedAt": "2021-10-26T02:27:18.822Z",
   "devdoc": {
     "kind": "dev",
     "methods": {},

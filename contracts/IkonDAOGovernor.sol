@@ -18,7 +18,7 @@ import "./Constants.sol";
 /// @custom:security-contact ftrouw@protonmail.com
 contract IkonDAOGovernor is Governor, Ownable, GovernorCountingSimple, GovernorVotes, GovernorVotesQuorumFraction, GovernorTimelockControl, Constants {
     string private _name; 
-    string private _version;
+    string public _version;
     uint256 private _votingDelay; 
     uint256 private _votingPeriod;
     uint256 private _owner;  

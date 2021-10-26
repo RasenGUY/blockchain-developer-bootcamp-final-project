@@ -1,4 +1,4 @@
-# icon DAO collective -IDAO- token (IDAO) - contribution token (IDAOC, IDAOG) 
+# IKONDAO - ERC20 (IKD) - contribution token (IKG, IKC) 
 A distributed collective for icons, vector graphics, animated svg's etc.  
 
 ## A platform where users can create and curate icons and vector art (like) (what ?)
@@ -131,16 +131,20 @@ Some workflows that describe (as much as i can for now) what the ux would feel l
 
 * creator login: 
     + creators clicks on login with metamask or other service 
-    + app checks wheter creator account belongs to blacklist 
-    + if creator is not in blacklist then dissalow login and is on creators list allow login as creator
-    + if creator is not in blacklist and is not creator list then allow login. 
+    + app checks wheter creator account belongs isMember or isBanned 
+    + if creator isBanned then dissalow login; 
+    + if creator isBanned is not true and isMember is not true then.
+        + display ui with become member button
+    + if creator isBanned is not true and isMember is true then.
+        + display ui (proposals page)
+
 
 * Making an 'create nft request' (before creating a request, a creator should discuss with other creator on the discord channel about the request, this way he can increase the chances that his propsal will pass and also fix issues, if there are, and also discuss variables - price, discount price etc.)
     + creator clicks on proposals on nav
     + on the proposal page creator clicks on create proposal
     + creator can select (from a selection box what kind of proposal to create)
         + system proposal
-        + create nft proposal 
+        + create nft proposal
         + accountability proposal
     + creator clicks on the create nft proposal, a modal pops up/creator is director to page for 'create nft request'
     + creator then proceeds to upload files and fill in the variable data
