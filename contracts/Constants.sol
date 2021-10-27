@@ -3,15 +3,26 @@ pragma solidity ^0.8.2;
 
 /// @title contains contsants to be used in the IkonDAO
 
+
+import "@openzeppelin/contracts/governance/IGovernor.sol";
+
 abstract contract Constants  {
 
-    /// @notice ACCESS CONTROL CONSTANTS
-    bytes32 internal constant ADMIN_ROLE = keccak256("IKONDAO_ADMIN_ROLE");
-    bytes32 internal constant MEMBER_ROLE = keccak256("IKONDAO_MEMBER_ROLE");
-    bytes32 internal constant BANNED_ROLE = keccak256("IKONDAO_BANNED_ROLE");
+    struct Proposal { 
+        uint256 id;
+        address proposer;
+        IGovernor.ProposalState state;
+    }
     
-    /// @notice module names
-    bytes32 internal constant GOVERNOR_MODULE = keccak256("IKONDAO_GOVERNOR_MODULE");
-    bytes32 internal constant GOVERNOR_COUNT_MODULE = keccak256("IKONDAO_GOVERNOR_COUNT_MODULE");
+    /// @notice ACCESS CONTROL CONSTANTS
+    bytes32 constant ADMIN_ROLE = keccak256("IKONDAO_ADMIN_ROLE");
+    bytes32 constant MEMBER_ROLE = keccak256("IKONDAO_MEMBER_ROLE");
+    bytes32 constant BANNED_ROLE = keccak256("IKONDAO_BANNED_ROLE");
+    
+    /// @notice description constants for proposals
+    string constant DESC_SET_DELAY = "Governor: delay changed"; 
 
+    /// @notice error messages
+    string constant REQUIRE_ALREADY_MEMBER = "IkonDAO: already a member"; 
+    string constant REQUIRE_USER_BANNED = "IkonDAO: banned users cannot become members"; 
 }

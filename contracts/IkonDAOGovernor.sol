@@ -28,6 +28,7 @@ contract IkonDAOGovernor is Governor, Ownable, GovernorCountingSimple, GovernorV
         GovernorVotes(_token)
         GovernorVotesQuorumFraction(4)
         GovernorTimelockControl(_timelock) 
+        // Ownable()
     {
         _votingDelay = _delay;
         _votingPeriod = _period;
