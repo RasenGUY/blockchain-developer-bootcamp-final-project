@@ -9,6 +9,7 @@ pragma solidity ^0.8.2;
 import "@openzeppelin/contracts/governance/IGovernor.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol"; 
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/governance/TimelockController.sol";
 
@@ -27,9 +28,9 @@ contract IkonDAO is Constants, OwnableUpgradeable, AccessControlEnumerableUpgrad
  
     mapping(uint256 => Proposal) public proposals;
     mapping(address => uint256[]) private memberProposals;
-    mapping(address => bool) public isMember;
 
     event MemberCreated(address indexed _member); 
+    event MemberBanned(address indexed _member); 
 
     /// @notice unsafe allow     
     constructor (){} 
@@ -45,7 +46,7 @@ contract IkonDAO is Constants, OwnableUpgradeable, AccessControlEnumerableUpgrad
         _setupRole(ADMIN_ROLE, _msgSender());
         _setRoleAdmin(ADMIN_ROLE, ADMIN_ROLE);
         _setRoleAdmin(MEMBER_ROLE, ADMIN_ROLE);
-
+        __AccessControlEnumerable_init();
         __Ownable_init();
     }
 
@@ -77,15 +78,27 @@ contract IkonDAO is Constants, OwnableUpgradeable, AccessControlEnumerableUpgrad
     function getLatestProposal(address _sender) public view returns (uint256){       
         return memberProposals[_sender][memberProposals[_sender].length - 1];
     }
+    
+    /// @dev creates member
+    function createMember(address _applicant) external {
+        require(!hasRole(MEMBER_ROLE, _applicant), REQUIRE_CREATEMEMBER_ALREADY_CREATED);
+        require(!hasRole(BANNED_ROLE, _applicant), REQUIRE_CREATEMEMBER_USER_BANNED);
+        grantRole(MEMBER_ROLE, _applicant);
+        emit MemberCreated(_applicant);
+    }
 
-    /// @dev create member
-    function createMember() external {
-        require(isMember[_msgSender()], REQUIRE_ALREADY_MEMBER);
-        require(isMember[_msgSender()], REQUIRE_USER_BANNED);
-        grantRole(MEMBER_ROLE, _msgSender());
-        isMember[_msgSender()] = true;
-        emit MemberCreated(_msgSender());
+    /// @dev bans member
+    function banMember(address _account) external {
+        require(!hasRole(BANNED_ROLE, _account), REQUIRE_BANMEMBER_ALREADY_BANNED);
+        require(hasRole(MEMBER_ROLE, _account), REQUIRE_BANMEMBER_ONLY_MEMBERS);
+        revokeRole(MEMBER_ROLE, _account);
+        emit MemberBanned(_account);
     } 
+
+    /// @dev distribute votes
+    /// @dev slash votes
+    /// @dev distribute tokens
+    /// @dev mintNft 
 
     /// @notice upgrades to this contract
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(ADMIN_ROLE){}

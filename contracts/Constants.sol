@@ -23,6 +23,9 @@ abstract contract Constants  {
     string constant DESC_SET_DELAY = "Governor: delay changed"; 
 
     /// @notice error messages
-    string constant REQUIRE_ALREADY_MEMBER = "IkonDAO: already a member"; 
-    string constant REQUIRE_USER_BANNED = "IkonDAO: banned users cannot become members"; 
+    string constant REQUIRE_CREATEMEMBER_ALREADY_CREATED = "IkonDAO: already a member"; 
+    string constant REQUIRE_CREATEMEMBER_USER_BANNED = "IkonDAO: banned users cannot become members"; 
+    string constant REQUIRE_BANMEMBER_ALREADY_BANNED = "IkonDAO: account already banned"; 
+    string constant REQUIRE_BANMEMBER_ONLY_MEMBERS = "IkonDAO: non members cannot be banned";
+     
 }

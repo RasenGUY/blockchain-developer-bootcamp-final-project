@@ -5,7 +5,7 @@ const { assert } = require('chai');
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const expect = chai.expect;
-const Web3 = require('web3');
+// const Web3 = require('web3');
 chai.use(chaiAsPromised);
 
 const DAO = artifacts.require('IkonDAO');
@@ -19,6 +19,9 @@ contract("IDAOCollective (proxy)", accounts => {
     let owner = accounts[0]; 
     let other = accounts[1];
     let dao, daoProxy, daoGovToken, daoToken, daoGovInstance, daoGovernor, daoTimelock; 
+    let memberRole = web3.utils.soliditySha3("IKONDAO_MEMBER_ROLE");
+    let adminRole = web3.utils.soliditySha3("IKONDAO_ADMIN_ROLE");
+    let bannedRole = web3.utils.soliditySha3("IKONDAO_BANNED_ROLE");
 
     beforeEach(async () => {        
         // get instances
@@ -58,22 +61,65 @@ contract("IDAOCollective (proxy)", accounts => {
     });
 
 
-    /// governor tests 
+    /// governor
     it("gets governor version", async ()=> {
         let version = await daoProxy.getGovernorVersion();
         assert.equal(version, "1.0.0", "governor version not correct");
     })
 
-    it("creates proposals and proposal has pending state", async ()=> {
+
+    it("creates members", async ()=> {
+        let [ ,  , alice, bob, carl, david] = accounts;
+    
+        // create members
+        await daoProxy.createMember(alice, {from: owner});
+        let isAliceMember = await daoProxy.hasRole(String(memberRole), alice);
+        assert.equal(isAliceMember, true, "member not created");
+       
+        // only nonmembers banned members cannot members
+        it("allows only non members and non banned members to be created", async ()=>{
+            await expect(implProxy.createMember(alice, {from: owner})).to.be.rejected
+            await daoProxy.grantRole(String(bannedRole), bob);
+            await expect(implProxy.createMember(bob, {from: owner})).to.be.rejected
+        })
+        
+        
+    });
+
+    it("allows for proposal creation", async ()=> {
 
         await daoProxy.setVotingPeriod([daoGovInstance.address], [0], [daoGovernor.methods.setVotingPeriod(5).encodeABI()]);
         let proposalId = await daoProxy.getLatestProposal(owner);
-        
         assert.isAbove(Number(proposalId.toString()), 0, "proposal not created");
         let proposalState = await daoGovernor.methods.state(proposalId).call({from:owner});
-        assert.equal(proposalState, 0, "proposal does not have pending state"); 
+        assert.equal(proposalState, 0, "proposal does not have pending state");
+        
+    });
 
-    })
+
+    /// governance token actions 
+    it("initiates correctly", async() => {
+        let balances = Promise.all([
+            await daoGovToken.balanceOf(alice),
+            await daoGovToken.balanceOf(bob),
+            await daoGovToken.balanceOf(carl),
+            await daoGovToken.balance(david)
+        ]);
+        console.log(balances);
+    });
+
+
+    // let proposal;
+    // /// proposal execution handled by daoTimeLock
+    // before(async () => {
+    //     /// transfer some erc20votes tokens to users 
+    //     /// let a user create a proposal
+    //     /// proposal id 
+    // })
+
+    // it("allows users to vote on proposals", async ()=> {
+
+    // })
 
     // accesscontrol
     // proposals

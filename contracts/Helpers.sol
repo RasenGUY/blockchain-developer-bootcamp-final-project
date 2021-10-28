@@ -11,11 +11,11 @@ import "./Constants.sol";
 
 library Helpers {
     
-    function getLatestProposal (
-        address _sender, 
-        Constants.WrapMap storage _wrapped
-    ) internal view returns (uint256) {
-        return _wrapped.map[_sender][_wrapped.map[_sender].length - 1];
-    }
+    // function getLatestProposal (
+    //     address _sender, 
+    //     Constants.WrapMap storage _wrapped
+    // ) internal view returns (uint256) {
+    //     return _wrapped.map[_sender][_wrapped.map[_sender].length - 1];
+    // }
 
 }
