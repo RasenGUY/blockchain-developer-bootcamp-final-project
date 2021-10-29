@@ -73,7 +73,7 @@ abstract contract ERC20SnapshotModified is ERC20 {
     /// @notice added functionality
     /// @dev returns balance at latests snapShot id, assuming that the order of snapShots are not tampered with 
     function _getLatestSnapshotBalanceOf (address account) internal view returns (uint256) {
-        return _accountBalanceSnapshots[account].values[_accountBalanceSnapshots[account].values.length - 1 ]; 
+        return _accountBalanceSnapshots[account].values[_lastSnapshotId(_accountBalanceSnapshots[account].ids)]; 
     }
 
     /**
@@ -101,6 +101,7 @@ abstract contract ERC20SnapshotModified is ERC20 {
         address to,
         uint256 amount
     ) internal virtual override {
+
         super._beforeTokenTransfer(from, to, amount);
 
         if (from == address(0)) {
