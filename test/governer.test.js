@@ -20,11 +20,12 @@ const IkonDAOTimelockController = artifacts.require('IkonDAOTimelockController')
 contract("IDAOCollective (proxy)", accounts => {
     let owner = accounts[0]; 
     let other = accounts[1];
-    let [ ,  , alice, bob, carl, david, eduard] = accounts;
+    let [ ,  , alice, bob, carl, david] = accounts;
     let dao, daoProxy, daoGovToken, daoToken, daoGovInstance, daoGovernor, daoTimelock; 
     let memberRole = web3.utils.soliditySha3("IKONDAO_MEMBER_ROLE");
     let adminRole = web3.utils.soliditySha3("IKONDAO_ADMIN_ROLE");
     let bannedRole = web3.utils.soliditySha3("IKONDAO_BANNED_ROLE");
+    let weightLimit, balances;
 
     beforeEach(async () => {        
         // get instances
@@ -39,6 +40,14 @@ contract("IDAOCollective (proxy)", accounts => {
         
         // deploy proxy 
         daoProxy = await deployProxy(DAO, [daoGovToken.address, daoGovInstance.address, daoTimelock.address, daoToken.address], {initializer: '__IkonDAO_init', kind: 'uups', unsafeAllow: ['constructor', 'delegatecall']});
+
+        balances = Promise.all([
+            await daoGovToken.balanceOf(alice),
+            await daoGovToken.balanceOf(bob),
+            await daoGovToken.balanceOf(carl),
+            await daoGovToken.balanceOf(david)
+        ]).then(values => balances = values.map(value => toNumber(value)));
+        await balances; 
     })
 
     // // upgradeabillity tests
@@ -98,32 +107,6 @@ contract("IDAOCollective (proxy)", accounts => {
         
     // });
 
-    // var balances; 
-    afterEach(async () => {
-
-        balances = Promise.all([
-            await daoGovToken.balanceOf(alice),
-            await daoGovToken.balanceOf(bob),
-            await daoGovToken.balanceOf(carl),
-            await daoGovToken.balanceOf(david)
-        ]).then(values => balances = values.map(value => new BN(value).div(new BN("1e18")).toNumber()));
-        
-        // correct balances
-        await balances;
-        // console.log(balances[1]);
-
-        let weightLimit = await daoGovToken.getWeightLimit(); 
-        // let snapId = await daoGovToken.totalSupplyAt(1, {from: owner});
-        console.log(daoGovToken);
-        // let [reached, limitReachedBob] = await daoGovToken.weightLimitReached(bob); // reverts
-        // let restReward = await daoGovToken.calculateRestReward(bob); // reverts
-        // let snapshot = await daoGovToken.getLatestSnapshotBalanceOf(bob); // reverts
-        // console.log(restReward)
-        console.log(balances[1]);
-        console.log(toNumber(weightLimit));
-        // console.log(toNumber(snapId));
-    });
-
     // /// governance token 
     // it("initiates correctly", async() => {
         
@@ -131,24 +114,36 @@ contract("IDAOCollective (proxy)", accounts => {
     //     assert.equal(balances.every(balance => balance == 100) , true, "some balances are not initialized correctly"); 
 
     //     // correct weightLimitFraction
-    //     let weightLimit = await daoGovToken.getWeightLimit();
-    //     weightLimit = new BN(weightLimit).div(new BN("1e18"));
+    //     weightLimit = await daoGovToken.getWeightLimit();
     //     let testAgainst = balances.reduce((pr, curr) => curr + pr) * 0.49;
-    //     assert.equal(weightLimit, testAgainst, "weightLimit not initiated correctly");
-                 
+    //     assert.equal(toNumber(weightLimit), testAgainst, "weightLimit not initiated correctly");
+
+        
+    //     it("does not transfer after it is initiated", async() =>{
+    //         // token pauased after initial distribution of votes        
+    //         await expect(daoGovToken.transfer(bob, new BN("50e18"), {from: alice})).to.be.rejected;
+    //     })
+
     // });
 
-    // it("does not transfer when paused", async() =>{        
-    //     await expect(daoGovToken.transfer(bob, new BN("50e18"), {from: alice})).to.be.rejected;
-    // })
 
     it("respects vote weight limit", async() => {
+
+        // user with more voting power than is allowed will not be rewarded votes
         await daoGovToken.unpause({from: owner}); 
         await daoGovToken.transfer(bob, web3.utils.toBN(new BN("100e18")), {from: alice}); 
         await daoGovToken.pause({from: owner}); 
-        // await daoGovToken.govRewardVotes(bob, {from: owner});  
-        // let bobBalance = await daoGovToken.balanceOf(bob);
-        // assert.equal(new BN(bobBalance).div(new BN("1e18")).toNumber(), 200, "governor still rewards even when weight limit is reached");
+
+        await daoGovToken.rewardVotes(bob); 
+        let bobVotes = await daoGovToken.getVotes(bob); 
+        
+        assert.equal(toNumber(bobVotes), 200, "governor still rewards even when weight limit is reached"); // bobs votes will not change since he already reached the limit
+        
+        await daoGovToken.rewardVotes(carl);
+        let carlVotes = await daoGovToken.getVotes(carl);
+        weightLimit = await daoGovToken.getWeightLimit();
+        assert.equal(toNumber(carlVotes), weightLimit, "something went wrong");
+        
     });
 
     // it("disallows users to transfer votes to eachother", async() => {

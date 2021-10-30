@@ -8,17 +8,18 @@ pragma solidity ^0.8.2;
 /// @dev functions currently implemented (other then imported library) functions could contain side-effects
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Snapshot.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "./ERC20SnapshotModified.sol";
+
 
 
 /// @custom:security-contact ftrouw@protonmail.com
-contract IkonDAOGovernanceToken is ERC20Burnable, ERC20SnapshotModified, Ownable, Pausable, ERC20Permit, ERC20Votes {
+contract IkonDAOGovernanceToken is ERC20Burnable, ERC20Snapshot, Ownable, Pausable, ERC20Permit, ERC20Votes {
 
     /// @notice represents the maximum amount of votes a user can own 
     /// @notice represented with decimals
@@ -26,7 +27,7 @@ contract IkonDAOGovernanceToken is ERC20Burnable, ERC20SnapshotModified, Ownable
     uint private _weightLimitFraction; 
     uint private _baseRewardVotes;
 
-    using SafeMath for uint256;
+    using SafeMath for *;
 
     event VotingPowerIncreased(address _receiver, uint256 _amount, string message);
     event VotingPowerSlashed(address _receiver, uint256 _amount, string message);
@@ -41,6 +42,7 @@ contract IkonDAOGovernanceToken is ERC20Burnable, ERC20SnapshotModified, Ownable
 
         for (uint i = 0; i < _initialUsers.length; i++){
             _mint(_initialUsers[i], _initialVotes);
+            selfDelegate(_initialUsers[i]);
             // _govRewardVotes(_initialUsers[i], _initialVotes);
         }
         pause();
@@ -61,16 +63,21 @@ contract IkonDAOGovernanceToken is ERC20Burnable, ERC20SnapshotModified, Ownable
 
     /// @dev checks wheter limit is reached it is it returns rest that should be sent
     /// @param _receiver address of the contributor
-    function weightLimitReached(address _receiver) private view returns (bool _reached, uint256) {        
-        return balanceOf(_receiver).add(_baseRewardVotes) < getWeightLimit() ? (_reached = false, _baseRewardVotes) : (_reached = true, calculateRestReward(_receiver));
+    function weightLimitReached(address _receiver) public view returns (bool _reached, uint256) {
+        uint256 limit = getWeightLimit();
+        uint256 votes = getVotes(_receiver);
+        return votes >= limit ? (_reached = true, 0) : (_reached = false, calculateRewards(votes, limit));
     }
-    
-    function calculateRestReward(address _receiver) private view returns (uint256) {
-        return getWeightLimit().sub(getLatestSnapshotBalanceOf(_receiver));
-    } 
 
-    function govRewardVotes(address _to) external onlyOwner {
-        _govRewardVotes(_to);
+    /// @dev calculates reward contribution
+    /// @param votes voteWeight of account
+    /// @param limit voteWeight limit  
+    function calculateRewards(uint256 votes, uint256 limit) private view returns (uint256){
+        return votes.add(_baseRewardVotes) <= limit ? _baseRewardVotes : limit - votes;
+    }
+
+    function rewardVotes(address _to) external onlyOwner {
+        _rewardVotes(_to);
     }
 
     /// @dev mints reward tokens to contributors
@@ -78,46 +85,36 @@ contract IkonDAOGovernanceToken is ERC20Burnable, ERC20SnapshotModified, Ownable
     /// @notice checks first if weightlimit (maximumVotes) is breached
     /// @notice also checks if reward + account balance
     /// @notice use in constructor  
-    function _govRewardVotes(address _to) private {
-        
+    function _rewardVotes(address _to) private {
         unpause(); // unpause the contract
 
         /// @notice check if user balance is 0
-        if (balanceOf(_to) != 0){
+        if (getVotes(_to) != 0){
             /// @notice if its not then proceed with actions below
             /// @notice weight exceeds limit ?
             (bool limitReached, uint256 reward) = weightLimitReached(_to);
-            if (!limitReached){
+            if (limitReached){
             
-                mint(_to, reward);
-                emit VotingPowerIncreased(_to, reward, "Level Up");
-            
-            } else if (limitReached && reward != 0){
-                
-                mint(_to, reward);
-                emit VotingPowerIncreased(_to, reward, "Level Up");
-
-            } else {
                 emit VotingPowerIncreased(_to, reward, "Can't level up for now, try helping others");
-            } 
-
+            
+            } else {
+                mint(_to, reward);
+                selfDelegate(_to);
+                emit VotingPowerIncreased(_to, reward, "Level up");
+            }
+ 
         } else {
-
             mint(_to, _baseRewardVotes);
-
+            selfDelegate(_to);
             emit VotingPowerIncreased(_to, _baseRewardVotes, "Level up");
-
         }
 
         pause(); // pause after reward distribution 
     }
 
-    function getLatestSnapshotBalanceOf (address _account) private view returns (uint256){
-        return _getLatestSnapshotBalanceOf(_account);
-    } 
 
-    function snapshot() public onlyOwner {
-        _snapshot();
+    function selfDelegate(address delegatee) private {
+        return _delegate(delegatee, delegatee);
     }
 
     function pause() public onlyOwner {
@@ -135,8 +132,9 @@ contract IkonDAOGovernanceToken is ERC20Burnable, ERC20SnapshotModified, Ownable
     function _beforeTokenTransfer(address from, address to, uint256 amount)
         internal
         whenNotPaused
-        override(ERC20, ERC20SnapshotModified)
+        override(ERC20, ERC20Snapshot)
     {   
+        _snapshot();
         super._beforeTokenTransfer(from, to, amount);
     }
 
@@ -153,6 +151,7 @@ contract IkonDAOGovernanceToken is ERC20Burnable, ERC20SnapshotModified, Ownable
         override(ERC20, ERC20Votes) whenNotPaused
     {
         super._mint(to, amount);
+        _snapshot();
     }
 
     function _burn(address account, uint256 amount)
@@ -161,30 +160,9 @@ contract IkonDAOGovernanceToken is ERC20Burnable, ERC20SnapshotModified, Ownable
     {
         super._burn(account, amount);
     }
-
-    // function transfer(address recipient, uint256 amount) public override whenNotPaused returns (bool) {
-    //     return super.transfer(recipient, amount); 
-    // }
-
-    // function allowance(address owner, address spender) public view override whenNotPaused returns (uint256) {
-    //     return super.allowance(owner, spender);
-    // }
-
-    // function approve(address spender, uint256 amount) public override whenNotPaused returns (bool) {
-    //     return super.approve(spender, amount);
-    // }
-
-    // function transferFrom(address sender, address recipient, uint256 amount) public override whenNotPaused returns (bool) {
-    //      return super.transferFrom(sender, recipient, amount);
-    // }
-
-    // function increaseAllowance(address spender, uint256 addedValue) public override  whenNotPaused returns (bool) {
-        
-    //     return super.increaseAllowance(spender, addedValue);
-    // }
-
-    // function decreaseAllowance(address spender, uint256 subtractedValue) public override whenNotPaused returns (bool) {
-    //     return super.decreaseAllowance(spender, subtractedValue);
-    // }
+    
+    /// override delegate functions
+    function delegate (address delgatee) public override {}
+    function delegateBySig(address delegatee, uint256 nonce, uint256 expiry, uint8 v, bytes32 r, bytes32 s) public override {}
     
 }
