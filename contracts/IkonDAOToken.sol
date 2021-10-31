@@ -12,17 +12,44 @@ import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Snapshot.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
+import "./Constants.sol";
+
 
 /// @custom:security-contact ftrouw@protonmail.com
-contract IkonDAOToken is ERC20, ERC20Burnable, ERC20Snapshot, AccessControl, ERC20Permit {
-    bytes32 public constant SNAPSHOT_ROLE = keccak256("SNAPSHOT_ROLE");
-    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+contract IkonDAOToken is ERC20, ERC20Burnable, ERC20Snapshot, AccessControl, ERC20Permit, Constants {
+    
+    uint256 _baseRewardTokens; 
 
-    constructor() ERC20("IkonDAO Token", "IKD") ERC20Permit("IkonDAO Token") {
-        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+    constructor(uint256 _baseRewards) ERC20("IkonDAO Token", "IKD") ERC20Permit("IkonDAO Token") {
+        _setupRole(ADMIN_ROLE, msg.sender);
         _setupRole(SNAPSHOT_ROLE, msg.sender);
         _mint(msg.sender, 1000000 * 10 ** decimals());
         _setupRole(MINTER_ROLE, msg.sender);
+        
+        /// @dev sets basereward
+        _baseRewardTokens = _baseRewards;
+    }
+
+    /// @dev see _rewardTokens
+    function rewardTokens(address to) external onlyRole(ADMIN_ROLE) {
+        _rewardTokens(_msgSender(), to);
+    }
+
+    /// @dev distributes rewards from dao to contributor
+    /// @param _to address of the contributoraddress
+    function _rewardTokens(address _from, address _to) private {
+        _transfer(_from, _to, _baseRewardTokens); 
+    } 
+
+    /// @dev returns base Token Rewards
+    function getRewardTokens() public view returns(uint256) {
+        return _baseRewardTokens; 
+    }
+
+    /// @dev sets base Token Reward
+    /// @param newBase is the amount to set rewards to 
+    function setRewardTokens(uint256 newBase) external onlyRole(ADMIN_ROLE) {
+        _baseRewardTokens = newBase;
     }
 
     function snapshot() public onlyRole(SNAPSHOT_ROLE) {
@@ -40,4 +67,5 @@ contract IkonDAOToken is ERC20, ERC20Burnable, ERC20Snapshot, AccessControl, ERC
     {
         super._beforeTokenTransfer(from, to, amount);
     }
+
 }

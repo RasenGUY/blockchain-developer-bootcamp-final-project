@@ -153,6 +153,12 @@ contract IkonDAOGovernanceToken is ERC20Burnable, ERC20Snapshot, Ownable, Pausab
         _unpause();
     }
 
+    function snapShot() external onlyOwner {
+        _unpause();
+        _snapshot();
+        _pause();
+    }
+
     function mint(address to, uint256 amount) private onlyOwner whenNotPaused {
         super._mint(to, amount);
     }
@@ -162,7 +168,6 @@ contract IkonDAOGovernanceToken is ERC20Burnable, ERC20Snapshot, Ownable, Pausab
         whenNotPaused
         override(ERC20, ERC20Snapshot)
     {   
-        _snapshot();
         super._beforeTokenTransfer(from, to, amount);
     }
 
@@ -179,7 +184,6 @@ contract IkonDAOGovernanceToken is ERC20Burnable, ERC20Snapshot, Ownable, Pausab
         override(ERC20, ERC20Votes) whenNotPaused
     {
         super._mint(to, amount);
-        _snapshot();
     }
 
     function _burn(address account, uint256 amount)
