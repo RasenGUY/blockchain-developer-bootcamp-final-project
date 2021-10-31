@@ -4,6 +4,7 @@ const BN = require("big.js");
 
 // from normal number to bn
 exports.resToNumber = res => new BN(res).div(new BN("1e18")).toNumber();
+exports.numToBN = num => web3.utils.toBN(new BN(String(num).concat("e18")));
 
 // // from decimals to BN
 // exports.floatToBN = (number, decimals) => {

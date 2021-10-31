@@ -27,7 +27,7 @@ contract IkonDAOGovernanceToken is ERC20Burnable, ERC20Snapshot, Ownable, Pausab
     uint private _weightLimitFraction; 
     uint private _baseRewardVotes;
 
-    using SafeMath for *;
+    using SafeMath for uint256;
 
     event VotingPowerIncreased(address _receiver, uint256 _amount, string message);
     event VotingPowerSlashed(address _receiver, uint256 _amount, string message);
@@ -50,9 +50,9 @@ contract IkonDAOGovernanceToken is ERC20Burnable, ERC20Snapshot, Ownable, Pausab
     
     /// @dev sets vote weight limit
     /// @param _fraction fraction to which the weight limit should be set  
-    function setWeightLimitFraction(uint256 _fraction) external onlyOwner {
-        _weightLimitFraction = _fraction;   
-    }
+    // function setWeightLimitFraction(uint256 _fraction) external onlyOwner {
+    //     _weightLimitFraction = _fraction;   
+    // }
 
     /// @dev returns weight limit of governance token
     function getWeightLimit() public view returns (uint256) {
@@ -60,6 +60,17 @@ contract IkonDAOGovernanceToken is ERC20Burnable, ERC20Snapshot, Ownable, Pausab
         uint256 y = x.div(1 * 10 ** decimals());
         return y;
     } 
+
+    /// @dev exposes baseReward
+    function getRewardVotes() public view returns(uint256) {
+        return _baseRewardVotes; 
+    }
+    
+    /// @dev sets _baseVotingReward
+    /// @param newBase is the amount to set rewards to 
+    function setRewardVotes(uint256 newBase) external onlyOwner {
+        _baseRewardVotes = newBase;
+    }
 
     /// @dev checks wheter limit is reached it is it returns rest that should be sent
     /// @param _receiver address of the contributor
@@ -76,8 +87,12 @@ contract IkonDAOGovernanceToken is ERC20Burnable, ERC20Snapshot, Ownable, Pausab
         return votes.add(_baseRewardVotes) <= limit ? _baseRewardVotes : limit - votes;
     }
 
-    function rewardVotes(address _to) external onlyOwner {
-        _rewardVotes(_to);
+    /// @notice see _rewardvotes 
+    function rewardVotes(address to) external onlyOwner {
+        require(to != address(0), "not a valid address");
+        unpause(); // unpause the contract
+        _rewardVotes(to);
+        pause();
     }
 
     /// @dev mints reward tokens to contributors
@@ -85,8 +100,7 @@ contract IkonDAOGovernanceToken is ERC20Burnable, ERC20Snapshot, Ownable, Pausab
     /// @notice checks first if weightlimit (maximumVotes) is breached
     /// @notice also checks if reward + account balance
     /// @notice use in constructor  
-    function _rewardVotes(address _to) private {
-        unpause(); // unpause the contract
+    function _rewardVotes(address _to) private whenNotPaused {
 
         /// @notice check if user balance is 0
         if (getVotes(_to) != 0){
@@ -108,12 +122,26 @@ contract IkonDAOGovernanceToken is ERC20Burnable, ERC20Snapshot, Ownable, Pausab
             selfDelegate(_to);
             emit VotingPowerIncreased(_to, _baseRewardVotes, "Level up");
         }
-
-        pause(); // pause after reward distribution 
     }
 
 
-    function selfDelegate(address delegatee) private {
+    /// @dev see _slashVotes
+    function slashVotes (address account, uint256 amount) external onlyOwner {    
+        require(amount <= getVotes(account), "amount exceeds user votes");
+        _unpause();
+        _slashVotes(account, amount);
+        pause();
+    }
+
+    /// @dev removes votes from account (accountability)
+    /// @param _account account whose votes will removed 
+    function _slashVotes(address _account, uint256 _amount) private whenNotPaused {
+        _burn(_account, _amount);
+    } 
+
+    /// @dev dao "self" delegates votes to user  
+    /// @param delegatee user who will receive votes
+    function selfDelegate(address delegatee) private whenNotPaused {
         return _delegate(delegatee, delegatee);
     }
 
@@ -161,8 +189,12 @@ contract IkonDAOGovernanceToken is ERC20Burnable, ERC20Snapshot, Ownable, Pausab
         super._burn(account, amount);
     }
     
-    /// override delegate functions
-    function delegate (address delgatee) public override {}
-    function delegateBySig(address delegatee, uint256 nonce, uint256 expiry, uint8 v, bytes32 r, bytes32 s) public override {}
+    /// @notice public delegate functions are overriden as dao does not allow delegateion of votes
+    function delegate (address delgatee) public pure override {
+        revert("delegating votes not allowed");
+    }
+    function delegateBySig(address delegatee, uint256 nonce, uint256 expiry, uint8 v, bytes32 r, bytes32 s) public pure override {
+        revert("delegating votes not allowed");
+    }
     
 }

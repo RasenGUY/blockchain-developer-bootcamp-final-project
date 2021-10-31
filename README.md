@@ -47,7 +47,7 @@ Governance tokens can only be required through contributions (creation of digita
 
 The governance token represents a creators contribution to the platform. creators can use their governance token to vote on proposals. next to that they also need the governance tokens for staking the utility token of the platform. 
 
-Note: one user can never obtain more governance points than the total of 51% (also a variable that can be set via community votes) of the creators of the token. This is to mitigate disproportional voting power between creators. 
+Note: one user can never obtain more governance points than the total of 51% of the creators of the token. This is to mitigate disproportional voting power between creators. 
 
 ### utility token
 The utility token can be used as a form of payment (for the nft's) so users would need to buy it on the open market if they choose to pay with it to buy the nft's. The utility token allows users to buy premium art at a discount (set by the community at the request approval process). 
