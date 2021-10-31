@@ -16,6 +16,8 @@ abstract contract Constants  {
     
     /// @notice ACCESS CONTROL CONSTANTS
     bytes32 constant ADMIN_ROLE = keccak256("IKONDAO_ADMIN_ROLE");
+    bytes32 constant MINTER_ROLE = keccak256("IKONDAO_MINTER_ROLE");
+    bytes32 constant SNAPSHOT_ROLE = keccak256("IKONDAO_SNAPSHOT_ROLE");
     bytes32 constant MEMBER_ROLE = keccak256("IKONDAO_MEMBER_ROLE");
     bytes32 constant BANNED_ROLE = keccak256("IKONDAO_BANNED_ROLE");
     
