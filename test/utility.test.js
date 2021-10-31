@@ -19,6 +19,6 @@ contract("IKonDAOCollective (utility)", accounts => {
     let dao, daoProxy, daoGovToken, daoToken, daoGovInstance, daoGovernor, daoTimelock; 
     let minterRole = web3.utils.soliditySha3("MINTER_ROLE");
     let snapShotRole = web3.utils.soliditySha3("SNAPSHOT_ROLE");
-    let snapShotRole = web3.utils.soliditySha3("DEFAULT_ADMIN_ROLE");
+    let adminRole = web3.utils.soliditySha3("IKONDAO_ADMIN_ROLE");
     let balances;  
 })

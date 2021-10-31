@@ -4,8 +4,7 @@ const IkonDAOGovernanceToken = artifacts.require('IkonDAOGovernanceToken');
 const IkonDAOToken = artifacts.require('IkonDAOToken');
 const IkonDAOGovernor = artifacts.require('IkonDAOGovernor');
 const IkonDAOTimelockController = artifacts.require('IkonDAOTimelockController');
-// const {numberToBN, floatToBN} = require('../test/bnHelpers');\
-const BN = require("big.js");
+const {resToNumber: toNum, numToBN: toBN}= require('../test/bnHelpers');
 
 
 module.exports = async function (deployer, networks, accounts) {
@@ -13,13 +12,13 @@ module.exports = async function (deployer, networks, accounts) {
     let other = accounts[1];
     let initialUsers = [accounts[2], accounts[3], accounts[4], accounts[5]]
     let dao, daoProxy, daoGovToken, daoToken, daoGovernor, daoTimelock;
-    let weigthLimitFraction = web3.utils.toBN(new BN("49e16"));
-    let initialVotes = web3.utils.toBN(new BN("100e+18"));
-    let baseReward = web3.utils.toBN(new BN("100e+18"));
+    let weigthLimitFraction = toBN(0.49); 
+    let initialVotes = toBN(100);
+    let baseReward = toBN(100);
 
     await deployer.deploy(DAO, {from: owner});
     await deployer.deploy(IkonDAOGovernanceToken, weigthLimitFraction, initialUsers, initialVotes, baseReward, {from: owner});
-    await deployer.deploy(IkonDAOToken, {from: owner}); 
+    await deployer.deploy(IkonDAOToken, baseReward, {from: owner}); 
         
     // instances 
     dao = await DAO.deployed(); 

@@ -1,6 +1,7 @@
 // some helper functions for calculating bignumbers
 const { replace } = require("lodash");
 const BN = require("big.js");
+const web3 = require("web3");
 
 // from normal number to bn
 exports.resToNumber = res => new BN(res).div(new BN("1e18")).toNumber();
