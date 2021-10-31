@@ -42,13 +42,13 @@ contract IkonDAOToken is ERC20, ERC20Burnable, ERC20Snapshot, AccessControl, ERC
     } 
 
     /// @dev returns base Token Rewards
-    function getRewardTokens() public view returns(uint256) {
+    function getBaseReward() public view returns(uint256) {
         return _baseRewardTokens; 
     }
 
     /// @dev sets base Token Reward
     /// @param newBase is the amount to set rewards to 
-    function setRewardTokens(uint256 newBase) external onlyRole(ADMIN_ROLE) {
+    function setBaseReward(uint256 newBase) external onlyRole(ADMIN_ROLE) {
         _baseRewardTokens = newBase;
     }
 

@@ -14,11 +14,12 @@ module.exports = async function (deployer, networks, accounts) {
     let dao, daoProxy, daoGovToken, daoToken, daoGovernor, daoTimelock;
     let weigthLimitFraction = toBN(0.49); 
     let initialVotes = toBN(100);
-    let baseReward = toBN(100);
+    let baseReward = toBN(100); 
+    let baseRewardUtility = toBN(5);
 
     await deployer.deploy(DAO, {from: owner});
     await deployer.deploy(IkonDAOGovernanceToken, weigthLimitFraction, initialUsers, initialVotes, baseReward, {from: owner});
-    await deployer.deploy(IkonDAOToken, baseReward, {from: owner}); 
+    await deployer.deploy(IkonDAOToken, baseRewardUtility, {from: owner}); 
         
     // instances 
     dao = await DAO.deployed(); 
