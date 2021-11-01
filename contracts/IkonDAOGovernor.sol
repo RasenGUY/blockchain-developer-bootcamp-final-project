@@ -17,14 +17,14 @@ import "./Constants.sol";
 
 /// @custom:security-contact ftrouw@protonmail.com
 contract IkonDAOGovernor is Governor, Ownable, GovernorCountingSimple, GovernorVotes, GovernorVotesQuorumFraction, GovernorTimelockControl, Constants {
-    string private _name; 
+    // string private _name; 
     string public _version;
     uint256 private _votingDelay; 
     uint256 private _votingPeriod;
     uint256 private _owner;  
 
-    constructor(ERC20Votes _token, TimelockController _timelock, string memory _govName, uint256 _delay, uint256 _period)
-        Governor(_govName)
+    constructor(ERC20Votes _token, TimelockController _timelock, uint256 _delay, uint256 _period)
+        Governor("IkonDaoGovernor")
         GovernorVotes(_token)
         GovernorVotesQuorumFraction(4)
         GovernorTimelockControl(_timelock) 
@@ -35,6 +35,14 @@ contract IkonDAOGovernor is Governor, Ownable, GovernorCountingSimple, GovernorV
         _version = "1.0.0";
     }
     
+    function blNumber() public view returns (uint256){
+        return block.number;
+    }
+    
+    function version() public view override(Governor, IGovernor) returns (string memory) {
+        return _version;
+    }
+
     function votingDelay() public view override returns (uint256) {
         return _votingDelay; // 1 block
     }
@@ -53,7 +61,6 @@ contract IkonDAOGovernor is Governor, Ownable, GovernorCountingSimple, GovernorV
 
     function setVotingDelay(uint256 _delay) public onlyOwner {
         _setVotingDelay(_delay); 
-        
     } 
 
     function _setVotingDelay(uint256 _delay) private {
