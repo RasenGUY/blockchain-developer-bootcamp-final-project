@@ -7,12 +7,14 @@ const IkonDAOTimelockController = artifacts.require('IkonDAOTimelockController')
 const {resToUnit, unitToBN, toBN } = require('../test/bnHelpers');
 
 
+
+
 module.exports = async function (deployer, networks, accounts) {
     let owner = accounts[0]; 
     let other = accounts[1];
     let initialUsers = [accounts[2], accounts[3], accounts[4], accounts[5]]
     let dao, daoProxy, daoGovToken, daoToken, daoGovernor, daoTimelock;
-    let weigthLimitFraction = unitToBN(0.49); 
+    let weigthLimitFraction = unitToBN(49e-2); 
     let initialVotes = unitToBN(100);
     let baseReward = unitToBN(100); 
     let baseRewardUtility = unitToBN(5);
@@ -28,7 +30,7 @@ module.exports = async function (deployer, networks, accounts) {
         
     await deployer.deploy(
         IkonDAOTimelockController, 
-        3, 
+        1, 
         [owner], 
         [owner], 
         {from: owner}

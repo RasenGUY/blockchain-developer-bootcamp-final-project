@@ -10,16 +10,16 @@ pragma solidity ^0.8.2;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Snapshot.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
-
+import "./Constants.sol";
 
 /// @custom:security-contact ftrouw@protonmail.com
-contract IkonDAOGovernanceToken is ERC20Burnable, ERC20Snapshot, Ownable, Pausable, ERC20Permit, ERC20Votes {
+contract IkonDAOGovernanceToken is ERC20Burnable, ERC20Snapshot, AccessControl, Pausable, ERC20Permit, ERC20Votes, Constants {
 
     /// @notice represents the maximum amount of votes a user can own 
     /// @notice represented with decimals
@@ -36,9 +36,15 @@ contract IkonDAOGovernanceToken is ERC20Burnable, ERC20Snapshot, Ownable, Pausab
         ERC20("IkonDAOGovernanceToken", " IKDG")
         ERC20Permit("IkonDAOGovernanceToken")
     {
+
         _weightLimitFraction = _fraction;
         _baseRewardVotes = _baseReward;
         // _mint(msg.sender, 10000000 * 10 ** decimals());
+        
+        _setupRole(ADMIN_ROLE, msg.sender);
+        _setRoleAdmin(ADMIN_ROLE, ADMIN_ROLE);
+        _setupRole(SNAPSHOT_ROLE, msg.sender);
+        _setRoleAdmin(SNAPSHOT_ROLE, ADMIN_ROLE);
 
         for (uint i = 0; i < _initialUsers.length; i++){
             _mint(_initialUsers[i], _initialVotes);
@@ -68,7 +74,7 @@ contract IkonDAOGovernanceToken is ERC20Burnable, ERC20Snapshot, Ownable, Pausab
     
     /// @dev sets _baseVotingReward
     /// @param newBase is the amount to set rewards to 
-    function setRewardVotes(uint256 newBase) external onlyOwner {
+    function setRewardVotes(uint256 newBase) external onlyRole(ADMIN_ROLE) {
         _baseRewardVotes = newBase;
     }
 
@@ -88,7 +94,7 @@ contract IkonDAOGovernanceToken is ERC20Burnable, ERC20Snapshot, Ownable, Pausab
     }
 
     /// @notice see _rewardvotes 
-    function rewardVotes(address to) external onlyOwner {
+    function rewardVotes(address to) external onlyRole(ADMIN_ROLE) {
         require(to != address(0), "not a valid address");
         unpause(); // unpause the contract
         _rewardVotes(to);
@@ -126,7 +132,7 @@ contract IkonDAOGovernanceToken is ERC20Burnable, ERC20Snapshot, Ownable, Pausab
 
 
     /// @dev see _slashVotes
-    function slashVotes (address account, uint256 amount) external onlyOwner {    
+    function slashVotes (address account, uint256 amount) external onlyRole(ADMIN_ROLE) {    
         require(amount <= getVotes(account), "amount exceeds user votes");
         _unpause();
         _slashVotes(account, amount);
@@ -145,21 +151,21 @@ contract IkonDAOGovernanceToken is ERC20Burnable, ERC20Snapshot, Ownable, Pausab
         return _delegate(delegatee, delegatee);
     }
 
-    function pause() public onlyOwner {
+    function pause() public onlyRole(ADMIN_ROLE) {
         _pause();
     }
 
-    function unpause() public onlyOwner {
+    function unpause() public onlyRole(ADMIN_ROLE) {
         _unpause();
     }
 
-    function snapShot() external onlyOwner {
+    function snapShot() external onlyRole(ADMIN_ROLE) {
         _unpause();
         _snapshot();
         _pause();
     }
 
-    function mint(address to, uint256 amount) private onlyOwner whenNotPaused {
+    function mint(address to, uint256 amount) private onlyRole(ADMIN_ROLE) whenNotPaused {
         super._mint(to, amount);
     }
 

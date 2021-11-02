@@ -34,11 +34,7 @@ contract IkonDAOGovernor is Governor, Ownable, GovernorCountingSimple, GovernorV
         _votingPeriod = _period;
         _version = "1.0.0";
     }
-    
-    function blNumber() public view returns (uint256){
-        return block.number;
-    }
-    
+
     function version() public view override(Governor, IGovernor) returns (string memory) {
         return _version;
     }

@@ -11,6 +11,7 @@
     "@openzeppelin/truffle-upgrades": "^1.10.0",
     "@truffle/contract": "^4.3.38",
     "big.js": "^6.1.1",
+    "bn.js": "^5.2.0",
     "ganache-core": "^2.13.2",
     "truffle-contract-size": "^2.0.1",
     "web3": "^1.6.0"

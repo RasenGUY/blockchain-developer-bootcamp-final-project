@@ -6,8 +6,9 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const expect = chai.expect;
 chai.use(chaiAsPromised);
+const BN = require("big.js");
 const { toUnit, unitToBN, toBN, toNumber } = require("./bnHelpers");
-const { increaseTime } = require("./mineBlocks");
+const { increaseTime, fakeMine } = require("./mineBlocks");
 const IkonDAOGovernanceToken = artifacts.require('IkonDAOGovernanceToken');
 const IkonDAOGovernor = artifacts.require('IkonDAOGovernor');
 const IkonDAOTimelockController = artifacts.require('IkonDAOTimelockController');
@@ -84,7 +85,7 @@ contract("IkonDAO (governor)", async accounts => {
         beforeEach( async() => {
             [govToken, token, timelocker, governor] = await instances;
             await governor.setVotingDelay(1);
-            
+            await governor.setVotingPeriod(4);
 
             tokenInst = new Contract(token.abi, token.address); 
             govTokenInst = new Contract(govToken.abi, govToken.address);
@@ -98,8 +99,8 @@ contract("IkonDAO (governor)", async accounts => {
                 0
             ]
             calldatas = [
-                govTokenInst.methods.rewardVotes(alice).encodeABI(),
-                tokenInst.methods.rewardTokens(bob).encodeABI()
+                tokenInst.methods.rewardTokens(bob).encodeABI(),
+                govTokenInst.methods.rewardVotes(alice).encodeABI()
             ];
         });
 
@@ -123,26 +124,62 @@ contract("IkonDAO (governor)", async accounts => {
         })
 
         it("changes state after delay is passed", async () => {
+            await governor.setVotingDelay(10, {from: owner}); 
             let description = "changes state after delay is passed"; 
-            let proposalId = await governor.propose(targets, values, calldatas, description, {from: owner});
-            
-            await increaseTime(web3, 30); /// jump a few blocks to the front 
-            let state = await governor.state(proposalId.logs[0].args['0']);
-            assert.isFalse(toNumber(state) === proposalState.Pending)
-
-        })
-
-        it("cast's votes", async() => {
-            // address indexed voter, uint256 proposalId, uint8 support, uint256 weight, string reason
-            let description = "changes state after delay is passed";
             let proposalId = await governor.hashProposal(targets, values, calldatas, toSha3(description));
             
-            // wait for delay to finish (currently at 1 block);
-            let res = await governor.castVote(proposalId, support.For, {from: alice}) // alice casts a vote
-            let voter = res.logs[0].args['voter'].toString(); 
-            let votedOn = res.logs[0].args['proposalId'].toString();
-            let sup = res.logs[0].args['support'].toString();
-            let weight = res.logs[0].args['weight']
+            let actions = [
+                {
+                    height: 0, callback: async () => governor.propose(targets, values, calldatas, description, {from: owner})
+                },  
+                {
+                    height: 50, callback: async () => governor.state(proposalId)
+                } 
+            ]
+
+            let results = await fakeMine (
+                async () => token.rewardTokens(accounts[8]),
+                actions,
+                100                       
+            )
+            let state = results[1];
+
+            assert.isFalse(toNumber(state) === proposalState.Pending)
+        });
+
+        it("cast's votes", async() => {
+            governor.setVotingDelay(10);
+            governor.setVotingPeriod(25);
+
+            // address indexed voter, uint256 proposalId, uint8 support, uint256 weight, string reason
+            let description = "cast's votes";
+            let proposalId = await governor.hashProposal(targets, values, calldatas, toSha3(description));
+            
+            let actions = [
+                {
+                    height: 0, callback: async () => governor.propose(targets, values, calldatas, description, {from: owner})
+                },  
+                {
+                    height: 12, callback: async () => governor.castVote(proposalId, support.For, {from: alice}) 
+                },
+                {
+                    height: 27, callback: async () => governor.state(proposalId)
+                } 
+            ]
+
+            let res = await fakeMine(
+                async() => token.rewardTokens(accounts[8]),
+                actions,
+                30
+            )
+            
+            let [voter, votedOn, sup, weight] = [
+                res[1].logs[0].args['voter'].toString(),
+                res[1].logs[0].args['proposalId'].toString(), 
+                res[1].logs[0].args['support'].toString(), 
+                res[1].logs[0].args['weight']
+            ]
+
             let aliceVoteWeight = await govToken.getVotes(alice);
             
             assert.equal(voter, alice, "name of voter is not correct"); 
@@ -150,14 +187,102 @@ contract("IkonDAO (governor)", async accounts => {
             assert.equal(toNumber(sup), support.For, "casted support does not match");
             assert.equal(toUnit(weight), toUnit(aliceVoteWeight),  "voters casted weight does not match actual weight"); 
         });
+
+        it("executes vote after voting period ends", async () => {
+            await governor.setVotingDelay(10);
+            await governor.setVotingPeriod(25);
+
+            let description = "respects set quorum";
+            let proposalId = await governor.hashProposal(targets, values, calldatas, toSha3(description), {from: owner});
+            await timelocker.grantRole(toSha3("PROPOSER_ROLE"), governor.address, {from: owner});
+            await timelocker.grantRole(toSha3("EXECUTOR_ROLE"), governor.address, {from: owner});
+            await timelocker.grantRole(toSha3("EXECUTOR_ROLE"), owner, {from: owner});
+            await token.transfer(timelocker.address, unitToBN(500), {from: owner});
+            await token.grantRole(toSha3("IKONDAO_ADMIN_ROLE"), timelocker.address, {from: owner});
+            await govToken.grantRole(toSha3("IKONDAO_ADMIN_ROLE"), timelocker.address, {from: owner});
+
+
+            let actions = [
+                {
+                    // 0
+                    height: 0, 
+                    callback: async () => governor.propose(targets, values, calldatas, description, {from: owner})
+                },  
+                {
+                    // 1
+                    height: 11, 
+                    callback: async () => governor.castVote(proposalId, support.For, {from: alice}) 
+                },
+                {
+                    // 2
+                    height: 12, 
+                    callback: async () => governor.castVote(proposalId, support.For, {from: bob}) 
+                },
+                {
+                    // 3
+                    height: 15, 
+                    callback: async () => governor.castVote(proposalId, support.For, {from: carl}) 
+                },
+                {
+                    // 4
+                    height: 24, 
+                    callback: async () => governor.castVote(proposalId, support.Abstain, {from: david}) 
+                },
+                {
+                    // 5
+                    height: 37, 
+                    callback: async () => governor.state(proposalId)
+                }, 
+                {
+                    // 6
+                    height: 38, 
+                    callback: async () => governor.queue(targets, values, calldatas, toSha3(description), {from: owner})
+                },
+                {
+                    // 7
+                    height: 45, 
+                    callback: async () => governor.state(proposalId)
+                },
+                {
+                    // 8
+                    height: 55, 
+                    callback: async () => governor.execute(targets, values, calldatas, toSha3(description)) 
+                },
+                {
+                    // 9 
+                    height: 59, 
+                    callback: async () => governor.state(proposalId)
+                }
+            ]
+
+            let results = await fakeMine(
+                async() => token.rewardTokens(accounts[9]),
+                actions,
+                60,
+                {
+                    log: true,
+                    actionNumber: 55
+                }
+            )
+            assert.equal(toNumber(results[5]), proposalState.Succeeded, "proposal not executed");
+
+            assert.equal(toNumber(results[7]), proposalState.Queued, "proposal not queued");
+
+            assert.equal(toNumber(results[9]), proposalState.Executed, "quorum not reached");
+            
+
+            let voteingPowerOfAlice = await govToken.balanceOf(alice) /// alice should be rewarded 100 votes
+            let tokensOfBob = await token.balanceOf(bob);
+            assert.equal(toUnit(voteingPowerOfAlice), toUnit(voteingPowerOfAlice) + 0, "propoals calldatas not executed user is not rewarded votingPower");
+            assert.equal(toUnit(tokensOfBob), toUnit(tokensOfBob) + 5, "propoals calldatas bob user is not rewarded tokens");
+        });
+
+        // it("executes votes", async () => {
+            
+        // })
+
         
     }) 
 
-
-
-
-    it("avoid vote clashes", async() => {});
-    it("respects set quorum", async () => {});    
-    it("excutes proposals", async() => {});
 });
 

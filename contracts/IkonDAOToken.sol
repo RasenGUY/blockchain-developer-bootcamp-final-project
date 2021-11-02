@@ -22,6 +22,7 @@ contract IkonDAOToken is ERC20, ERC20Burnable, ERC20Snapshot, AccessControl, ERC
 
     constructor(uint256 _baseRewards) ERC20("IkonDAO Token", "IKD") ERC20Permit("IkonDAO Token") {
         _setupRole(ADMIN_ROLE, msg.sender);
+        _setRoleAdmin(ADMIN_ROLE, ADMIN_ROLE);
         _setupRole(SNAPSHOT_ROLE, msg.sender);
         _mint(msg.sender, 1000000 * 10 ** decimals());
         _setupRole(MINTER_ROLE, msg.sender);
