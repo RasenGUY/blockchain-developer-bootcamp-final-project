@@ -62,9 +62,7 @@ contract IkonDAOGovernanceToken is ERC20Burnable, ERC20Snapshot, AccessControl, 
 
     /// @dev returns weight limit of governance token
     function getWeightLimit() public view returns (uint256) {
-        uint256 x = totalSupply().mul(_weightLimitFraction);
-        uint256 y = x.div(1 * 10 ** decimals());
-        return y;
+        return totalSupply().mul(_weightLimitFraction).div(100);
     } 
 
     /// @dev exposes baseReward

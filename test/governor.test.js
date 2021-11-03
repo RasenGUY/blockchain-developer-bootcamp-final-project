@@ -123,7 +123,7 @@ contract("IkonDAO (governor)", async accounts => {
             await expect(governor.castVote(proposalId.logs[0].args['0'], support.For, {from: alice})).to.be.rejected;
         })
 
-        it("changes state after delay is passed", async () => {
+        it("changes state of proposal after delay is passed", async () => {
             await governor.setVotingDelay(10, {from: owner}); 
             let description = "changes state after delay is passed"; 
             let proposalId = await governor.hashProposal(targets, values, calldatas, toSha3(description));
@@ -188,7 +188,7 @@ contract("IkonDAO (governor)", async accounts => {
             assert.equal(toUnit(weight), toUnit(aliceVoteWeight),  "voters casted weight does not match actual weight"); 
         });
 
-        it("executes vote after voting period ends", async () => {
+        it("executes vote after voting period ends and updates state of", async () => {
             await governor.setVotingDelay(10);
             await governor.setVotingPeriod(25);
 
@@ -243,44 +243,66 @@ contract("IkonDAO (governor)", async accounts => {
                     height: 45, 
                     callback: async () => governor.state(proposalId)
                 },
+                
                 {
-                    // 8
+                    //  8
+                    height: 46, 
+                    callback: async () => govToken.balanceOf(alice) 
+                },
+                {
+                    //  9
+                    height: 47, 
+                    callback: async () => token.balanceOf(bob) 
+                },
+                {
+                    // 10
                     height: 55, 
                     callback: async () => governor.execute(targets, values, calldatas, toSha3(description)) 
                 },
                 {
-                    // 9 
-                    height: 59, 
+                    // 11
+                    height: 57, 
                     callback: async () => governor.state(proposalId)
-                }
+                },
+                {
+                    // 12
+                    height: 60, 
+                    callback: async () => govToken.balanceOf(alice) 
+                },
+                {
+                    // 13
+                    height: 63, 
+                    callback: async () => token.balanceOf(bob) 
+                },
             ]
 
             let results = await fakeMine(
                 async() => token.rewardTokens(accounts[9]),
                 actions,
-                60,
-                {
-                    log: true,
-                    actionNumber: 55
-                }
-            )
+                65
+                // {
+                //     log: true,
+                //     actionNumber: [
+                //         {h: 46, wrapper: result => console.log(toUnit(result))}, 
+                //         {h: 47, wrapper: result => console.log(toUnit(result))},
+                //         {h: 60, wrapper: result => console.log(toUnit(result))},
+                //         {h: 63, wrapper: result => console.log(toUnit(result))},
+                //     ]
+                // }
+            );
             assert.equal(toNumber(results[5]), proposalState.Succeeded, "proposal not executed");
-
             assert.equal(toNumber(results[7]), proposalState.Queued, "proposal not queued");
+            assert.equal(toNumber(results[11]), proposalState.Executed, "quorum not reached");
 
-            assert.equal(toNumber(results[9]), proposalState.Executed, "quorum not reached");
-            
 
-            let voteingPowerOfAlice = await govToken.balanceOf(alice) /// alice should be rewarded 100 votes
-            let tokensOfBob = await token.balanceOf(bob);
-            assert.equal(toUnit(voteingPowerOfAlice), toUnit(voteingPowerOfAlice) + 0, "propoals calldatas not executed user is not rewarded votingPower");
-            assert.equal(toUnit(tokensOfBob), toUnit(tokensOfBob) + 5, "propoals calldatas bob user is not rewarded tokens");
+            let aliceVotePowerBefore = toUnit(results[8]);
+            let bobTokenBalanceBefore = toUnit(results[9]); 
+            let aliceVotePowerAfter = toUnit(results[12]);
+            let bobTokenBalanceAfter = toUnit(results[13]);
+
+            assert.equal(aliceVotePowerAfter, aliceVotePowerBefore + 96 , "propoals calldatas not executed user is not rewarded votingPower");
+            assert.equal(bobTokenBalanceAfter, bobTokenBalanceBefore + 5, "propoals calldatas bob user is not rewarded tokens");
         });
-
-        // it("executes votes", async () => {
-            
-        // })
-
         
     }) 
 

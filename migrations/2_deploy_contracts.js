@@ -14,7 +14,7 @@ module.exports = async function (deployer, networks, accounts) {
     let other = accounts[1];
     let initialUsers = [accounts[2], accounts[3], accounts[4], accounts[5]]
     let dao, daoProxy, daoGovToken, daoToken, daoGovernor, daoTimelock;
-    let weigthLimitFraction = unitToBN(49e-2); 
+    let weigthLimitFraction = toBN(49); 
     let initialVotes = unitToBN(100);
     let baseReward = unitToBN(100); 
     let baseRewardUtility = unitToBN(5);
