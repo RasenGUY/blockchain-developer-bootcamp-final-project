@@ -5,13 +5,13 @@ const IkonDAOGovernanceToken = artifacts.require('IkonDAOGovernanceToken');
 const IkonDAOToken = artifacts.require('IkonDAOToken');
 const IkonDAOGovernor = artifacts.require('IkonDAOGovernor');
 const IkonDAOTimelockController = artifacts.require('IkonDAOTimelockController');
+const IkonDAOVectorCollectible = artifacts.require("IkonDAOVectorCollectible");
 const {resToUnit, unitToBN, toBN } = require('../test/bnHelpers');
-
 module.exports = async function (deployer, networks, accounts) {
   let owner = accounts[0]; 
   let other = accounts[1];
   let initialUsers = [accounts[2], accounts[3], accounts[4], accounts[5]]
-  let dao, daoProxy, daoGovToken, daoToken, daoGovernor, daoTimelock;
+  let dao, daoProxy, daoGovToken, daoToken, daoGovernor, daoTimelock, nft;
   let weigthLimitFraction = toBN(49); 
   let initialVotes = unitToBN(100);
   let baseReward = unitToBN(100); 
@@ -45,8 +45,11 @@ module.exports = async function (deployer, networks, accounts) {
       {from: owner}
   ); 
   daoGovernor = await IkonDAOGovernor.deployed();
-  
   daoProxy = await deployProxy(DAO, [daoGovToken.address, daoGovernor.address, daoTimelock.address, daoToken.address], {kind: 'uups', initializer: '__IkonDAO_init', unsafeAllow: [ 'constructor', 'delegatecall']}, {from: owner});
+
+  await deployer.deploy(IkonDAOVectorCollectible, daoProxy.address, {from: owner});
+  nft = await IkonDAOVectorCollectible.deployed();
+
   // daoGovernor.transferOwnership(daoProxy.address);
   // daoTimelock.transferOwnership(daoProxy.address);
   };

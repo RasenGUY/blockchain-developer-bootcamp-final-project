@@ -16,7 +16,7 @@ const IkonDAOToken = artifacts.require('IkonDAOToken');
 
 
 
-contract("IDAOCollective (proxy)", accounts => {
+contract("IkonDAO (proxy)", accounts => {
     let owner = accounts[0]; 
     let other = accounts[1];
     let [ ,  , alice, bob, carl, david] = accounts;

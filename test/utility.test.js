@@ -11,7 +11,7 @@ const DAO = artifacts.require('IkonDAO');
 const IkonDAOToken = artifacts.require('IkonDAOToken');
 
 
-contract("IKonDAOCollective (utility)", accounts => {
+contract("IkonDAO (utility token)", accounts => {
     let owner = accounts[0]; 
     let other = accounts[1];
     let alice = accounts[2];

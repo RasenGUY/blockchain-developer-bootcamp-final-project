@@ -1,5 +1,4 @@
 const { assert } = require('chai');
-// const Contract = require('web3-eth-contract');
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const expect = chai.expect;
@@ -10,9 +9,7 @@ const { toUnit, unitToBN, toBN, toNumber } = require("./bnHelpers");
 const IkonDAOGovToken = artifacts.require('IkonDAOGovernanceToken');
 const util = require("util");
 
-
-
-contract("IDAOCollective (governance Token)", accounts => {    
+contract("IkonDAO (governance Token)", accounts => {    
     let owner = accounts[0]; 
     let other = accounts[1];
     let [ ,  , alice, bob, carl, david] = accounts;
