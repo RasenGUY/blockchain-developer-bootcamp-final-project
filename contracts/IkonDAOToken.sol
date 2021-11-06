@@ -57,7 +57,7 @@ contract IkonDAOToken is ERC20, ERC20Burnable, ERC20Snapshot, AccessControl, ERC
         _snapshot();
     }
 
-    function mint(address to, uint256 amount) public onlyRole(MINTER_ROLE) {
+    function mint(address to, uint256 amount) external onlyRole(MINTER_ROLE) {
         _mint(to, amount);
     }
 

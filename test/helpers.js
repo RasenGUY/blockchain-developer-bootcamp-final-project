@@ -36,6 +36,3 @@ exports.fakeMine = async (fakeMine, actions, miningLength, options = undefined) 
     }
     return results; 
 } 
-
-exports.encodeSTB32 = inp => web3.eth.abi.encodeParameter('bytes32', inp);
-exports.decodeB32TS = inp => web3.eth.abi.decodeParameter('string', inp);

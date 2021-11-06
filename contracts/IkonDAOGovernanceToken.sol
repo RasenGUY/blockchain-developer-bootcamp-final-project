@@ -78,7 +78,7 @@ contract IkonDAOGovernanceToken is ERC20Burnable, ERC20Snapshot, AccessControl, 
 
     /// @dev checks wheter limit is reached it is it returns rest that should be sent
     /// @param _receiver address of the contributor
-    function weightLimitReached(address _receiver) public view returns (bool _reached, uint256) {
+    function weightLimitReached(address _receiver) private view returns (bool _reached, uint256) {
         uint256 limit = getWeightLimit();
         uint256 votes = getVotes(_receiver);
         return votes >= limit ? (_reached = true, 0) : (_reached = false, calculateRewards(votes, limit));
@@ -90,7 +90,7 @@ contract IkonDAOGovernanceToken is ERC20Burnable, ERC20Snapshot, AccessControl, 
     function calculateRewards(uint256 votes, uint256 limit) private view returns (uint256){
         return votes.add(_baseRewardVotes) <= limit ? _baseRewardVotes : limit - votes;
     }
-
+    
     /// @notice see _rewardvotes 
     function rewardVotes(address to) external onlyRole(ADMIN_ROLE) {
         require(to != address(0), "not a valid address");

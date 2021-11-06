@@ -1,6 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.2;
 
+/// @title The IkonDAO Vectore Collectible - fungible vector art produced by dao members 
+/// @author Fernando M. Trouw
+/// @notice this contract should be used for basic simulation purposes only 
+/// @notice this contract is an experimental contract and should not be used to initiate project that will hold real value
+/// @dev functions currently implemented (other then imported library) functions could contain side-effects
+
+
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";

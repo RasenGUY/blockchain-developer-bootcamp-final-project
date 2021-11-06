@@ -93,7 +93,7 @@ contract IkonDAOGovernor is Governor, Ownable, GovernorCountingSimple, GovernorV
 
     function propose(address[] memory targets, uint256[] memory values, bytes[] memory calldatas, string memory description)
         public
-        override(Governor, IGovernor)
+        override(Governor, IGovernor) onlyOwner
         returns (uint256)
     {
         return super.propose(targets, values, calldatas, description);
