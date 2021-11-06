@@ -23,12 +23,14 @@ abstract contract Constants  {
     bytes32 constant BANNED_ROLE = keccak256("IKONDAO_BANNED_ROLE");
     
     /// @notice description constants for proposals
-    string constant DESC_SET_DELAY = "Governor: delay changed"; 
+    string constant DESC_SET_DELAY = "IkonDAO Governor: delay changed"; 
 
     /// @notice error messages
     string constant REQUIRE_CREATEMEMBER_ALREADY_CREATED = "IkonDAO: already a member"; 
     string constant REQUIRE_CREATEMEMBER_USER_BANNED = "IkonDAO: banned users cannot become members"; 
     string constant REQUIRE_BANMEMBER_ALREADY_BANNED = "IkonDAO: account already banned"; 
     string constant REQUIRE_BANMEMBER_ONLY_MEMBERS = "IkonDAO: non members cannot be banned";
-     
+    
+    string constant NFT_ALREADY_EXISTS = "IkonDAO Collectible: collectible must be unique";
+    
 }

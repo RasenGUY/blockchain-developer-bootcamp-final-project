@@ -5,7 +5,7 @@ const expect = chai.expect;
 chai.use(chaiAsPromised);
 
 const BN = require("big.js");
-const { toUnit, unitToBN, toBN, toNumber } = require("./bnHelpers");
+const { toUnit, unitToBN, toBN, toNumber } = require("./helpers");
 const IkonDAOGovToken = artifacts.require('IkonDAOGovernanceToken');
 const util = require("util");
 

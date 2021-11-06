@@ -6,7 +6,7 @@ const chaiAsPromised = require('chai-as-promised');
 const expect = chai.expect;
 chai.use(chaiAsPromised);
 
-const { toUnit, unitToBN } = require("./bnHelpers");
+const { toUnit, unitToBN } = require("./helpers");
 const DAO = artifacts.require('IkonDAO');
 const IkonDAOToken = artifacts.require('IkonDAOToken');
 

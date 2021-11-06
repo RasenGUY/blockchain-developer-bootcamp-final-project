@@ -12,6 +12,7 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgrad
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol"; 
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/governance/TimelockController.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/utils/ERC721HolderUpgradeable.sol";
 
 import "./IkonDAOGovernor.sol";
 import "./IkonDAOGovernanceToken.sol";
@@ -19,7 +20,7 @@ import "./IkonDAOToken.sol";
 import "./Constants.sol";
 // import "./Helpers.sol"; 
 
-contract IkonDAO is Constants, OwnableUpgradeable, AccessControlEnumerableUpgradeable, UUPSUpgradeable {
+contract IkonDAO is Constants, OwnableUpgradeable, AccessControlEnumerableUpgradeable, ERC721HolderUpgradeable, UUPSUpgradeable {
     
     IkonDAOGovernor private _governor;
     IkonDAOToken private _daoToken; 
@@ -42,12 +43,16 @@ contract IkonDAO is Constants, OwnableUpgradeable, AccessControlEnumerableUpgrad
         _governor = IkonDAOGovernor(_daoGovernor);
         _daoToken = IkonDAOToken(_ikonDaoToken);
 
+
         /// @notice setRoles
         _setupRole(ADMIN_ROLE, _msgSender());
         _setRoleAdmin(ADMIN_ROLE, ADMIN_ROLE);
         _setRoleAdmin(MEMBER_ROLE, ADMIN_ROLE);
         __AccessControlEnumerable_init();
         __Ownable_init();
+        
+
+        __ERC721Holder_init(); // makes give holding capacity to erc721 token
     }
 
     /// @dev returns governor version

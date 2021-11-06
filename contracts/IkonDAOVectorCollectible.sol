@@ -14,12 +14,29 @@ contract IkonDAOVectorCollectible is ERC721, ERC721Enumerable, ERC721URIStorage,
     using Counters for Counters.Counter;
 
     Counters.Counter private _tokenIdCounter;
-    mapping(uint256 => bytes32) private _categories; 
-    mapping(bytes32 => bool) private _isCategory;
-    address private _DAO; 
+
+    struct Metadata {
+        bytes32 name;
+        string description;
+        bytes32 externalLink;
+        bytes32 image; 
+        bytes32 category;
+        bytes32 artistHandle;
+    }
+
+    struct Category {
+        bytes32 name;
+    }
+
+    mapping(uint256 => Metadata) private tokenMetadata;
+    Category[] private categoryList;
+    mapping(bytes32 => bool) private isCategory; 
+    
+
+    address _DAO;  /// maps category to list of tokens that belong to it
 
     event DaoAddressChanged(address newAddress);
-    event VectorMinted(uint256 tokenId, bytes32 Category);
+    event VectorMinted(uint256 tokenId, address receiver);
 
     constructor(address DAO) ERC721("IkonDAO Vector Collectible", "IKDVC") {
         _setupRole(ADMIN_ROLE, msg.sender);
@@ -46,21 +63,83 @@ contract IkonDAOVectorCollectible is ERC721, ERC721Enumerable, ERC721URIStorage,
     }
 
     /// @dev mints vector token for the icon dao
-    /// @param category category under which the vector falls      
-    function safeMintVector(bytes32 category) external onlyRole(MINTER_ROLE) returns (string memory) {
-        _categories[_tokenIdCounter.current()] = category;
-        safeMint(_DAO);
-        emit VectorMinted(_tokenIdCounter.current() - 1, category);
-        return tokenURI(_tokenIdCounter.current() - 1);     
+    /// @param _name of vector
+    /// @param _description description of token
+    /// @param _externalLink external link of vector
+    /// @param _imageHash of vector      
+    /// @param _category category under which the vector falls      
+    /// @param _handle artist handle to give credit to artist
+    function safeMintVector(
+        bytes32 _name, 
+        string memory _description, 
+        bytes32 _externalLink, 
+        bytes32 _imageHash,
+        bytes32 _category, 
+        bytes32 _handle
+        ) external onlyRole(MINTER_ROLE) whenNotPaused {
+        
+        uint256 tokenId = _tokenIdCounter.current();
+
+        if (tokenId != 0){ // only check after minting of the first token
+            require(!isImageTaken(_imageHash), NFT_ALREADY_EXISTS); 
+        } 
+        
+        /// metadata
+        Metadata memory metadata = Metadata({
+            description: _description,
+            artistHandle: _handle, 
+            category: _category,
+            externalLink: _externalLink,
+            image: _imageHash,
+            name: _name
+        });
+
+        if (!isCategory[_category]){ 
+            
+            safeMint(_DAO); // mint new nft 
+            
+            Category memory category = Category({
+                name: _category
+            }); // create new category 
+
+            categoryList.push(category);
+            isCategory[_category] = true; // validate category
+            tokenMetadata[tokenId] = metadata; // adds metadata to tokenid
+
+        }  else {
+
+            safeMint(_DAO);
+            tokenMetadata[tokenId] = metadata;
+        }
+
+        emit VectorMinted(tokenId, _DAO);
+    }
+
+    /// @dev returns true image hash of a to-be-minted nft already exists
+    /// @param imageHash ipfs hash of the image in in bytes32 format
+    /// @notice this functions acts as an extra check to make sure that only unique vectors (i.e. they must have a unique image hash) can 
+    function isImageTaken(bytes32 imageHash) private view returns (bool exists) {
+        for (uint i = 0; i < _tokenIdCounter.current(); i++){
+            if (tokenMetadata[i].image == imageHash){
+                exists = true;
+            }
+        }
+    }
+    function getCategories() external view returns (Category[] memory) {
+        return(categoryList);
+    }
+
+    function getMetadata(uint256 tokenId) public view returns (Metadata memory){
+        return (tokenMetadata[tokenId]);
     }
     
     /// @dev returns dao address 
-    function getDaoAddress() public view returns (address){
+    function getDAOAddress() public view returns (address){
         return _DAO;
     }
 
     /// @dev see _setDaoAddress
-    function setDaoAddress(address newAddress) external {
+    function setDAOAddress(address newAddress) external onlyRole(ADMIN_ROLE) whenNotPaused {
         _setDaoAddress(newAddress);
         emit DaoAddressChanged(newAddress);
     }
@@ -80,7 +159,7 @@ contract IkonDAOVectorCollectible is ERC721, ERC721Enumerable, ERC721URIStorage,
     }
 
     // The following functions are overrides required by Solidity.
-    function _burn(uint256 tokenId) internal override(ERC721, ERC721URIStorage) {
+    function _burn(uint256 tokenId) internal override(ERC721, ERC721URIStorage) onlyRole(ADMIN_ROLE) whenNotPaused {
         super._burn(tokenId);
     }
 

@@ -47,3 +47,19 @@ fungibleDao
     - Governance Token (ERC20, ERC20Votes, ERC20Wrapper, Pausable)
     - Dao Utility Token (ERC20, ERC20Capped - OpenZeppelin)
     - Non-fungible tokens (ERC721, Pausable - OpenZeppelin)
+
+
+    Ikons
+        - represented by an ikon in svg or png created by an artist
+        - it should have an ikon title
+        - it should also have a category, that can be set by the artist, choose from a list of existing categories or from a new one created by artist
+            - note a list of categories could be stored in the the smart contract
+        - artisthandle
+            - the icon should also have a handle represented buy the artist
+        - metadata
+    
+
+        - categories 
+            - should be able to type in tokenId and get category from it
+            - should be able to check wheter category exists to update category list
+            
