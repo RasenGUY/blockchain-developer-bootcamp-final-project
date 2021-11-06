@@ -18,17 +18,19 @@ import "./IkonDAOGovernor.sol";
 import "./IkonDAOGovernanceToken.sol";
 import "./IkonDAOToken.sol";
 import "./Constants.sol";
+import "./IIkonDAO.sol";
+
 // import "./Helpers.sol"; 
 
 contract IkonDAO is Constants, OwnableUpgradeable, AccessControlEnumerableUpgradeable, ERC721HolderUpgradeable, UUPSUpgradeable {
     
-    IkonDAOGovernor private _governor;
-    IkonDAOToken private _daoToken; 
-    IkonDAOGovernanceToken private _govToken;
-    TimelockController private _daoTimelock;    
- 
-    mapping(uint256 => Proposal) public proposals;
-    mapping(address => uint256[]) private memberProposals;
+    IIkonDAO private governor;
+    IIkonDAO private timelocker;    
+    // IIkonDAO private token; 
+    // IIkonDAO private votes;
+    // mapping(uint256 => Proposal) public proposals;
+    // mapping(address => uint256[]) private memberProposals;
+    // mapping(Avatar => IIkonDAO) private avatar;  
 
     event MemberCreated(address indexed _member); 
     event MemberBanned(address indexed _member); 
@@ -37,13 +39,14 @@ contract IkonDAO is Constants, OwnableUpgradeable, AccessControlEnumerableUpgrad
     constructor (){} 
 
     /// @notice initializes ikonDAO
-    function __IkonDAO_init(address _govTokenAddress, address _daoGovernor, address _daoTimelockAddress, address _ikonDaoToken) external initializer(){
-        _govToken = IkonDAOGovernanceToken(_govTokenAddress);
-        _daoTimelock = TimelockController(payable(_daoTimelockAddress));
-        _governor = IkonDAOGovernor(_daoGovernor);
-        _daoToken = IkonDAOToken(_ikonDaoToken);
+    function __IkonDAO_init(address govAddress, address timelockerAddress) external initializer(){
 
-
+        /// @notice instantiate dao interface
+        governor = IIkonDAO(govAddress);
+        timelocker = IIkonDAO(payable(timelockerAddress));
+        // votes = IIkonDAO(govTokenAddress);
+        // token = IIkonDAO(daoToken);
+                
         /// @notice setRoles
         _setupRole(ADMIN_ROLE, _msgSender());
         _setRoleAdmin(ADMIN_ROLE, ADMIN_ROLE);
@@ -51,59 +54,57 @@ contract IkonDAO is Constants, OwnableUpgradeable, AccessControlEnumerableUpgrad
         __AccessControlEnumerable_init();
         __Ownable_init();
         
-
-        __ERC721Holder_init(); // makes give holding capacity to erc721 token
+        __ERC721Holder_init(); // give nft holding capacity of erc721 token
     }
 
-    /// @dev returns governor version
-    function getGovernorVersion() public view returns (string memory) {
-        return _governor._version(); 
-    }
-
-    /// @dev creates a proposal to set votingDelay
-    function setVotingPeriod(
-        address[] calldata _targets, 
-        uint256[] calldata _values, 
-        bytes[] memory _calldatas
-    ) external {
-        
-        uint256 _proposalId = _governor.propose(_targets, _values, _calldatas, DESC_SET_DELAY);
-        
-        Proposal memory proposal = Proposal({
-            id: _proposalId,
-            proposer: _msgSender(),
-            state: _governor.state(_proposalId)
-        });
-
-        proposals[_proposalId] = proposal;
-        memberProposals[_msgSender()].push(_proposalId); 
-    }
-
-    /// @dev get latest proposal
-    function getLatestProposal(address _sender) public view returns (uint256){       
-        return memberProposals[_sender][memberProposals[_sender].length - 1];
+    /// @dev creates new dao proposal
+    /// @param targets contract from calldatas should be executed
+    /// @param values values thaat will be sent to the targets
+    /// @param datas datas that will be called by the targets
+    /// @param description description of the proposal
+    function propose (
+        address[] calldata targets, 
+        uint256[] calldata values, 
+        bytes[] memory datas,
+        string calldata description
+    ) public onlyRole(MEMBER_ROLE) {
+        governor.propose(targets, values, datas, description);
     }
     
-    /// @dev creates member
-    function createMember(address _applicant) external {
-        require(!hasRole(MEMBER_ROLE, _applicant), REQUIRE_CREATEMEMBER_ALREADY_CREATED);
-        require(!hasRole(BANNED_ROLE, _applicant), REQUIRE_CREATEMEMBER_USER_BANNED);
-        grantRole(MEMBER_ROLE, _applicant);
-        emit MemberCreated(_applicant);
+    function execute(
+        address[] calldata targets, 
+        uint256[] calldata values, 
+        bytes[] memory datas,
+        bytes32 descriptionHash
+    ) public onlyRole(MEMBER_ROLE) {
+        governor.execute(targets, values, datas, descriptionHash);
     }
 
+    function queue(
+        address[] calldata targets, 
+        uint256[] calldata values, 
+        bytes[] memory datas,
+        bytes32 descriptionHash
+    ) public onlyRole(MEMBER_ROLE) {
+        governor.queue(targets, values, datas, descriptionHash);
+    }
+
+    /// @dev makes a member of the caller of this function
+    function createMember() external {
+        require(!hasRole(MEMBER_ROLE, _msgSender()), REQUIRE_CREATEMEMBER_ALREADY_CREATED);
+        require(!hasRole(BANNED_ROLE, _msgSender()), REQUIRE_CREATEMEMBER_USER_BANNED);
+        grantRole(MEMBER_ROLE, _msgSender());
+        emit MemberCreated(_msgSender());
+    }
+   
     /// @dev bans member
-    function banMember(address _account) external {
+    /// @param _account target account to be banned
+    function banMember(address _account) external onlyRole(ADMIN_ROLE) {
         require(!hasRole(BANNED_ROLE, _account), REQUIRE_BANMEMBER_ALREADY_BANNED);
         require(hasRole(MEMBER_ROLE, _account), REQUIRE_BANMEMBER_ONLY_MEMBERS);
         revokeRole(MEMBER_ROLE, _account);
         emit MemberBanned(_account);
     } 
-
-    /// @dev distribute votes
-    /// @dev slash votes
-    /// @dev distribute tokens
-    /// @dev mintNft 
 
     /// @notice upgrades to this contract
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(ADMIN_ROLE){}

@@ -6,9 +6,7 @@ pragma solidity ^0.8.2;
 /// @notice this contract should be used for basic simulation purposes only 
 /// @notice this contract is an experimental contract and should not be used to initiate project that will hold real value
 /// @dev functions currently implemented (other then imported library) functions could contain side-effects
-
-
-interface IIKonDAO {
+interface IIkonDAO {
 
     struct Metadata {
         bytes32 name;
@@ -90,6 +88,7 @@ interface IIKonDAO {
 
     /// @notice timelockController methods
     function cancel() external;
+    function grantRole(bytes32 role, address account) external;
 
     /// @notice generic functions used accross all smart contracts
     function pause() external;
