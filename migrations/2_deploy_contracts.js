@@ -45,7 +45,7 @@ module.exports = async function (deployer, networks, accounts) {
       {from: owner}
   ); 
   daoGovernor = await IkonDAOGovernor.deployed();
-  daoProxy = await deployProxy(DAO, [daoGovToken.address, daoGovernor.address, daoTimelock.address, daoToken.address], {kind: 'uups', initializer: '__IkonDAO_init', unsafeAllow: [ 'constructor', 'delegatecall']}, {from: owner});
+  daoProxy = await deployProxy(DAO, [daoGovernor.address, daoTimelock.address, daoToken.address], {kind: 'uups', initializer: '__IkonDAO_init', unsafeAllow: [ 'constructor', 'delegatecall']}, {from: owner});
 
   await deployer.deploy(IkonDAOVectorCollectible, daoProxy.address, {from: owner});
   nft = await IkonDAOVectorCollectible.deployed();

@@ -6,110 +6,317 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const expect = chai.expect;
 chai.use(chaiAsPromised);
+const { toUnit, unitToBN, toBN, extractEventSignatures, generateMappingsFromSignatures, subscribeToLogs} = require("./helpers");
 
-const { toUnit, unitToBN, toBN } = require("./helpers");
-const DAO = artifacts.require('IkonDAO');
+const IkonDAO = artifacts.require('IkonDAO');
 const IkonDAOGovernanceToken = artifacts.require('IkonDAOGovernanceToken');
 const IkonDAOGovernor = artifacts.require('IkonDAOGovernor');
 const IkonDAOTimelockController = artifacts.require('IkonDAOTimelockController');
 const IkonDAOToken = artifacts.require('IkonDAOToken');
+const IkonDAOVectorCollectible = artifacts.require("IkonDAOVectorCollectible");
 
-
+web3.setProvider('ws://localhost:8545');
+const utils = web3.utils;
+const toSha3 = web3.utils.soliditySha3;
 
 contract("IkonDAO (proxy)", accounts => {
-    let owner = accounts[0]; 
-    let other = accounts[1];
-    let [ ,  , alice, bob, carl, david] = accounts;
-    let dao, daoProxy, daoGovToken, daoToken, daoGovInstance, daoGovernor, daoTimelock; 
-    let memberRole = web3.utils.soliditySha3("IKONDAO_MEMBER_ROLE");
-    let adminRole = web3.utils.soliditySha3("IKONDAO_ADMIN_ROLE");
-    let bannedRole = web3.utils.soliditySha3("IKONDAO_BANNED_ROLE");
-    let weightLimit, balances;
 
-    beforeEach(async () => {        
-        // get instances
-        dao = await DAO.deployed(); 
-        daoGovToken = await IkonDAOGovernanceToken.deployed();
-        daoToken = await IkonDAOToken.deployed();
+    // general 
+    let [owner, other , alice, bob, carl, david, ed, fred, gerald, hilda] = accounts;
 
-        // get instance of daoTimelock
-        daoTimelock = await IkonDAOTimelockController.deployed();        
-        daoGovInstance = await IkonDAOGovernor.deployed();
-        daoGovernor = new web3.eth.Contract(daoGovInstance.abi, daoGovInstance.address); 
+    let [MEMBER_ROLE, ADMIN_ROLE, BANNED_ROLE, PAUSER_ROLE, MINTER_ROLE] = [
+        toSha3("IKONDAO_MEMBER_ROLE"),
+        toSha3("IKONDAO_ADMIN_ROLE"),
+        toSha3("IKONDAO_BANNED_ROLE"),
+        toSha3("IKONDAO_PAUSER_ROLE"),
+        toSha3("IKONDAO_MINTER_ROLE")
+    ]
+
+    // inputs 
+    // gov token 
+    let weigthLimitFraction = toBN(49); 
+    let initialVotes = unitToBN(100);
+    let baseRewardVotes = unitToBN(100); 
+
+    // utility token
+    let baseRewardUtility = unitToBN(5);
+
+    // governor
+    let votingDelay = 3;
+    let votingPeriod = 10;
+    let initialUsers = [alice, bob, carl, david, ed, fred, gerald, hilda];
+
+    // timelocker 
+    let timelockDelay = 2;
+    let proposers = [owner]
+    let executors = [owner]
+
+    // artifacts
+    let dao, daoProxy, govToken, token, governor, timelock, nft;
+
+    // contract instance -> for getting abi methods
+    let governorInst, govTokenInst, tokenInst, timelockInst, proposals;
+
+    // voting
+    const proposalState = {
+        Pending: 0,
+        Active: 1, 
+        Canceled: 2,
+        Defeated: 3,
+        Succeeded: 4,
+        Queued: 5,
+        Expired: 6,
+        Executed: 7
+    }
+    let support = {
+        Against: 0,
+        For: 1,
+        Abstain: 2
+    }
+
+    /// events
+    let govEventSigMap, tokenEventSigMap, govTokenEventSigMap, timelockerEventSigMap, daoEventSigMap, nftEventSigMap;
+
+    beforeEach( async () => {
         
-        // deploy proxy 
-        daoProxy = await deployProxy(DAO, [daoGovToken.address, daoGovInstance.address, daoTimelock.address, daoToken.address], {initializer: '__IkonDAO_init', kind: 'uups', unsafeAllow: ['constructor', 'delegatecall']});
-    })
+        // initiate new contracts before each describe 
+        dao = await IkonDAO.new();
+        govToken = await IkonDAOGovernanceToken.new(weigthLimitFraction, initialUsers, initialVotes, baseRewardVotes, {from: owner});
+        token = await IkonDAOToken.new(baseRewardUtility, {from: owner});
+        timelock = await IkonDAOTimelockController.new(timelockDelay, proposers, executors);
+        governor = await IkonDAOGovernor.new(token.address, timelock.address, votingDelay, votingPeriod, {from: owner});
+        daoProxy = await deployProxy(IkonDAO, [governor.address, timelock.address, token.address], {initializer: '__IkonDAO_init', kind: 'uups', unsafeAllow: ['constructor', 'delegatecall']});
+        nft = await IkonDAOVectorCollectible.new(daoProxy.address);
 
-    // upgradeabillity tests
-    it("set the correct owner", async () => {
-        let daoOwner = await daoProxy.owner()
-        assert.equal(daoOwner, owner, "owner is not the deployer contract");
-    })
+        /// contract instance 
+        governorInst = new web3.eth.Contract(governor.abi, governor.address); 
+        govTokenInst = new web3.eth.Contract(govToken.abi, govToken.address); 
+        tokenInst = new web3.eth.Contract(token.abi, token.address); 
+        timelockInst = new web3.eth.Contract(timelock.abi, timelock.address);
+        nftInst = new web3.eth.Contract(nft.abi, nft.address);
 
-    it("transferOwnerShip", async () => {
-        await daoProxy.transferOwnership(other); 
-        let newOwner = await daoProxy.owner(); 
-        assert.equal(newOwner, other, "ownership not sucessfully transferred");
-    })
+        // give proxy admin rights to governor
+        await governor.grantRole(ADMIN_ROLE, daoProxy.address, {from: owner});
 
-    it("renounces ownership", async () => {
-        await daoProxy.renounceOwnership(); 
-        const zeroAddress = "0x0000000000000000000000000000000000000000";
-        assert.equal(await daoProxy.owner(), zeroAddress , "does not renounce ownership successfully");
-    });
+        // proposals object
+        function Proposals (){
+            
+            // system proposals
+            this.setVotingDelay = (delay, description) => ({ // sets voting delay
+                targets: [governor.address],
+                values: [0],
+                calldatas: [governorInst.methods.setVotingDelay(delay).encodeABI()],
+                description: description
+            })
+            this.setVotingPeriod = (period, description) => ({ // sets voting period
+                targets: [governor.address],
+                values: [0],
+                calldatas: [governorInst.methods.setVotingPeriod(period).encodeABI()],
+                description: description
+            })
 
-    it("can handle upgrades and ownership by owner", async () => {
-        await expect(daoProxy.transferOwnership(accounts[2], {from: other})).to.be.rejected   
-    });
-
-    /// governor
-    it("gets governor version", async ()=> {
-        let version = await daoProxy.getGovernorVersion();
-        assert.equal(version, "1.0.0", "governor version not correct");
-    })
-
-    it("creates members", async ()=> {
+            this.setGovTokenReward = (newReward, description) => ({ // sets new govtoken rewards
+                targets: [govToken.address],
+                values: [0],
+                calldatas: [govTokenInst.methods.setRewardVotes(unitToBN(newReward)).encodeABI()],
+                description: description,
+            })
     
-        // create members
-        await daoProxy.createMember(alice, {from: owner});
-        let isAliceMember = await daoProxy.hasRole(String(memberRole), alice);
-        assert.equal(isAliceMember, true, "member not created");
-       
+            this.updateTimelockerDelay = (newDelay, description) => ({ // sets new delay for timelocker
+                targets: [timelocker.address],
+                values: [0],
+                calldatas: [timlockInst.methods.updateDelay(newDelay).encodeABI()],
+                description: description
+            })
+            this.updateTimelock = (newTimelock, description) => ({ // changes timelocker address of the governor
+                targets: [governor.address],
+                values: [0],
+                calldatas: [governorInst.methods.updateTimelock(newTimelock).encodeABI()],
+                description: description
+            })
+            
+            // accountability proposals
+            this.banMember = (member, description) => ({
+                targets: [daoProxy.address],
+                values: [0],
+                calldatas: [daoInst.methods.banMember(member).encodeABI()],
+                description: description
+            })       
+
+            this.slashVotes = (member, amount, description) => ({
+                targets: [govToken.address],
+                values: [0],
+                calldatas: [govTokenInst.methods.slashVotes(member, unitToBN(amount)).encodeABI()],
+                description: description
+            })
+    
+            // dao proposals
+            /// mint nft's
+            this.mintNft = (proposer, nftArgs, description) => ({
+                targets: [daoProxy.address, nft.address, govToken.address, tokens.address],
+                values: [0],
+                calldatas: [
+                    daoInst.methods.transferTokensToTimelocker().encodeAbi(), // transfer utility tokens for reward
+                    nftInst.methods.safeMintVector(
+                        utils.utf8ToHex(nftArgs.name), 
+                        nftArgs.description,
+                        utils.utf8ToHex(nftArgs.externalLink),
+                        utils.utf8ToHex(nftArgs.imageHash),
+                        utils.utf8ToHex(nftArgs.category),
+                        utils.utf8ToHex(nftArgs.handle)
+                    ).encodeABI(), /// mint nft's 
+                    govTokenInst.methods.rewardVotes(proposer).encodeABI(), /// reward votes to minter
+                    token.methods.rewardTokens(proposer).encodeABI() /// reward tokens utility tokens to proposer
+                ],
+                description: description
+            })
+
+            // mint utility tokens
+            this.mintTokens = (amount, description) => ({
+                targets: [daoProxy.address],
+                values: [0],
+                calldatas: [daoInst.methods.mintUtilityTokens(unitToBN(amount))],
+                description: description
+            })
+        }
+
+        /// instantiate proposals object
+        proposals = new Proposals(); 
+
+        // events 
+        // console.log(governor.abi); 
+        // map names to address and topics of sigs
+        govEventSigMap = generateMappingsFromSignatures(extractEventSignatures(governor.abi));
+        tokenEventSigMap = generateMappingsFromSignatures(extractEventSignatures(token.abi)); 
+        govTokenEventSigMap = generateMappingsFromSignatures(extractEventSignatures(govToken.abi)); 
+        timelockerEventSigMap = generateMappingsFromSignatures(extractEventSignatures(timelock.abi)); 
+        daoEventSigMap = generateMappingsFromSignatures(extractEventSignatures(dao.abi));
+        nftEventSigMap = generateMappingsFromSignatures(extractEventSignatures(nft.abi));
+                 
+        
+    });    
+        
+    describe("Initialization", () => {
+
+        // beforeEach(async () => {        
+            
+            
+        // })
+
+        // upgradeabillity tests
+        it("set the correct owner", async () => {
+            let daoOwner = await daoProxy.owner()
+            assert.equal(daoOwner, owner, "owner is not the deployer contract");
+        })
+
+        it("transferOwnerShip", async () => {
+            await daoProxy.transferOwnership(other); 
+            let newOwner = await daoProxy.owner(); 
+            assert.equal(newOwner, other, "ownership not sucessfully transferred");
+        });
+
+        it("renounces ownership", async () => {
+            await daoProxy.renounceOwnership(); 
+            const zeroAddress = "0x0000000000000000000000000000000000000000";
+            assert.equal(await daoProxy.owner(), zeroAddress , "does not renounce ownership successfully");
+        });
+
+        it("can handle upgrades and ownership by owner", async () => {
+            await expect(daoProxy.transferOwnership(accounts[2], {from: other})).to.be.rejected   
+        });
+
+    })
+
+
+    describe("Member functionalities", () => {
+
+        it("creates members", async ()=> {
+            // create members
+            await daoProxy.createMember({from: alice});            
+            let isAliceMember = await daoProxy.hasRole(MEMBER_ROLE, alice);
+            assert.equal(isAliceMember, true, "member not created"); 
+        });
+
         // only nonmembers banned members cannot members
         it("allows only non members and non banned members to be created", async ()=>{
-            await expect(implProxy.createMember(alice, {from: owner})).to.be.rejected
-            await daoProxy.grantRole(String(bannedRole), bob);
-            await expect(implProxy.createMember(bob, {from: owner})).to.be.rejected
+            await daoProxy.createMember({from: alice})
+            await expect(daoProxy.createMember({from: alice})).to.be.rejected
+            await daoProxy.banMember(alice, {from: owner});
+            await expect(daoProxy.createMember({from: alice})).to.be.rejected
+        });
+
+        it("bans members", async () => {
+            await daoProxy.createMember({from: david});
+            await daoProxy.banMember(david, {from: owner});
+            assert.isTrue(await daoProxy.hasRole(BANNED_ROLE, david), "member does not have banned role");
         });
     });
 
-    it("allows for proposal creation", async ()=> {
 
-        await daoProxy.setVotingPeriod([daoGovInstance.address], [0], [daoGovernor.methods.setVotingPeriod(5).encodeABI()]);
-        let proposalId = await daoProxy.getLatestProposal(owner);
-        assert.isAbove(Number(proposalId.toString()), 0, "proposal not created");
-        let proposalState = await daoGovernor.methods.state(proposalId).call({from:owner});
-        assert.equal(proposalState, 0, "proposal does not have pending state");
+    describe("Proposals", () => {
         
-    });
+        
+        /// proposal description
+        it("dissalows non members and banned members from creating proposals", async () => {
+            // let proposals = new Proposals();
+            let description = "update voting period";
+            let updateVP = proposals.setVotingPeriod(5, description);
+            await expect(daoProxy.propose(updateVP.targets, updateVP.values, updateVP.calldatas, description, {from: carl})).to.be.rejected;
+        })
+
+        let description, proposal, logs;
+        before(() => {            
+            /// members 
+            description = "update voting period";
+            proposal = proposals.setVotingPeriod(5, description);
+            logs = subscribeToLogs(alice, govEventSigMap.get('ProposalCreated'), web3)
+        })
+        it("allows for proposal creation", async () => {
+            await daoProxy.createMember({from: alice});
+            let proposalId = await daoProxy.propose(proposal.targets, proposal.values, proposal.calldatas, proposal.description, {from: alice});
+            logs.on("data", function(log){
+                console.log(log);
+            })
+            .on("changed", function(log){
+                console.log(log);
+            });
+            // console.log(logs);
+            // console.log(proposalId.receipt.rawLogs);
+            // let state = await governor.state(proposalId.logs[0].args['0']);
+            // assert.equal(state, proposalState.Pending, "proposal not created successfully");
+        });
 
 
+        it("queues proposals", async ()=> {});
+        it("executes proposals", async ()=> {});
+    })
 
+    // describe("Access Control", () => {
 
-    // let proposal;
-    // /// proposal execution handled by daoTimeLock
-    // before(async () => {
-    //     /// transfer some erc20votes tokens to users 
-    //     /// let a user create a proposal
-    //     /// proposal id 
+    //     it("allows only members to create proposals", async ()=> {});
+    //     it("allows only members to queue proposals", async ()=>{});
+    //     it("allows only members to execute proposals", async ()=>{});
+        
     // })
 
-    // it("allows users to vote on proposals", async ()=> {
+    // describe("Execution of core dao functionalities through proposals", ()=> {
+        
+    //     describe("Accountability Proposals", () => { 
+    //         it("it slashes votes from users through proposal", async ()=> {});
+    //         it("it bans users through proposal", async ()=> {});
+    //     });
 
-    // })
+    //     describe("System Proposals", () => { 
+    //         it("updates votingDelay through proposal cycle");
+    //         it("updates votingPeriod through proposal cycle");
+    //         it("updates delay on timelocker through proposal cycle");
+    //     });
 
-    // accesscontrol
-    // proposals
+    //     describe("DAO proposals", () => {
+    //          it("it mints nfts through proposal cycle", async () => {});
+    //          it("rewards tokens through proposal cycle", async () => {});
+    //          it("rewards votes through proposal cycle", async () => {}); 
+    //     });       
+    // });
     
 })

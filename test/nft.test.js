@@ -31,7 +31,7 @@ contract("IkonDao (nft)", accounts => {
         daoToken= await IkonDAOToken.deployed(); 
         daoTimelock = await IkonDAOTimelockController.deployed();
         daoGovToken = await IkonDAOGovernanceToken.deployed();
-        daoProxy = await deployProxy(DAO, [daoGovToken.address, daoGovernor.address, daoTimelock.address, daoToken.address], {kind: 'uups', initializer: '__IkonDAO_init', unsafeAllow: [ 'constructor', 'delegatecall']}, {from: owner});
+        daoProxy = await deployProxy(DAO, [daoGovernor.address, daoTimelock.address, daoToken.address], {kind: 'uups', initializer: '__IkonDAO_init', unsafeAllow: [ 'constructor', 'delegatecall']}, {from: owner});
     })
 
     

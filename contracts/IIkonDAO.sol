@@ -38,7 +38,7 @@ interface IIkonDAO {
     function votingPeriod() external returns (uint256);
     function setVotingPeriod(uint256 _period) external;
     function setVotingDelay(uint256 _delay) external;
-    function propose(address[] memory targets, uint256[] memory values, bytes[] memory calldatas, string memory description) external;
+    function propose(address[] memory targets, uint256[] memory values, bytes[] memory calldatas, string memory description) external returns (uint256);
     function queue(
         address[] memory targets,
         uint256[] memory values,
@@ -63,6 +63,8 @@ interface IIkonDAO {
     function setBaseReward(uint256 newBase) external;
     function snapshot() external;
     function mint(address to, uint256 amount) external;
+    function transfer(address to, uint256 amount) external; 
+    function decimals() external returns (uint256); 
 
     /// @notice govtoken methods
     function getWeightLimit() external returns (uint256);

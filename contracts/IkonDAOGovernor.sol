@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/governance/extensions/GovernorCountingSimple.sol
 import "@openzeppelin/contracts/governance/extensions/GovernorVotes.sol";
 import "@openzeppelin/contracts/governance/extensions/GovernorVotesQuorumFraction.sol";
 import "@openzeppelin/contracts/governance/extensions/GovernorTimelockControl.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
 
 import "./Constants.sol"; 
 
@@ -16,7 +16,8 @@ import "./Constants.sol";
 /// @notice this contract is an experimental contract and should not be used to initiate project that will hold real value
 
 /// @custom:security-contact ftrouw@protonmail.com
-contract IkonDAOGovernor is Governor, Ownable, GovernorCountingSimple, GovernorVotes, GovernorVotesQuorumFraction, GovernorTimelockControl, Constants {
+contract IkonDAOGovernor is Governor, AccessControl, GovernorCountingSimple, GovernorVotes, GovernorVotesQuorumFraction, GovernorTimelockControl, Constants {
+
     // string private _name; 
     string public _version;
     uint256 private _votingDelay; 
@@ -28,11 +29,17 @@ contract IkonDAOGovernor is Governor, Ownable, GovernorCountingSimple, GovernorV
         GovernorVotes(_token)
         GovernorVotesQuorumFraction(4)
         GovernorTimelockControl(_timelock) 
-        // Ownable()
+        
     {
+        /// contract metadata 
         _votingDelay = _delay;
         _votingPeriod = _period;
         _version = "1.0.0";
+
+
+        /// accesscontrol
+        _setupRole(ADMIN_ROLE, _msgSender());
+        _setRoleAdmin(ADMIN_ROLE, ADMIN_ROLE);
     }
 
     function version() public view override(Governor, IGovernor) returns (string memory) {
@@ -47,7 +54,7 @@ contract IkonDAOGovernor is Governor, Ownable, GovernorCountingSimple, GovernorV
         return _votingPeriod; // 1 minutes 
     }
 
-    function setVotingPeriod(uint256 _period) external onlyOwner {
+    function setVotingPeriod(uint256 _period) external onlyRole(ADMIN_ROLE) {
         _setVotingPeriod(_period);
     }
 
@@ -55,7 +62,7 @@ contract IkonDAOGovernor is Governor, Ownable, GovernorCountingSimple, GovernorV
         _votingPeriod = _period; 
     }
 
-    function setVotingDelay(uint256 _delay) public onlyOwner {
+    function setVotingDelay(uint256 _delay) public onlyRole(ADMIN_ROLE) {
         _setVotingDelay(_delay); 
     } 
 
@@ -93,7 +100,7 @@ contract IkonDAOGovernor is Governor, Ownable, GovernorCountingSimple, GovernorV
 
     function propose(address[] memory targets, uint256[] memory values, bytes[] memory calldatas, string memory description)
         public
-        override(Governor, IGovernor) onlyOwner
+        override(Governor, IGovernor) onlyRole(ADMIN_ROLE)
         returns (uint256)
     {
         return super.propose(targets, values, calldatas, description);
@@ -126,7 +133,7 @@ contract IkonDAOGovernor is Governor, Ownable, GovernorCountingSimple, GovernorV
     function supportsInterface(bytes4 interfaceId)
         public
         view
-        override(Governor, GovernorTimelockControl)
+        override(Governor, GovernorTimelockControl, AccessControl)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);

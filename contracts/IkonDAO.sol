@@ -26,7 +26,7 @@ contract IkonDAO is Constants, OwnableUpgradeable, AccessControlEnumerableUpgrad
     
     IIkonDAO private governor;
     IIkonDAO private timelocker;    
-    // IIkonDAO private token; 
+    IIkonDAO private token; 
     // IIkonDAO private votes;
     // mapping(uint256 => Proposal) public proposals;
     // mapping(address => uint256[]) private memberProposals;
@@ -39,18 +39,19 @@ contract IkonDAO is Constants, OwnableUpgradeable, AccessControlEnumerableUpgrad
     constructor (){} 
 
     /// @notice initializes ikonDAO
-    function __IkonDAO_init(address govAddress, address timelockerAddress) external initializer(){
+    function __IkonDAO_init(address govAddress, address timelockerAddress, address tokenAddress) external initializer(){
 
         /// @notice instantiate dao interface
         governor = IIkonDAO(govAddress);
         timelocker = IIkonDAO(payable(timelockerAddress));
+        token = IIkonDAO(tokenAddress);
         // votes = IIkonDAO(govTokenAddress);
-        // token = IIkonDAO(daoToken);
                 
         /// @notice setRoles
         _setupRole(ADMIN_ROLE, _msgSender());
         _setRoleAdmin(ADMIN_ROLE, ADMIN_ROLE);
         _setRoleAdmin(MEMBER_ROLE, ADMIN_ROLE);
+        _setupRole(ADMIN_ROLE, timelockerAddress);
         __AccessControlEnumerable_init();
         __Ownable_init();
         
@@ -67,33 +68,43 @@ contract IkonDAO is Constants, OwnableUpgradeable, AccessControlEnumerableUpgrad
         uint256[] calldata values, 
         bytes[] memory datas,
         string calldata description
-    ) public onlyRole(MEMBER_ROLE) {
-        governor.propose(targets, values, datas, description);
+    ) public onlyRole(MEMBER_ROLE) returns (uint256) {
+        return governor.propose(targets, values, datas, description);
     }
-    
+
+    /// @dev executes proposal through dao governor
+    /// @param targets contract from calldatas should be executed
+    /// @param values values thaat will be sent to the targets
+    /// @param datas datas that will be called by the targets
+    /// @param descriptionHash description of the proposal
     function execute(
         address[] calldata targets, 
         uint256[] calldata values, 
         bytes[] memory datas,
         bytes32 descriptionHash
-    ) public onlyRole(MEMBER_ROLE) {
-        governor.execute(targets, values, datas, descriptionHash);
+    ) public onlyRole(MEMBER_ROLE) returns (uint256) {
+        return governor.execute(targets, values, datas, descriptionHash);
     }
 
+    /// @dev queues a succeeded proposal to the timelock
+    /// @param targets contract from calldatas should be executed
+    /// @param values values thaat will be sent to the targets
+    /// @param datas datas that will be called by the targets
+    /// @param descriptionHash description of the proposal
     function queue(
         address[] calldata targets, 
         uint256[] calldata values, 
         bytes[] memory datas,
         bytes32 descriptionHash
-    ) public onlyRole(MEMBER_ROLE) {
-        governor.queue(targets, values, datas, descriptionHash);
+    ) public onlyRole(MEMBER_ROLE) returns (uint256) {
+        return governor.queue(targets, values, datas, descriptionHash); 
     }
 
     /// @dev makes a member of the caller of this function
     function createMember() external {
         require(!hasRole(MEMBER_ROLE, _msgSender()), REQUIRE_CREATEMEMBER_ALREADY_CREATED);
         require(!hasRole(BANNED_ROLE, _msgSender()), REQUIRE_CREATEMEMBER_USER_BANNED);
-        grantRole(MEMBER_ROLE, _msgSender());
+        _setupRole(MEMBER_ROLE, _msgSender());
         emit MemberCreated(_msgSender());
     }
    
@@ -103,8 +114,21 @@ contract IkonDAO is Constants, OwnableUpgradeable, AccessControlEnumerableUpgrad
         require(!hasRole(BANNED_ROLE, _account), REQUIRE_BANMEMBER_ALREADY_BANNED);
         require(hasRole(MEMBER_ROLE, _account), REQUIRE_BANMEMBER_ONLY_MEMBERS);
         revokeRole(MEMBER_ROLE, _account);
+        _setupRole(BANNED_ROLE, _account);
         emit MemberBanned(_account);
     } 
+
+    /// @dev transfers utility tokens for user rewards
+    function transferTokensToTimelocker() external onlyRole(ADMIN_ROLE) {
+        uint256 baseReward = token.getBaseReward(); 
+        token.transfer(address(timelocker), baseReward);
+    } 
+
+    /// @dev mints tokens to the proxy address
+    /// @param amount amount of tokens that will be minted to proxy address
+    function mintUtilityTokens(uint256 amount) external onlyRole(ADMIN_ROLE) {
+        token.mint(address(this), amount * 10 ** token.decimals());
+    }
 
     /// @notice upgrades to this contract
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(ADMIN_ROLE){}

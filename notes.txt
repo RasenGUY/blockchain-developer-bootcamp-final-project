@@ -63,3 +63,84 @@ fungibleDao
             - should be able to type in tokenId and get category from it
             - should be able to check wheter category exists to update category list
             
+
+
+IkonDAO proposals
+- create members
+
+- accountability proposals  
+    - ban members
+    - slashvotes
+
+- dao proposals
+    - mint nft
+    - reward contributions
+        - reward tokens
+        - reward votes
+
+- system proposals    
+    - high priority
+        - set voting period
+        - set voting delay
+        - set tokenReward
+        - set votReward
+        - set delay for timelock
+        - change timelocker address
+        - 
+
+    - low priority 
+        - set voteWeightlimit
+            - note that some mechanisms will have to be implemented with for redristibution of votes
+        - change daoTimeLocker
+        - abillity to call some proposals in batch
+            - banMembers
+        - proposal for rewarding votes to member 
+
+
+ikondao functionalities
+    - high priority 
+        - record for proposals (this can all be retrieved from interacting with the governor) (make sure functions for retrieving this kind of information is public)
+            - proposal Id
+            - member that create the proposal
+            - proposalState (information can be retrieved from the governor)
+        - counter for proposals so every new proposal is uniquenes
+        - general description tags for proposal types 
+
+        - create system, accountabilty and general proposals 
+            - uniqueness in all proposal generated  
+    
+    - low priority
+        - set pricing mechanism for nft
+        - staking
+        - layer2
+
+
+ui functionalities
+    - to do
+        - watch course video on web3react
+        - sign in with wallet
+        - proposal
+            - show proposalState
+                - period (time before deadline)
+                - % of votes (for, against, abstain)
+            
+            - who created proposal
+            - proposal type 
+                - system
+                - accountability proposal
+                - minting proposal  
+    - information needed for app
+        
+        - main page (proposal)
+            - total proposal created
+            - total proposal passed
+            - total proposal failed
+            - nft vectors
+            - non nft vectors 
+
+        - individual page info members
+            - list of proposals with most recent proposal at the top
+                - button to vote on a proposal
+                - button for executing proposal (if it is ready to be executed - can only be executed by members)
+            - button for creating proposal
+        -      

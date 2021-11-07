@@ -31,6 +31,6 @@ abstract contract Constants  {
     /// @notice proposal types
     string constant PROPOSAL_SYSTEM = "IkonDAO system propopal";
     string constant PROPOSAL_ACCOUNTABILITY = "IkonDAO accountability proposal";
-    string constant PROPOSAL_DAO = "IkonDAO vector collectible mint proposal ";
+    string constant PROPOSAL_DAO = "IkonDAO vector collectible mint proposal";
 
 }

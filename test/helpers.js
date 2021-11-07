@@ -36,3 +36,22 @@ exports.fakeMine = async (fakeMine, actions, miningLength, options = undefined) 
     }
     return results; 
 } 
+exports.extractEventSignatures = abi => abi.filter( obj => (obj.type === 'event'));
+
+exports.generateMappingsFromSignatures = objSigs => { 
+        
+        let sigMap = new Map();
+
+        for(let i = 0; i < objSigs.length; i++){
+                if (objSigs[i] && objSigs[i].name && objSigs[i].signature){
+                        sigMap.set(objSigs[i].name, [objSigs[i].signature]);
+                }
+        }
+        return sigMap;
+}
+
+exports.subscribeToLogs = (address, topics, web3, type) => web3.eth.subscribe(
+        type, 
+        {address: address, topics: topics}, 
+        (error, result) => !error ? console.log(result) : console.log(error) 
+        ) 
