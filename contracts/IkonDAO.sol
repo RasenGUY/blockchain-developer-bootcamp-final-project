@@ -72,9 +72,9 @@ contract IkonDAO is Constants, OwnableUpgradeable, AccessControlEnumerableUpgrad
         _proposalId = governor.propose(targets, values, datas, description);
     }
 
-    function castVotes(uint256 proposalId, uint8 support) external returns (uint256) {
+    function castVote(uint256 proposalId, uint8 support) external onlyRole(MEMBER_ROLE) returns (uint256) {
         emit Log(proposalId, support);
-        return governor.castVotes(proposalId, _msgSender(), support); 
+        return governor.castVote(proposalId, _msgSender(), support); 
     }   
 
     /// @dev executes proposal through dao governor

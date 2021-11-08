@@ -64,7 +64,7 @@ interface IIkonDAO {
     function timelock() external returns (address);
     function state(uint256 proposalId) external returns (ProposalState);
     function proposalDeadline(uint256 proposalId) external returns (uint256);
-    function castVotes(uint256 proposalId, address voter, uint8 support) external returns (uint256);
+    function castVote(uint256 proposalId, address voter, uint8 support) external returns (uint256);
 
     /// @notice token methods
     function rewardTokens(address to) external;

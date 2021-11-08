@@ -18,19 +18,25 @@ exports.fakeMine = async (fakeMine, actions, miningLength, options = undefined) 
     for (let i = 0; i < miningLength; i++){
             
             if (actions.filter(action => action.height === i).length != 0){
-                    
-                    let result = await actions[counter].callback();
-                    if (options != undefined && options.log === true){
-                            if (options.actionNumber.h != undefined && options.actionNumber.h === i){
-                                    options.actionNumber.wrapper(result);
-                            } 
-                            if (options.actionNumber.length != undefined && options.actionNumber.filter(action => action.h === i).length != 0){
-                                    options.actionNumber.filter(action => action.h === i)[0].wrapper(result);
-                            }
-                                    
-                    } 
-                    results.push(result);
-                    counter++; 
+                
+                let result, error;
+                try {
+                        result = await actions[counter].callback();
+                } catch (e){
+
+                        error = e;
+                }
+                if (options != undefined && options.log === true){
+                        if (options.actionNumber.h != undefined && options.actionNumber.h === i){
+                                options.actionNumber.wrapper(result);
+                        } 
+                        if (options.actionNumber.length != undefined && options.actionNumber.filter(action => action.h === i).length != 0){
+                                options.actionNumber.filter(action => action.h === i)[0].wrapper(result);
+                        }
+                                
+                } 
+                results.push(error ? {r: result, e: error} : result);
+                counter++; 
             } 
             await fakeMine();       
     }

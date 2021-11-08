@@ -24,9 +24,9 @@ contract IkonDAOGovernor is Governor, AccessControl, GovernorCountingSimple, Gov
     uint256 private _votingPeriod;
     uint256 private _owner;  
 
-    constructor(ERC20Votes _token, TimelockController _timelock, uint256 _delay, uint256 _period)
+    constructor(ERC20Votes _govToken, TimelockController _timelock, uint256 _delay, uint256 _period)
         Governor("IkonDaoGovernor")
-        GovernorVotes(_token)
+        GovernorVotes(_govToken)
         GovernorVotesQuorumFraction(4)
         GovernorTimelockControl(_timelock) 
         
@@ -35,7 +35,6 @@ contract IkonDAOGovernor is Governor, AccessControl, GovernorCountingSimple, Gov
         _votingDelay = _delay;
         _votingPeriod = _period;
         _version = "1.0.0";
-
 
         /// accesscontrol
         _setupRole(ADMIN_ROLE, _msgSender());
@@ -71,15 +70,24 @@ contract IkonDAOGovernor is Governor, AccessControl, GovernorCountingSimple, Gov
     } 
     
     /// @dev see IkonDAO{castVote}
-    function castVotes(uint256 proposalId, address voter, uint8 support) external returns (uint256) {
+    function castVote(uint256 proposalId, address voter, uint8 support) external onlyRole(ADMIN_ROLE) returns (uint256) {
         return _castVote(proposalId, voter, support, "");
     }
-                                  
+
     /// @dev see IkonDAO{castVote}
     function castVote(uint256 proposalId, uint8 support) public override(Governor, IGovernor) onlyRole(ADMIN_ROLE) returns(uint256) {
         return super.castVote(proposalId, support);
     }
-    
+
+    function queue(
+        address[] memory targets,
+        uint256[] memory values,
+        bytes[] memory calldatas,
+        bytes32 descriptionHash
+    ) public override onlyRole(ADMIN_ROLE) returns (uint256) {
+        return super.queue(targets, values, calldatas, descriptionHash);
+    }
+
     function castVoteWithReason(
         uint256 proposalId, 
         uint8 support, 
@@ -89,7 +97,7 @@ contract IkonDAOGovernor is Governor, AccessControl, GovernorCountingSimple, Gov
         onlyRole(ADMIN_ROLE) returns(uint256){
         return super.castVoteWithReason(proposalId, support, reason);
     }
-    
+
     function castVoteBySig(
         uint256 proposalId, 
         uint8 support, 
@@ -129,6 +137,8 @@ contract IkonDAOGovernor is Governor, AccessControl, GovernorCountingSimple, Gov
     {
         return super.state(proposalId);
     }
+    
+   
 
     function propose(address[] memory targets, uint256[] memory values, bytes[] memory calldatas, string memory description)
         public
