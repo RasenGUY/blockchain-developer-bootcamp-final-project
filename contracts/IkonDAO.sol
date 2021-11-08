@@ -34,6 +34,7 @@ contract IkonDAO is Constants, OwnableUpgradeable, AccessControlEnumerableUpgrad
 
     event MemberCreated(address indexed _member); 
     event MemberBanned(address indexed _member); 
+    event Log(uint256 id, uint8 support);
 
     /// @notice unsafe allow     
     constructor (){} 
@@ -51,10 +52,9 @@ contract IkonDAO is Constants, OwnableUpgradeable, AccessControlEnumerableUpgrad
         _setupRole(ADMIN_ROLE, _msgSender());
         _setRoleAdmin(ADMIN_ROLE, ADMIN_ROLE);
         _setRoleAdmin(MEMBER_ROLE, ADMIN_ROLE);
-        _setupRole(ADMIN_ROLE, timelockerAddress);
+        _setRoleAdmin(BANNED_ROLE, ADMIN_ROLE);
         __AccessControlEnumerable_init();
         __Ownable_init();
-        
         __ERC721Holder_init(); // give nft holding capacity of erc721 token
     }
 
@@ -68,9 +68,14 @@ contract IkonDAO is Constants, OwnableUpgradeable, AccessControlEnumerableUpgrad
         uint256[] calldata values, 
         bytes[] memory datas,
         string calldata description
-    ) public onlyRole(MEMBER_ROLE) returns (uint256) {
-        return governor.propose(targets, values, datas, description);
+    ) public onlyRole(MEMBER_ROLE) returns (uint256 _proposalId) {
+        _proposalId = governor.propose(targets, values, datas, description);
     }
+
+    function castVotes(uint256 proposalId, uint8 support) external returns (uint256) {
+        emit Log(proposalId, support);
+        return governor.castVotes(proposalId, _msgSender(), support); 
+    }   
 
     /// @dev executes proposal through dao governor
     /// @param targets contract from calldatas should be executed
@@ -82,8 +87,8 @@ contract IkonDAO is Constants, OwnableUpgradeable, AccessControlEnumerableUpgrad
         uint256[] calldata values, 
         bytes[] memory datas,
         bytes32 descriptionHash
-    ) public onlyRole(MEMBER_ROLE) returns (uint256) {
-        return governor.execute(targets, values, datas, descriptionHash);
+    ) public onlyRole(MEMBER_ROLE) returns (uint256 _proposalId) {
+        _proposalId = governor.execute(targets, values, datas, descriptionHash);
     }
 
     /// @dev queues a succeeded proposal to the timelock
@@ -96,8 +101,8 @@ contract IkonDAO is Constants, OwnableUpgradeable, AccessControlEnumerableUpgrad
         uint256[] calldata values, 
         bytes[] memory datas,
         bytes32 descriptionHash
-    ) public onlyRole(MEMBER_ROLE) returns (uint256) {
-        return governor.queue(targets, values, datas, descriptionHash); 
+    ) public onlyRole(MEMBER_ROLE) returns (uint256 _proposalId) {
+        _proposalId = governor.queue(targets, values, datas, descriptionHash); 
     }
 
     /// @dev makes a member of the caller of this function

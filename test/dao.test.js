@@ -6,7 +6,7 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const expect = chai.expect;
 chai.use(chaiAsPromised);
-const { toUnit, unitToBN, toBN, extractEventSignatures, generateMappingsFromSignatures, subscribeToLogs} = require("./helpers");
+const { toUnit, unitToBN, toBN, extractEventSignatures, generateMappingsFromSignatures, subscribeToLogs, fakeMine} = require("./helpers");
 
 const IkonDAO = artifacts.require('IkonDAO');
 const IkonDAOGovernanceToken = artifacts.require('IkonDAOGovernanceToken');
@@ -44,12 +44,14 @@ contract("IkonDAO (proxy)", accounts => {
     // governor
     let votingDelay = 3;
     let votingPeriod = 10;
-    let initialUsers = [alice, bob, carl, david, ed, fred, gerald, hilda];
-
+    
     // timelocker 
     let timelockDelay = 2;
     let proposers = [owner]
     let executors = [owner]
+    
+    // govToken
+    let initialUsers = [alice, bob, carl, david, ed, fred, gerald, hilda];
 
     // artifacts
     let dao, daoProxy, govToken, token, governor, timelock, nft;
@@ -108,6 +110,7 @@ contract("IkonDAO (proxy)", accounts => {
                 calldatas: [governorInst.methods.setVotingDelay(delay).encodeABI()],
                 description: description
             })
+
             this.setVotingPeriod = (period, description) => ({ // sets voting period
                 targets: [governor.address],
                 values: [0],
@@ -128,6 +131,7 @@ contract("IkonDAO (proxy)", accounts => {
                 calldatas: [timlockInst.methods.updateDelay(newDelay).encodeABI()],
                 description: description
             })
+
             this.updateTimelock = (newTimelock, description) => ({ // changes timelocker address of the governor
                 targets: [governor.address],
                 values: [0],
@@ -264,30 +268,138 @@ contract("IkonDAO (proxy)", accounts => {
             await expect(daoProxy.propose(updateVP.targets, updateVP.values, updateVP.calldatas, description, {from: carl})).to.be.rejected;
         })
 
-        let description, proposal, logs;
-        before(() => {            
+        let description, proposal, proposalId;
+        before(async () => {            
             /// members 
-            description = "update voting period";
+            description = "allows for proposal creation";
             proposal = proposals.setVotingPeriod(5, description);
-            logs = subscribeToLogs(alice, govEventSigMap.get('ProposalCreated'), web3)
+            proposalId = await governor.hashProposal(proposal.targets, proposal.values, proposal.calldatas, toSha3(proposal.description));
         })
         it("allows for proposal creation", async () => {
             await daoProxy.createMember({from: alice});
-            let proposalId = await daoProxy.propose(proposal.targets, proposal.values, proposal.calldatas, proposal.description, {from: alice});
-            logs.on("data", function(log){
-                console.log(log);
-            })
-            .on("changed", function(log){
-                console.log(log);
-            });
-            // console.log(logs);
-            // console.log(proposalId.receipt.rawLogs);
-            // let state = await governor.state(proposalId.logs[0].args['0']);
-            // assert.equal(state, proposalState.Pending, "proposal not created successfully");
+            await daoProxy.propose(proposal.targets, proposal.values, proposal.calldatas, proposal.description, {from: alice});
+            let state = await governor.state(proposalId);
+            assert.equal(state, proposalState.Pending, "proposal not created successfully");
         });
 
+        let onlyMemberCastVotesActions;  
+        before( async () => {
+            description = "allows members to cast proposal";
+            proposal = proposals.setVotingDelay(10, description);
+            proposalId = await governor.hashProposal(proposal.targets, proposal.values, proposal.calldatas, toSha3(proposal.description));
+        
+            onlyMemberCastVotesActions = [
+                {
+                    height: 0,
+                    callback: async () => {
+                        try {
+                            await daoProxy.createMember({from: alice})
+                            await daoProxy.createMember({from: david})
+                            await daoProxy.createMember({from: carl})
+                            await daoProxy.createMember({from: ed})
+                            await daoProxy.createMember({from: bob})
+                        } catch(e){
+                            return e ? e : "created members sucessfully";
+                        }
+                    }
+                },
+                {
+                    height: 1,
+                    callback: async () => daoProxy.propose(proposal.targets, proposal.values, proposal.calldatas, proposal.description, {from: alice})
+                },
+                {
+                    height: 25,
+                    callback: async () => {
+                        try {
+                            await daoProxy.castVotes(proposalId, support.For, {from: alice})
+                        } catch (e) {
+                            return e ? "some error occurred" : "vote succeeded";
+                        }
+                    } 
+                }
+            ]
+        })
+        it("allows only members to cast votes on proposals", async () => {
+            let results = await  fakeMine(
+                async () => token.rewardTokens(other, {from: owner}),
+                onlyMemberCastVotesActions,
+                30
+            )
+            assert.equal(results[results.length - 1], 'some error occurred', "allows non member to cast vote");
+        });
 
-        it("queues proposals", async ()=> {});
+        let checkQueuesActions;        
+        before(async () => {
+            // new descriptions
+            description = "queues proposals";
+            proposal = proposals.setVotingPeriod(10, description);
+            proposalId = await governor.hashProposal(proposal.targets, proposal.values, proposal.calldatas, toSha3(proposal.description));
+            console.log(proposal);
+
+            /// fake mine
+            checkQueuesActions = [
+                {
+                    height: 0,
+                    callback: async () => {
+                        try {
+
+                            await daoProxy.createMember({from: alice})
+                            await daoProxy.createMember({from: david})
+                            await daoProxy.createMember({from: carl})
+                            await daoProxy.createMember({from: ed})
+                            await daoProxy.createMember({from: bob})
+
+                        } catch(e) {
+
+                            return e ? e : "created members sucessfully";
+                        }
+                    }
+                },
+                {
+                    height: 1,
+                    callback: async () => daoProxy.propose(proposal.targets, proposal.values, proposal.calldatas, proposal.description, {from: alice})
+                },
+                {
+                    height: 35,
+                    callback: async () => {
+                        try {
+                            await daoProxy.castVotes(proposalId, support.For, {from: bob})
+                        } catch (e) {
+                            console.log(e);
+                            return e ? e : "members succesully voted";
+                        }
+                    }
+                },
+                // {
+                //     height: 30,
+                //     callback: async () => {
+                //         await daoProxy.queue(proposal.targets, proposal.values, proposal.calldatas, toSha3(proposal.description), {from: alice})
+                //     }
+                // },
+                // {
+                //     height: 32,
+                //     callback: async () => governor.state(proposalId) 
+                // },
+            ]
+        })
+        it("queues proposals", async ()=> {
+            let results = await fakeMine(
+                async () => token.rewardTokens(other, {from: owner}),
+                checkQueuesActions,
+                43,
+                {
+                    log: true,
+                    actionNumber: [
+                        {h: 0, wrapper: result => console.log(result)},
+                        {h: 1, wrapper: result => console.log(result)},
+                        {h: 35, wrapper: result => console.log(result)}
+                    ]
+                }
+            )
+            // console.log(results[1])
+            assert.equal(results[results.length - 1], proposalState.Queued, "proposal is not queued");
+        });
+
         it("executes proposals", async ()=> {});
     })
 

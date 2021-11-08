@@ -69,6 +69,38 @@ contract IkonDAOGovernor is Governor, AccessControl, GovernorCountingSimple, Gov
     function _setVotingDelay(uint256 _delay) private {
         _votingDelay = _delay;
     } 
+    
+    /// @dev see IkonDAO{castVote}
+    function castVotes(uint256 proposalId, address voter, uint8 support) external returns (uint256) {
+        return _castVote(proposalId, voter, support, "");
+    }
+                                  
+    /// @dev see IkonDAO{castVote}
+    function castVote(uint256 proposalId, uint8 support) public override(Governor, IGovernor) onlyRole(ADMIN_ROLE) returns(uint256) {
+        return super.castVote(proposalId, support);
+    }
+    
+    function castVoteWithReason(
+        uint256 proposalId, 
+        uint8 support, 
+        string calldata reason) 
+        public 
+        override(Governor, IGovernor) 
+        onlyRole(ADMIN_ROLE) returns(uint256){
+        return super.castVoteWithReason(proposalId, support, reason);
+    }
+    
+    function castVoteBySig(
+        uint256 proposalId, 
+        uint8 support, 
+        uint8 v,
+        bytes32 r, 
+        bytes32 s) 
+        public 
+        override(Governor, IGovernor) 
+        onlyRole(ADMIN_ROLE) returns(uint256){
+        return super.castVoteBySig(proposalId, support, v, r, s);
+    }
 
     // The following functions are overrides required by Solidity.
     function quorum(uint256 blockNumber)

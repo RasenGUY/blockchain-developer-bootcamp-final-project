@@ -38,24 +38,33 @@ interface IIkonDAO {
     function votingPeriod() external returns (uint256);
     function setVotingPeriod(uint256 _period) external;
     function setVotingDelay(uint256 _delay) external;
-    function propose(address[] memory targets, uint256[] memory values, bytes[] memory calldatas, string memory description) external returns (uint256);
+    
+    function propose(
+        address[] memory targets, 
+        uint256[] memory values, 
+        bytes[] memory calldatas, 
+        string memory description
+    ) external returns (uint256);
+    
     function queue(
         address[] memory targets,
         uint256[] memory values,
         bytes[] memory calldatas,
         bytes32 descriptionHash
     ) external returns (uint256);
+    
     function execute(
         address[] memory targets,
         uint256[] memory values,
         bytes[] memory calldatas,
         bytes32 descriptionHash
-    ) external returns (uint256 proposalId);
+    ) external returns (uint256);
+
     function proposalEta(uint256 proposalId) external returns (uint256); 
     function timelock() external returns (address);
     function state(uint256 proposalId) external returns (ProposalState);
     function proposalDeadline(uint256 proposalId) external returns (uint256);
-    function castVote(uint256 proposalId, uint8 support) external returns (uint256 balance);
+    function castVotes(uint256 proposalId, address voter, uint8 support) external returns (uint256);
 
     /// @notice token methods
     function rewardTokens(address to) external;
