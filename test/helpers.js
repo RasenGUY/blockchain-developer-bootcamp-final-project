@@ -23,7 +23,6 @@ exports.fakeMine = async (fakeMine, actions, miningLength, options = undefined) 
                 try {
                         result = await actions[counter].callback();
                 } catch (e){
-
                         error = e;
                 }
                 if (options != undefined && options.log === true){

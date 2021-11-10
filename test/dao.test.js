@@ -1,5 +1,5 @@
 // load dependencies 
-const { deployProxy, upgradeProxy } = require('@openzeppelin/truffle-upgrades');
+const { deployProxy, upgradeProxy , upgrades} = require('@openzeppelin/truffle-upgrades');
 const { assert } = require('chai');
 // const Contract = require('web3-eth-contract');
 const chai = require('chai');
@@ -12,7 +12,7 @@ const { toUnit, unitToBN, toBN, extractEventSignatures, generateMappingsFromSign
 const IkonDAO = artifacts.require('IkonDAO');
 const IkonDAOGovernanceToken = artifacts.require('IkonDAOGovernanceToken');
 const IkonDAOGovernor = artifacts.require('IkonDAOGovernor');
-const IkonDAOTimelockController = artifacts.require('IkonDAOTimelockController');
+const Timelock = artifacts.require('Timelock');
 const IkonDAOToken = artifacts.require('IkonDAOToken');
 const IkonDAOVectorCollectible = artifacts.require("IkonDAOVectorCollectible");
 
@@ -61,7 +61,10 @@ contract("IkonDAO (proxy)", accounts => {
     let dao, daoProxy, govToken, token, governor, timelocker, nft;
 
     // contract instance -> for getting abi methods
-    let governorInst, govTokenInst, tokenInst, timelockerInst, proposals;
+    let governorInst, govTokenInst, tokenInst, timelockerInst, daoProxyInst;
+
+    // for storing proposal methods
+    let proposals;
 
     // voting
     const proposalState = {
@@ -82,22 +85,16 @@ contract("IkonDAO (proxy)", accounts => {
 
     /// events
     let govEventSigMap, tokenEventSigMap, govTokenEventSigMap, timelockerEventSigMap, daoEventSigMap, nftEventSigMap;
-
+    
     beforeEach( async () => {
         
         // initiate new contracts before each describe 
         dao = await IkonDAO.new();
-        
         govToken = await IkonDAOGovernanceToken.new(weigthLimitFraction, initialUsers, initialVotes, baseRewardVotes, {from: owner});
-        
         token = await IkonDAOToken.new(baseRewardUtility, {from: owner});
-        
-        timelocker = await IkonDAOTimelockController.new(timelockDelay, proposers, executors);
-        
+        timelocker = await Timelock.new(timelockDelay, proposers, executors);
         governor = await IkonDAOGovernor.new(govToken.address, timelocker.address, votingDelay, votingPeriod, {from: owner});
-
         daoProxy = await deployProxy(IkonDAO, [governor.address, timelocker.address, token.address], {initializer: '__IkonDAO_init', kind: 'uups', unsafeAllow: ['constructor', 'delegatecall']});
-        
         nft = await IkonDAOVectorCollectible.new(daoProxy.address);
 
         /// contract instance 
@@ -106,12 +103,38 @@ contract("IkonDAO (proxy)", accounts => {
         tokenInst = new web3.eth.Contract(token.abi, token.address); 
         timelockerInst = new web3.eth.Contract(timelocker.abi, timelocker.address);
         nftInst = new web3.eth.Contract(nft.abi, nft.address);
+        daoProxyInst = new web3.eth.Contract(daoProxy.abi, daoProxy.address);
+
+        // console.log(dao.address)
+        // console.log(govToken.address)
+        // console.log(token.address)
+        // console.log(timelocker.address)
+        // console.log(governor.address)
+        // console.log(daoProxy.address)
+        // console.log(nft.address)
 
         // give proxy admin rights to governor
         await governor.grantRole(ADMIN_ROLE, daoProxy.address, {from: owner});
+        await governor.grantRole(ADMIN_ROLE, timelocker.address, {from: owner});
+        await token.grantRole(ADMIN_ROLE, timelocker.address, {from: owner});
+        await govToken.grantRole(ADMIN_ROLE, timelocker.address, {from: owner});
+        await daoProxy.grantRole(ADMIN_ROLE, timelocker.address, {from: owner})
         await timelocker.grantRole(PROPOSER_ROLE, governor.address);
         await timelocker.grantRole(EXECUTOR_ROLE, governor.address);
+        
+        // await web3.eth.sendTransaction({
+        //     from: owner,
+        //     to: timelocker.address,
+        //     value: web3.utils.toWei('1', 'ether'),
+        // });
 
+        // await web3.eth.sendTransaction({
+        //     from: owner,
+        //     to: daoProxy.address,
+        //     value: web3.utils.toWei('1', 'ether'),
+        // });
+          
+        
         // proposals object
         function Proposals (){
             
@@ -120,14 +143,16 @@ contract("IkonDAO (proxy)", accounts => {
                 targets: [governor.address],
                 values: [0],
                 calldatas: [governorInst.methods.setVotingDelay(delay).encodeABI()],
-                description: description
+                description: description,
+                gasEstimate: governorInst.methods.setVotingDelay(delay).estimateGas({from: owner}, amount => amount)
             })
 
             this.setVotingPeriod = (period, description) => ({ // sets voting period
                 targets: [governor.address],
                 values: [0],
                 calldatas: [governorInst.methods.setVotingPeriod(period).encodeABI()],
-                description: description
+                description: description,
+                gasEstimate: governorInst.methods.setVotingPeriod(period).estimateGas({from: owner}, amount => amount)
             })
 
             this.setGovTokenReward = (newReward, description) => ({ // sets new govtoken rewards
@@ -135,20 +160,39 @@ contract("IkonDAO (proxy)", accounts => {
                 values: [0],
                 calldatas: [govTokenInst.methods.setRewardVotes(unitToBN(newReward)).encodeABI()],
                 description: description,
-            })
-    
-            this.updateTimelockerDelay = (newDelay, description) => ({ // sets new delay for timelocker
-                targets: [timelocker.address],
-                values: [0],
-                calldatas: [timlockInst.methods.updateDelay(newDelay).encodeABI()],
-                description: description
+                gasEstimate: govTokenInst.methods.setRewardVotes(unitToBN(newReward)).estimateGas({from: owner}, amount => amount)
             })
 
-            this.updateTimelock = (newTimelock, description) => ({ // changes timelocker address of the governor
+            this.setTokenReward = (newReward, description) => ({ // sets new govtoken rewards
+                targets: [token.address],
+                values: [0],
+                calldatas: [tokenInst.methods.setBaseReward(unitToBN(newReward)).encodeABI()],
+                description: description,
+                gasEstimate: tokenInst.methods.setBaseReward(unitToBN(newReward)).estimateGas({from: owner}, amount => amount)
+            })
+    
+            this.setTimelockDelay = (newDelay, description) => ({ // sets new delay for timelocker
+                targets: [timelocker.address],
+                values: [0],
+                calldatas: [timelockerInst.methods.updateDelay(newDelay).encodeABI()],
+                description: description,
+                gasEstimate: timelockerInst.methods.updateDelay(newDelay).estimateGas({from: timelocker.address}, amount => amount)
+            })
+
+            this.setTimelockAddress = (newTimelock, description) => ({ // changes timelocker address of the governor
                 targets: [governor.address],
                 values: [0],
                 calldatas: [governorInst.methods.updateTimelock(newTimelock).encodeABI()],
-                description: description
+                description: description,
+                gasEstimate: governorInst.methods.updateTimelock(newTimelock).estimateGas({from: timelocker.address}, amount => amount)
+            })
+
+            this.setProxyAddress = (newImplementation, description) => ({
+                targets: [daoProxy.address],
+                value: [0],
+                calldatas: [daoProxyInst.methods.upgradeTo(newImplementation).encodeABI()],
+                description: description,
+                gasEstimate: daoProxyInst.methods.upgradeTo(newImplementation).estimateGas({from: owner}, amount => amount)
             })
             
             // accountability proposals
@@ -156,14 +200,16 @@ contract("IkonDAO (proxy)", accounts => {
                 targets: [daoProxy.address],
                 values: [0],
                 calldatas: [daoInst.methods.banMember(member).encodeABI()],
-                description: description
+                description: description,
+                gasEstimate: daoInst.methods.banMember(member).estimateGas({from: owner}, amount => amount)
             })       
 
             this.slashVotes = (member, amount, description) => ({
                 targets: [govToken.address],
                 values: [0],
                 calldatas: [govTokenInst.methods.slashVotes(member, unitToBN(amount)).encodeABI()],
-                description: description
+                description: description,
+                gasEstimate: govTokenInst.methods.slashVotes(member, unitToBN(amount)).estimateGas({from: owner}, amount => amount)
             })
     
             // dao proposals
@@ -184,23 +230,44 @@ contract("IkonDAO (proxy)", accounts => {
                     govTokenInst.methods.rewardVotes(proposer).encodeABI(), /// reward votes to minter
                     token.methods.rewardTokens(proposer).encodeABI() /// reward tokens utility tokens to proposer
                 ],
-                description: description
+                description: description,
+                gasEstimate: 
+                daoInst.methods.transferTokensToTimelocker().estimateGas({from: owner}, amount => amount) +
+                nftInst.methods.safeMintVector(
+                    utils.utf8ToHex(nftArgs.name), 
+                    nftArgs.description,
+                    utils.utf8ToHex(nftArgs.externalLink),
+                    utils.utf8ToHex(nftArgs.imageHash),
+                    utils.utf8ToHex(nftArgs.category),
+                    utils.utf8ToHex(nftArgs.handle)
+                ).estimateGas({from: timelocker.address}, amount => amount) +
+                govTokenInst.methods.rewardVotes(proposer).estimateGas({from: owner}, amount => amount) +
+                token.methods.rewardTokens(proposer).estimateGas({from: owner}, amount => amount)
             })
 
             // mint utility tokens
             this.mintTokens = (amount, description) => ({
                 targets: [daoProxy.address],
                 values: [0],
-                calldatas: [daoInst.methods.mintUtilityTokens(unitToBN(amount))],
-                description: description
+                calldatas: [daoInst.methods.mintUtilityTokens(unitToBN(amount)).encodeABI()],
+                description: description,
+                gasEstimate: daoInst.methods.mintUtilityTokens(unitToBN(amount)).estimateGas({from: owner}, amount => amount)
             })
         }
 
         /// instantiate proposals object
         proposals = new Proposals(); 
+        // nftargs = {
+        //     name: "fernando",
+        //     description: "loves nft's",
+        //     externalLink: "go fuck yourself",
+        //     imageHash: "someHash",
+        //     category: "some category",
+        //     handle: "some handle"
+        // }
+
 
         // events 
-        // console.log(governor.abi); 
         // map names to address and topics of sigs
         govEventSigMap = generateMappingsFromSignatures(extractEventSignatures(governor.abi));
         tokenEventSigMap = generateMappingsFromSignatures(extractEventSignatures(token.abi)); 
@@ -214,31 +281,29 @@ contract("IkonDAO (proxy)", accounts => {
         
     describe("Initialization", () => {
 
-        // beforeEach(async () => {        
-            
-            
-        // })
-
         // upgradeabillity tests
-        it("set the correct owner", async () => {
-            let daoOwner = await daoProxy.owner()
-            assert.equal(daoOwner, owner, "owner is not the deployer contract");
-        })
-
-        it("transferOwnerShip", async () => {
-            await daoProxy.transferOwnership(other); 
-            let newOwner = await daoProxy.owner(); 
-            assert.equal(newOwner, other, "ownership not sucessfully transferred");
+        it("set the correct admin", async () => {
+            let daoAdmin = await daoProxy.hasRole(ADMIN_ROLE, owner);
+            assert.isTrue(daoAdmin === true, "owner is not the deployer contract");
         });
 
-        it("renounces ownership", async () => {
-            await daoProxy.renounceOwnership(); 
-            const zeroAddress = "0x0000000000000000000000000000000000000000";
-            assert.equal(await daoProxy.owner(), zeroAddress , "does not renounce ownership successfully");
+        it("makes designated contracts admins", async () => {
+            await daoProxy.grantRole(ADMIN_ROLE, other, {from: owner});
+            let newAdmin = await daoProxy.hasRole(ADMIN_ROLE, other);
+            assert.isTrue(newAdmin === true, "does not set admins correctly");
         });
 
-        it("can handle upgrades and ownership by owner", async () => {
-            await expect(daoProxy.transferOwnership(accounts[2], {from: other})).to.be.rejected   
+        it("allows only admins to upgrade", async () => {
+            let newImplementation = await IkonDAO.new();
+            await expect(daoProxy.upgradeTo(newImplementation.address, {from: other})).to.be.rejected;
+        });
+
+        it("upgrades contract correctly and maintains state", async () => {
+            await daoProxy.createMember({from: fred});
+            let newImplementation = await IkonDAO.new();
+            await daoProxy.upgradeTo(newImplementation.address);
+            let newProxy = new web3.eth.Contract(newImplementation.abi, daoProxy.address);
+            assert.isTrue(await newProxy.methods.hasRole(MEMBER_ROLE, fred).call(), "does not upgrade sucessfully");
         });
 
     })
@@ -270,8 +335,6 @@ contract("IkonDAO (proxy)", accounts => {
 
 
     describe("Proposals", () => {
-        
-        
         /// proposal description
         it("dissalows non members and banned members from creating proposals", async () => {
             // let proposals = new Proposals();
@@ -387,53 +450,299 @@ contract("IkonDAO (proxy)", accounts => {
                 },
             ]
         })
+
         it("queues proposals", async ()=> {
+            
             let results = await fakeMine(
                 async () => token.rewardTokens(other, {from: owner}),
                 checkQueuesActions,
-                45,
+                45
+            )
+            let state = results[results.length-1];
+            assert.equal(state.toNumber(), proposalState.Queued, "proposal is not queued");
+        });
+
+        let onlyMembersExecuteProposalsActions;
+        before(async () => {
+            description = "allows only members to execute proposals";
+            proposal = proposals.setVotingPeriod(10, description);
+            proposalId = await governor.hashProposal(proposal.targets, proposal.values, proposal.calldatas, toSha3(proposal.description));
+
+            onlyMembersExecuteProposalsActions = [
                 {
-                    log: true,
+                    height: 0,
+                    callback: async () => {
+
+                            await daoProxy.createMember({from: alice})
+                            await daoProxy.createMember({from: david})
+                            await daoProxy.createMember({from: carl})
+                            await daoProxy.createMember({from: ed})
+                            await daoProxy.createMember({from: bob})
+
+                        }
+                },
+                {
+                    height: 1,
+                    callback: async () => daoProxy.propose(proposal.targets, proposal.values, proposal.calldatas, proposal.description, {from: alice})
+                },
+                {
+                    height: Number(votingDelay+1),
+                    callback: async () => { 
+                        await daoProxy.castVote(proposalId, support.For, {from: alice}) 
+                        await daoProxy.castVote(proposalId, support.For, {from: bob}) 
+                        await daoProxy.castVote(proposalId, support.For, {from: carl}) 
+                        await daoProxy.castVote(proposalId, support.For, {from: david}) 
+                        await daoProxy.castVote(proposalId, support.For, {from: ed}) 
+                    }
+                },
+                {
+                    height: Number(votingDelay+1+votingPeriod+1+votingDelay),
+                    callback: async () => {
+                            await daoProxy.queue(proposal.targets, proposal.values, proposal.calldatas, toSha3(proposal.description), {from: alice})
+                    }
+                },
+                {
+                    height: 44,
+                    callback: async () => daoProxy.execute(proposal.targets, proposal.values, proposal.calldatas, toSha3(proposal.description), {from: fred})
+                },
+            
+            ]
+        })
+        it("allows only members execute proposal", async ()=> {
+            let results = await fakeMine(
+                async () => token.rewardTokens(other, {from: owner}),
+                onlyMembersExecuteProposalsActions,
+                45
+            )
+            assert.equal(results[results.length - 1].e.reason , String(`AccessControl: account ${String(fred).toLowerCase()} is missing role ${MEMBER_ROLE}`))
+        });
+
+        let executesProposalsActions;
+        before(async () => {
+            description = "executes proposals";
+            proposal = proposals.setVotingPeriod(15, description);
+            proposalId = await governor.hashProposal(proposal.targets, proposal.values, proposal.calldatas, toSha3(proposal.description));
+            // console.log(carl);
+            // console.log(proposal);
+            // toSha3(proposal.description);
+            // console.log(governorInst)
+            // console.log(IkonDAO)
+
+            executesProposalsActions = [
+                {
+                    height: 0,
+                    callback: async () => {
+
+                            await daoProxy.createMember({from: alice})
+                            await daoProxy.createMember({from: david})
+                            await daoProxy.createMember({from: carl})
+                            await daoProxy.createMember({from: ed})
+                            await daoProxy.createMember({from: bob})
+
+                        }
+                },
+                {
+                    height: 1,
+                    callback: async () => daoProxy.propose(proposal.targets, proposal.values, proposal.calldatas, proposal.description, {from: alice})
+                },
+                {
+                    height: Number(votingDelay+1),
+                    callback: async () => { 
+                        await daoProxy.castVote(proposalId, support.For, {from: alice}) 
+                        await daoProxy.castVote(proposalId, support.For, {from: bob}) 
+                        await daoProxy.castVote(proposalId, support.For, {from: carl}) 
+                        await daoProxy.castVote(proposalId, support.For, {from: david}) 
+                        await daoProxy.castVote(proposalId, support.For, {from: ed}) 
+                    }
+                },
+                {
+                    height: Number(votingDelay+1+votingPeriod+1+votingDelay),
+                    callback: async () => {
+                            await daoProxy.queue(proposal.targets, proposal.values, proposal.calldatas, toSha3(proposal.description), {from: alice})
+                    }
+                },
+                {
+                    height: 44,
+                    callback: async () => {try {
+                        
+                        daoProxy.execute(proposal.targets, proposal.values, proposal.calldatas, toSha3(proposal.description), {from: carl})} catch(e){console.log(e.data)}
+                    }
+                },
+                {
+                    height: 49,
+                    callback: async () => governor.votingPeriod()
+                }
+            ]
+        })
+
+        it("executes proposal", async ()=> {
+            let results = await fakeMine(
+                async () => token.rewardTokens(other, {from: owner}),
+                executesProposalsActions,
+                50,
+                {
+                    logs: true,
                     actionNumber: [
-                        {h: 0, wrapper: result => console.log(result)},
-                        {h: Number(votingDelay+1), wrapper: result => console.log(result)},
-                        {h: Number(votingDelay+1+votingPeriod+1+votingDelay), wrapper: result => console.log(result)},
                         {h: 44, wrapper: result => console.log(result)}
                     ]
                 }
             )
-            assert.equal(state.toNumber(), proposalState.Queued, "proposal is not queued");
+            let newVotingPeriod = results[results.length -1];
+            console.log(results[4].e)
+            assert.equal(newVotingPeriod.toNumber(), 15, "proposal not executed correctly");
         });
-
-        // it("executes proposals", async ()=> {});
     })
 
-    // describe("Access Control", () => {
-
-    //     it("allows only members to create proposals", async ()=> {});
-    //     it("allows only members to queue proposals", async ()=>{});
-    //     it("allows only members to execute proposals", async ()=>{});
-        
-    // })
-
     // describe("Execution of core dao functionalities through proposals", ()=> {
-        
-    //     describe("Accountability Proposals", () => { 
-    //         it("it slashes votes from users through proposal", async ()=> {});
-    //         it("it bans users through proposal", async ()=> {});
+    //     let propose = Number(1); 
+    //     let startVote = Number(votingDelay + 1);
+    //     let endVote = Number(startVote + votingPeriod + 1);
+    //     let queue = Number(endVote + votingDelay + 1);
+    //     let execute = queue + (endVote - startVote) + 1; 
+    //     let test = execute + 5;
+
+    //     console.log("propose: ", propose)
+    //     console.log("start: ", startVote)
+    //     console.log("end: " ,endVote)
+    //     console.log("queue: ", queue)
+    //     console.log("execute: ", execute)
+    //     console.log("test: ", test)
+
+    //     let createMembers = {
+    //         height: 0,
+    //         callback: async () => {
+    //                 await daoProxy.createMember({from: alice})
+    //                 await daoProxy.createMember({from: bob})
+    //                 await daoProxy.createMember({from: carl})
+    //                 await daoProxy.createMember({from: david})
+    //                 await daoProxy.createMember({from: ed})
+    //                 await daoProxy.createMember({from: fred})
+    //                 await daoProxy.createMember({from: gerald})
+    //                 await daoProxy.createMember({from: hilda})
+    //             }
+    //     }
+    //     let withLogs = {
+    //         logs: true,
+    //         actionNumber: [
+    //             {
+    //                 h: propose, 
+    //                 wrapper: result => console.log(result) 
+    //             },
+    //             {
+    //                 h: startVote, 
+    //                 wrapper: result => console.log(result) 
+    //             },
+    //             {
+    //                 h: queue, 
+    //                 wrapper: result => console.log(result) 
+    //             },
+    //             {
+    //                 h: execute, 
+    //                 wrapper: result => console.log(result) 
+    //             },
+    //             {
+    //                 h: test, 
+    //                 wrapper: result => console.log(result) 
+    //             }
+    //         ]
+    //     }
+
+    //     let proposal, proposalId;
+    //     describe("System Proposals", () => {
+                        
+    //         // create all proposals wih their descriptions
+    //         let [ 
+    //             setVotingPeriodDesc, 
+    //             setVotingDelayDesc, 
+    //             setTokenRewardDesc, 
+    //             setGovTokenRewardDesc, 
+    //             setTimelockDelayDesc, 
+    //             setTimelockAddressDesc, 
+    //             setProxyAddressDesc ] = [
+    //             "set voting period", 
+    //             "set voting delay",
+    //             "set token reward",
+    //             "set vote reward",
+    //             "set timelock delay",
+    //             "set timlock address",
+    //             "set proxy address"
+    //         ] 
+
+            
+    //         let votingPeriodThroughProposalActions;
+    //         before(async ()=> {
+    //             proposal = proposals.setVotingPeriod(5, setVotingPeriodDesc);
+    //             proposalId = await governor.hashProposal(proposal.targets, proposal.values, proposal.calldatas, toSha3(proposal.description)); 
+
+    //             votingPeriodThroughProposalActions = [
+    //                 createMembers,
+    //                 {
+    //                     height: propose,
+    //                     callback: async () => {
+    //                         daoProxy.propose(proposal.targets, proposal.values, proposal.calldatas, proposal.description, {from: alice})
+    //                     }
+    //                 },
+    //                 {
+    //                     height: startVote,
+    //                     callback: async () => {
+    //                         daoProxy.castVote(proposalId, support.For, {from: alice})
+    //                         daoProxy.castVote(proposalId, support.For, {from: bob})
+    //                         daoProxy.castVote(proposalId, support.For, {from: david})
+    //                     }
+    //                 },
+    //                 {
+    //                     height: queue,
+    //                     callback: async () => {
+    //                         await daoProxy.queue(proposal.targets, proposal.values, proposal.calldatas, toSha3(proposal.description), {from: bob})
+    //                     }
+    //                 },
+    //                 {
+    //                     height: queue+1,
+    //                     callback: async () => await governor.state(proposalId, {from: bob})
+    //                 },
+    //                 {
+    //                     height: execute,
+    //                     callback: async () => {
+    //                         await daoProxy.execute(proposal.targets, proposal.values, proposal.calldatas, toSha3(proposal.description), {from: david})
+    //                     }
+    //                 },
+    //                 {
+    //                     height: test,
+    //                     callback: async () => await governor.votingPeriod()
+    //                 }
+    //             ]
+    //         }) 
+    //         it("it updates voting period through proposal", async ()=> {
+    //             let logs = withLogs;
+    //             logs.actionNumber.push({h: queue+1, callback: result => console.log(result)}); 
+                
+    //             let results = await fakeMine(
+    //                 async () => token.rewardTokens(other, {from: owner}),
+    //                 votingPeriodThroughProposalActions,
+    //                 test+1, // blocks
+    //                 logs
+    //             )
+    //             console.log(results[5]);
+    //             // assert.equal(results[results.length -1], 5, "voting period does not match input"); 
+    //         });
+    //         it("it updates voting delay through proposal", async ()=> {});
+    //         it("it updates token reward through proposal", async ()=> {});
+    //         it("it updates timelock delay through proposal", async ()=> {});
+    //         it("it updates timelock address through proposal", async ()=> {});
+    //         it("it upgrades proxyaddress through proposal", async ()=> {});
     //     });
 
-    //     describe("System Proposals", () => { 
-    //         it("updates votingDelay through proposal cycle");
-    //         it("updates votingPeriod through proposal cycle");
-    //         it("updates delay on timelocker through proposal cycle");
-    //     });
+    //     // describe("System Proposals", () => { 
+    //     //     it("updates votingDelay through proposal cycle");
+    //     //     it("updates votingPeriod through proposal cycle");
+    //     //     it("updates delay on timelocker through proposal cycle");
+    //     // });
 
-    //     describe("DAO proposals", () => {
-    //          it("it mints nfts through proposal cycle", async () => {});
-    //          it("rewards tokens through proposal cycle", async () => {});
-    //          it("rewards votes through proposal cycle", async () => {}); 
-    //     });       
+    //     // describe("DAO proposals", () => {
+    //     //      it("it mints nfts through proposal cycle", async () => {});
+    //     //      it("rewards tokens through proposal cycle", async () => {});
+    //     //      it("rewards votes through proposal cycle", async () => {}); 
+    //     // });       
     // });
     
 })

@@ -11,7 +11,6 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol"; 
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
-import "@openzeppelin/contracts/governance/TimelockController.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/utils/ERC721HolderUpgradeable.sol";
 
 import "./IkonDAOGovernor.sol";
@@ -22,11 +21,11 @@ import "./IIkonDAO.sol";
 
 // import "./Helpers.sol"; 
 
-contract IkonDAO is Constants, OwnableUpgradeable, AccessControlEnumerableUpgradeable, ERC721HolderUpgradeable, UUPSUpgradeable {
+contract IkonDAO is Constants, AccessControlEnumerableUpgradeable, ERC721HolderUpgradeable, UUPSUpgradeable {
     
-    IIkonDAO private governor;
-    IIkonDAO private timelocker;    
-    IIkonDAO private token; 
+    IkonDAOGovernor private governor;
+    address private timelocker;    
+    IkonDAOToken private token; 
     // IIkonDAO private votes;
     // mapping(uint256 => Proposal) public proposals;
     // mapping(address => uint256[]) private memberProposals;
@@ -43,9 +42,9 @@ contract IkonDAO is Constants, OwnableUpgradeable, AccessControlEnumerableUpgrad
     function __IkonDAO_init(address govAddress, address timelockerAddress, address tokenAddress) external initializer(){
 
         /// @notice instantiate dao interface
-        governor = IIkonDAO(govAddress);
-        timelocker = IIkonDAO(payable(timelockerAddress));
-        token = IIkonDAO(tokenAddress);
+        governor = IkonDAOGovernor(govAddress);
+        timelocker = timelockerAddress;
+        token = IkonDAOToken(tokenAddress);
         // votes = IIkonDAO(govTokenAddress);
                 
         /// @notice setRoles
@@ -54,7 +53,6 @@ contract IkonDAO is Constants, OwnableUpgradeable, AccessControlEnumerableUpgrad
         _setRoleAdmin(MEMBER_ROLE, ADMIN_ROLE);
         _setRoleAdmin(BANNED_ROLE, ADMIN_ROLE);
         __AccessControlEnumerable_init();
-        __Ownable_init();
         __ERC721Holder_init(); // give nft holding capacity of erc721 token
     }
 
@@ -87,8 +85,8 @@ contract IkonDAO is Constants, OwnableUpgradeable, AccessControlEnumerableUpgrad
         uint256[] calldata values, 
         bytes[] memory datas,
         bytes32 descriptionHash
-    ) public onlyRole(MEMBER_ROLE) returns (uint256 _proposalId) {
-        _proposalId = governor.execute(targets, values, datas, descriptionHash);
+    ) public onlyRole(MEMBER_ROLE) returns (uint256) {
+        return governor.execute{gas: gasleft()}(targets, values, datas, descriptionHash);
     }
 
     /// @dev queues a succeeded proposal to the timelock
@@ -101,8 +99,8 @@ contract IkonDAO is Constants, OwnableUpgradeable, AccessControlEnumerableUpgrad
         uint256[] calldata values, 
         bytes[] memory datas,
         bytes32 descriptionHash
-    ) public onlyRole(MEMBER_ROLE) returns (uint256 _proposalId) {
-        _proposalId = governor.queue(targets, values, datas, descriptionHash); 
+    ) public onlyRole(MEMBER_ROLE) returns (uint256) {
+        return governor.queue(targets, values, datas, descriptionHash); 
     }
 
     /// @dev makes a member of the caller of this function
@@ -135,6 +133,15 @@ contract IkonDAO is Constants, OwnableUpgradeable, AccessControlEnumerableUpgrad
         token.mint(address(this), amount * 10 ** token.decimals());
     }
 
-    /// @notice upgrades to this contract
-    function _authorizeUpgrade(address newImplementation) internal override onlyRole(ADMIN_ROLE){}
+    /// @dev authorizes upgrades to this contract
+    /// @param newImplementation address to wich to upgrade
+    function _authorizeUpgrade(address newImplementation) internal override onlyRole(ADMIN_ROLE) {}
+
+    // /// @dev upgrades the implemenation contract
+    // /// @param newImplementation address to wich to upgrade
+    // function upgradeTo(address newImplementation) external override onlyRole(ADMIN_ROLE) {
+    //     super.upgradeTo(newImplementation);
+    // }
+
+
 }

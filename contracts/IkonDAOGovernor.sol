@@ -24,11 +24,11 @@ contract IkonDAOGovernor is Governor, AccessControl, GovernorCountingSimple, Gov
     uint256 private _votingPeriod;
     uint256 private _owner;  
 
-    constructor(ERC20Votes _govToken, TimelockController _timelock, uint256 _delay, uint256 _period)
+    constructor(ERC20Votes _govToken, address _timelock, uint256 _delay, uint256 _period)
         Governor("IkonDaoGovernor")
         GovernorVotes(_govToken)
         GovernorVotesQuorumFraction(4)
-        GovernorTimelockControl(_timelock) 
+        GovernorTimelockControl(TimelockController(payable(_timelock))) 
         
     {
         /// contract metadata 

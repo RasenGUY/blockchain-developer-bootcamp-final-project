@@ -4,8 +4,9 @@ const DAO = artifacts.require('IkonDAO');
 const IkonDAOGovernanceToken = artifacts.require('IkonDAOGovernanceToken');
 const IkonDAOToken = artifacts.require('IkonDAOToken');
 const IkonDAOGovernor = artifacts.require('IkonDAOGovernor');
-const IkonDAOTimelockController = artifacts.require('IkonDAOTimelockController');
+const Timelock = artifacts.require('Timelock');
 const IkonDAOVectorCollectible = artifacts.require("IkonDAOVectorCollectible");
+
 const {resToUnit, unitToBN, toBN } = require('../test/helpers');
 module.exports = async function (deployer, networks, accounts) {
   let owner = accounts[0]; 
@@ -28,13 +29,14 @@ module.exports = async function (deployer, networks, accounts) {
   daoToken = await IkonDAOToken.deployed();
       
   await deployer.deploy(
-      IkonDAOTimelockController, 
+      Timelock, 
       1, 
       [owner], 
       [owner], 
       {from: owner}
   );
-  daoTimelock = await IkonDAOTimelockController.deployed();
+//   daoTimelock = await IkonDAOTimelockController.deployed();
+  daoTimelock = await Timelock.deployed();
   
   await deployer.deploy(
       IkonDAOGovernor,
