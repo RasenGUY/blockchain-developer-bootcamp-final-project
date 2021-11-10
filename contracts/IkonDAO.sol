@@ -86,7 +86,7 @@ contract IkonDAO is Constants, AccessControlEnumerableUpgradeable, ERC721HolderU
         bytes[] memory datas,
         bytes32 descriptionHash
     ) public onlyRole(MEMBER_ROLE) returns (uint256) {
-        return governor.execute{gas: gasleft()}(targets, values, datas, descriptionHash);
+        return governor.execute(targets, values, datas, descriptionHash);
     }
 
     /// @dev queues a succeeded proposal to the timelock

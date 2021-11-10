@@ -53,7 +53,7 @@ contract IkonDAOGovernor is Governor, AccessControl, GovernorCountingSimple, Gov
         return _votingPeriod; // 1 minutes 
     }
 
-    function setVotingPeriod(uint256 _period) external onlyRole(ADMIN_ROLE) {
+    function setVotingPeriod(uint256 _period) public {
         _setVotingPeriod(_period);
     }
 
@@ -138,8 +138,6 @@ contract IkonDAOGovernor is Governor, AccessControl, GovernorCountingSimple, Gov
         return super.state(proposalId);
     }
     
-   
-
     function propose(address[] memory targets, uint256[] memory values, bytes[] memory calldatas, string memory description)
         public
         override(Governor, IGovernor) onlyRole(ADMIN_ROLE)
