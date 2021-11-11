@@ -60,3 +60,76 @@ exports.subscribeToLogs = (address, topics, web3, type) => web3.eth.subscribe(
         {address: address, topics: topics}, 
         (error, result) => !error ? console.log(result) : console.log(error) 
         ) 
+
+exports.fakeMineTwo = async (gov, proxy, proposal, members, fakeMineFunc, testFunc, proposalState) => {
+
+        let results = []; 
+        let testResults = [];
+        let proposalId, resCreateMembers, state;
+
+        try {
+                
+                resCreateMembers = await Promise.all(members.map(async member => await proxy.createMember({from: member.address})));  
+                // create members first 
+                await proxy.propose(proposal.targets, proposal.values, proposal.calldatas, proposal.description, {from: members[Math.floor(Math.random() * members.length)].address }); /// create proposal
+                
+                proposalId = await gov.hashProposal(proposal.targets, proposal.values, proposal.calldatas, web3.utils.soliditySha3(proposal.description)); 
+                
+                state = await gov.state(proposalId, {from: members[Math.floor(Math.random() * members.length)].address }); ///
+
+                results.push(resCreateMembers);
+                results.push(proposalId);
+                results.push(state);
+
+        } catch (e){
+                console.log(e);
+        }
+
+        let stopFakeMining = false;
+        while (!stopFakeMining){
+                
+                state = await gov.state(proposalId, {from: members[Math.floor(Math.random() * members.length)].address});
+
+                try {
+                        
+                        if (Number(state.toString()) === proposalState.Active){
+                                let result = await Promise.all(members.map(async member => proxy.castVote(proposalId, member.support, {from: member.address})));
+                                results.push(result);
+                                await fakeMineFunc();
+
+                        }
+                        
+                        if (Number(state.toString()) === proposalState.Succeeded){
+                                let result = await proxy.queue(proposal.targets, proposal.values, proposal.calldatas, web3.utils.soliditySha3(proposal.description), {from: members[Math.floor(Math.random() * members.length)].address })
+                                results.push(result);
+                                await fakeMineFunc();
+                        }
+
+                        if (Number(state.toString()) === proposalState.Queued){
+                                let result = await proxy.queue(proposal.targets, proposal.values, proposal.calldatas, web3.utils.soliditySha3(proposal.description), {from: members[Math.floor(Math.random() * members.length)].address})
+                                results.push(result);
+                                await fakeMineFunc();
+                        }
+
+                        if (
+                                state.toNumber() === proposalState.Executed || 
+                                state.toNumber() === proposalState.Failed || 
+                                state.toNumber() === proposalState.Expired || 
+                                state.toNumber() === proposalState.Defeated || 
+                                state.toNumber() === proposalState.Canceled  
+                        ){
+                                let result = await testFunc();
+                                testResults.push(result); 
+                                stopFakeMining = true;
+                        }
+
+                } catch (e) {
+                        console.log(e);
+                        // stopFakeMining = true;
+                }
+
+                await fakeMineFunc();
+        }
+
+        return [results, testResults]
+} 

@@ -53,7 +53,7 @@ contract IkonDAOGovernor is Governor, AccessControl, GovernorCountingSimple, Gov
         return _votingPeriod; // 1 minutes 
     }
 
-    function setVotingPeriod(uint256 _period) public {
+    function setVotingPeriod(uint256 _period) external onlyRole(ADMIN_ROLE) {
         _setVotingPeriod(_period);
     }
 

@@ -23,9 +23,9 @@ import "./IIkonDAO.sol";
 
 contract IkonDAO is Constants, AccessControlEnumerableUpgradeable, ERC721HolderUpgradeable, UUPSUpgradeable {
     
-    IkonDAOGovernor private governor;
+    IIkonDAO private governor;
     address private timelocker;    
-    IkonDAOToken private token; 
+    IIkonDAO private token; 
     // IIkonDAO private votes;
     // mapping(uint256 => Proposal) public proposals;
     // mapping(address => uint256[]) private memberProposals;
@@ -42,9 +42,9 @@ contract IkonDAO is Constants, AccessControlEnumerableUpgradeable, ERC721HolderU
     function __IkonDAO_init(address govAddress, address timelockerAddress, address tokenAddress) external initializer(){
 
         /// @notice instantiate dao interface
-        governor = IkonDAOGovernor(govAddress);
+        governor = IIkonDAO(govAddress);
         timelocker = timelockerAddress;
-        token = IkonDAOToken(tokenAddress);
+        token = IIkonDAO(tokenAddress);
         // votes = IIkonDAO(govTokenAddress);
                 
         /// @notice setRoles
