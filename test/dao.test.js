@@ -54,6 +54,11 @@ contract("IkonDAO (proxy)", accounts => {
     let proposers = [owner]
     let executors = [owner]
     
+    let settings = {};
+    settings.votingDelay = votingDelay + 2;
+    settings.queued =  votingDelay + votingPeriod + 5;
+    settings.timelockDelay = settings.queued + timelockDelay + 5;
+
     // govToken
     let initialUsers = [alice, bob, carl, david, ed, fred, gerald, hilda];
 
@@ -112,8 +117,13 @@ contract("IkonDAO (proxy)", accounts => {
         daoProxyInst = new web3.eth.Contract(daoProxy.abi, daoProxy.address);
 
         // give proxy admin rights to governor
-        await governor.grantRole(ADMIN_ROLE, daoProxy.address, {from: owner});
-        await governor.grantRole(ADMIN_ROLE, timelocker.address, {from: owner});
+        await governor.grantRole(ADMIN_ROLE, daoProxy.address, {from: owner}); // for proxy to make proposals and execute through governor
+        await governor.grantRole(ADMIN_ROLE, timelocker.address, {from: owner}); // for timelocker to execute proposals
+        await token.grantRole(ADMIN_ROLE, timelocker.address, {from: owner}); // for timelocker to execute proposals
+        await token.grantRole(ADMIN_ROLE, governor.address, {from: owner}); // for timelocker to execute proposals
+        await govToken.grantRole(ADMIN_ROLE, timelocker.address, {from: owner}); // for timelocker to execute proposals
+        await daoProxy.grantRole(ADMIN_ROLE, timelocker.address, {from: owner}); // for timlocker to exectute proposals
+
         await timelocker.grantRole(PROPOSER_ROLE, governor.address); // for queueing of proposals
         await timelocker.grantRole(EXECUTOR_ROLE, governor.address); // for executing transactions
                   
@@ -443,102 +453,46 @@ contract("IkonDAO (proxy)", accounts => {
     })
 
     describe("Execution of core dao functionalities through proposals", ()=> {
-        let create = 0; // 0
-        let propose = create + 1; // 1
-        let castVote = create + propose + votingDelay + 5; // 9
-        let queue = castVote + votingPeriod + 10; // 23
-        let execute = queue + votingDelay + timelockDelay + castVote; // 32 
-        console.log(execute)
-        let test = execute + 3; // 35
-        let duration = test + 5; // 40
-        let createMembersAction = (instance) => ({
-            height: create,
-            callback: async () => {
-                await instance.createMember({from: alice})
-                await instance.createMember({from: bob})
-                await instance.createMember({from: carl})
-                await instance.createMember({from: david})
-                await instance.createMember({from: ed})
-                await instance.createMember({from: fred})
-                await instance.createMember({from: gerald})
-                await instance.createMember({from: hilda})
-            }
-        })
-        let proposeAction = (instance, proposal, from) => ({
-            height: propose,
-            callback: async () => instance.propose(proposal.targets, proposal.values, proposal.calldatas, proposal.description, {from: from}) 
-        }) 
-        let voteStartAction = (instance, proposalId) => ({
-            height: castVote, // 9
-            callback: async () => {
-                await instance.castVote(proposalId, support.For, {from: alice})
-                await instance.castVote(proposalId, support.For, {from: bob})
-                await instance.castVote(proposalId, support.For, {from: david})
-                await instance.castVote(proposalId, support.For, {from: carl})
-            }
-        })
-        let snapshot = (height, instance, proposalId, from) => ({
-            height: height,
-            callback: async () => await instance.state(proposalId, {from: from})
-        })
-        let queueAction = (instance, proposal, from) => ({
-            height: queue, // 23
-            callback: async () => await instance.queue(proposal.targets, proposal.values, proposal.calldatas, toSha3(proposal.description), {from: from})
-        })
-        let executeAction = (instance, proposal, from) => ({
-            height: execute, // 32
-            callback: async () => await instance.execute(proposal.targets, proposal.values, proposal.calldatas, toSha3(proposal.description), {from: from})
-        }) 
-        let testAction = (height, func) => ({
-            height: height,
-            callback: func
-        })
-
-        let withLogs = {
-            logs: true,
-            actionNumber: [
-                { h: create, wrapper: result => console.log(result) },
-                { h: propose, wrapper: result => console.log(result) },
-                { h: castVote, wrapper: result => console.log(result) },
-                { h: queue, wrapper: result => console.log(result) },
-                { h: execute, wrapper: result => console.log(result) },
-                { h: test, wrapper: result => console.log(result) }
-            ]
-        }
-    
 
         // create all proposals wih their descriptions
         let [ 
             setVotingPeriodDesc, 
             setVotingDelayDesc, 
             setTokenRewardDesc, 
-            setGovTokenRewardDesc, 
-            setTimelockDelayDesc, 
             setTimelockAddressDesc, 
-            setProxyAddressDesc ] = [
+            setTimelockDelayDesc, 
+            setGovTokenRewardDesc, 
+            setImplementationAddressDesc,
+            slashVotesDesc,
+            rewardTokensDesc,
+            rewardVotesDesc
+         ] = [
             "set voting period", 
             "set voting delay",
             "set token reward",
-            "set vote reward",
+            "set timelock address",
             "set timelock delay",
-            "set timlock address",
-            "set proxy address"
-        ] 
+            "set vote reward",
+            "set implemenation address",
+            "slash votes of account",
+            "reward tokens", 
+            "reward votes"
+        ]
+
+        let members = [
+            {address: alice, support: support.For},
+            {address: bob, support: support.For},
+            {address: carl, support: support.For},
+            {address: david, support: support.For},
+            {address: ed, support: support.For},
+            {address: gerald, support: support.For},
+            {address: hilda, support: support.For}
+        ]
 
         describe("System Proposals", () => {
                         
             
             it("it updates voting period through proposal", async ()=> {
-
-                let members = [
-                    {address: alice, support: support.For},
-                    {address: bob, support: support.For},
-                    {address: carl, support: support.For},
-                    {address: david, support: support.For},
-                    {address: ed, support: support.For},
-                    {address: gerald, support: support.For},
-                    {address: hilda, support: support.For}
-                ]
 
                 let proposal = new Proposal(
                     governor.address,
@@ -546,86 +500,283 @@ contract("IkonDAO (proxy)", accounts => {
                     setVotingPeriodDesc
                 )
                 
-                // let proposalId = await governor.hashProposal(proposal.targets, proposal.values, proposal.calldatas, toSha3(proposal.description)); 
                 let toTest = async () => governor.votingPeriod()
                 
-                let [results, testResults] = await fakeMineTwo(governor,
+                let [results, testResults, error] = await fakeMineTwo(governor,
                     daoProxy, 
                     proposal, 
                     members,
                     async () => token.rewardTokens(other, {from: owner}),
                     toTest,
-                    proposalState
+                    proposalState,
+                    settings
                 )
-
-                // let actions  = [
-                //     createMembersAction(daoProxy),
-                //     proposeAction(daoProxy, proposal, carl),
-                //     voteStartAction(daoProxy, proposalId),
-                //     queueAction(daoProxy, proposal, carl),
-                //     executeAction(daoProxy, proposal, fred),
-                //     snapshot(execute + 1, governor, proposalId, bob),
-                //     testAction(test, toTest)
-                // ]
-                // console.log(actions); 
-                // let results = await fakeMine(
-                //     async () => token.rewardTokens(other, {from: owner}),
-                //     actions,
-                //     duration // blocks
-                // )
-                console.log(results);
                 let [votingPeriod] = testResults
-                assert.equal(votingPeriod.toNumber(), 13, "voting period does not match input"); 
+                assert.equal(Number(votingPeriod.toString()), 13, "voting period does not match input"); 
             });
 
-            // it("it updates voting delay through proposal", async ()=> {
+            it("it updates voting delay through proposal", async ()=> {
                 
-            //     let proposal = new Proposal(
-            //         governor.address,
-            //         governorInst.methods.setVotingDelay(15).encodeABI(),
-            //         setVotingDelayDesc
-            //     )
+                let proposal = new Proposal(
+                    governor.address,
+                    governorInst.methods.setVotingDelay(15).encodeABI(),
+                    setVotingDelayDesc
+                )
 
-            //     let proposalId = await governor.hashProposal(proposal.targets, proposal.values, proposal.calldatas, toSha3(proposal.description));
-            //     let toTest = async () => governor.votingDelay()
+                let toTest = async () => governor.votingDelay()
                 
-            //     let actions = [
-            //         createMembersAction(daoProxy),
-            //         proposeAction(daoProxy, proposal, carl),
-            //         voteStartAction(daoProxy, proposalId),
-            //         queueAction(daoProxy, proposal, carl),
-            //         executeAction(daoProxy, proposal, fred),
-            //         snapshot(execute + 1, governor, proposalId, bob),
-            //         testAction(test, toTest)
-            //     ];
+                let [results, testResults] = await fakeMineTwo(
+                    governor,
+                    daoProxy, 
+                    proposal, 
+                    members,
+                    async () => token.rewardTokens(other, {from: owner}),
+                    toTest,
+                    proposalState,
+                    settings
+                )
+                let [votingDelay] = testResults; 
+                assert.equal(Number(votingDelay.toString()), 15, "does not set correct voting delay through proposal");
 
-            //     let results = await fakeMine(
-            //         async () => token.rewardTokens(other, {from: owner}),
-            //         actions,
-            //         duration // blocks
-            //     )
-            //     let votingDelay = results[results.length -1]; 
-            //     assert.equal(votingDelay, 15, "does not set correct voting delay through proposal");
+            });
 
-            // });
+            it("it updates token reward through proposal", async ()=> {
+                 
+                let proposal = new Proposal(
+                    token.address,
+                    tokenInst.methods.setBaseReward(unitToBN(10)).encodeABI(),
+                    setTokenRewardDesc
+                )
+                
+                let toTest = async () => token.getBaseReward();
+                
+                let [results, testResults, error] = await fakeMineTwo(
+                    governor,
+                    daoProxy, 
+                    proposal, 
+                    members,
+                    async () => token.rewardTokens(other, {from: owner}),
+                    toTest,
+                    proposalState,
+                    settings
+                )
+                let [newBaseReward] = testResults;
+                assert.equal(toUnit(newBaseReward), 10, "does not reward tokens through daoProxy proposal");
+            });
 
-            // it("it updates token reward through proposal", async ()=> {});
-            // it("it updates timelock delay through proposal", async ()=> {});
-            // it("it updates timelock address through proposal", async ()=> {});
-            // it("it upgrades proxyaddress through proposal", async ()=> {});
+
+            it("it updates timelock address through proposal", async ()=> {
+                
+                let newTimelock = await Timelock.new(timelockDelay, proposers, executors);
+                
+                let proposal = new Proposal(
+                    governor.address,
+                    governorInst.methods.updateTimelock(newTimelock.address).encodeABI(),
+                    setTimelockAddressDesc
+                )
+                
+                let toTest = async () => governor.timelock();
+                
+                let [results, testResults, error] = await fakeMineTwo(
+                    governor,
+                    daoProxy, 
+                    proposal, 
+                    members,
+                    async () => token.rewardTokens(other, {from: owner}),
+                    toTest,
+                    proposalState,
+                    settings
+                )
+                let [newAddress] = testResults;
+                assert.equal(newAddress.toString(), newTimelock.address, "does not reward tokens through daoProxy proposal");
+            });
+
+            it("it updates timelockdelay", async ()=> {
+                
+                let proposal = new Proposal(
+                    timelocker.address,
+                    timelockerInst.methods.updateDelay(5).encodeABI(),
+                    setTimelockDelayDesc,
+                )
+                
+                let toTest = async () => timelocker.getMinDelay();
+                
+                let [results, testResults, error] = await fakeMineTwo(
+                    governor,
+                    daoProxy, 
+                    proposal, 
+                    members,
+                    async () => token.rewardTokens(other, {from: owner}),
+                    toTest,
+                    proposalState,
+                    settings
+                )
+
+                let [newDelay] = testResults;
+                assert.equal(Number(newDelay.toString()), 5, "does not update delay succesfully");
+            });
+
+            it("it sets govToken rewards through proposal", async ()=> {
+                
+                let proposal = new Proposal(
+                    govToken.address,
+                    govTokenInst.methods.setRewardVotes(unitToBN(150)).encodeABI(),
+                    setGovTokenRewardDesc
+                )
+                
+                let toTest = async () => govToken.getRewardVotes();
+                
+                let [results, testResults, error] = await fakeMineTwo(
+                    governor,
+                    daoProxy, 
+                    proposal, 
+                    members,
+                    async () => token.rewardTokens(other, {from: owner}),
+                    toTest,
+                    proposalState,
+                    settings
+                )
+
+                let [newBase] = testResults;
+                assert.equal(toUnit(newBase), 150, "does govToken rewards succesfully");
+            });
+
+            it("it updates proxy to new implementation through proposal", async ()=> {
+                
+                let newImplementation = await IkonDAO.new();
+
+                let proposal = new Proposal(
+                    daoProxy.address,
+                    daoProxyInst.methods.upgradeTo(newImplementation.address).encodeABI(),
+                    setImplementationAddressDesc
+                )
+
+                let toTest = async () => {}
+                
+                
+                let [results, testResults, error] = await fakeMineTwo(
+                    governor,
+                    daoProxy, 
+                    proposal, 
+                    members,
+                    async () => token.rewardTokens(other, {from: owner}),
+                    toTest,
+                    proposalState,
+                    settings
+                )
+
+                let upgradedTo = results[results.length - 1].logs[0].args['implementation']
+                // console.log(results[results.length - 1].logs[0].args['implementation'])
+                assert.equal(upgradedTo, newImplementation.address, "does not upgrade implemenation while maitaining state");
+            });
+
         });
 
-    //     // describe("System Proposals", () => { 
-    //     //     it("updates votingDelay through proposal cycle");
-    //     //     it("updates votingPeriod through proposal cycle");
-    //     //     it("updates delay on timelocker through proposal cycle");
-    //     // });
+        describe("Accountability proposal", () => { 
+            it("slashes votes through proposal", async () => {
 
-    //     // describe("DAO proposals", () => {
-    //     //      it("it mints nfts through proposal cycle", async () => {});
-    //     //      it("rewards tokens through proposal cycle", async () => {});
-    //     //      it("rewards votes through proposal cycle", async () => {}); 
-    //     // });       
+                let proposal = new Proposal(
+                    govToken.address,
+                    govTokenInst.methods.slashVotes(bob, unitToBN(30)).encodeABI(),
+                    slashVotesDesc
+                )
+
+                let toTest = async () => govToken.balanceOf(bob)
+                                
+                let [results, testResults, error] = await fakeMineTwo(
+                    governor,
+                    daoProxy, 
+                    proposal, 
+                    members,
+                    async () => token.rewardTokens(other, {from: owner}),
+                    toTest,
+                    proposalState,
+                    settings
+                )
+
+                let [bobsVotes] = testResults;
+                assert.equal(toUnit(bobsVotes), 70, "does not slash votes of account");
+
+            });
+            it("it bans members through proposal", async () => {
+
+                let proposal = new Proposal(
+                    daoProxy.address,
+                    daoProxyInst.methods.banMember(bob).encodeABI(),
+                    slashVotesDesc
+                )
+
+                let toTest = async () => daoProxy.hasRole(BANNED_ROLE, bob);
+                                
+                let [results, testResults, error] = await fakeMineTwo(
+                    governor,
+                    daoProxy, 
+                    proposal, 
+                    members,
+                    async () => token.rewardTokens(other, {from: owner}),
+                    toTest,
+                    proposalState,
+                    settings
+                )
+                
+                let [isBobBanned] = testResults;
+                assert.isTrue(isBobBanned, "does not slash votes of account");
+            });
+        });
+
+        describe("DAO proposals", () => {
+            it("rewards tokens through proposal", async () => {
+                let proposal = new Proposal(
+                    token.address,
+                    tokenInst.methods.rewardTokens(carl).encodeABI(),
+                    rewardTokensDesc
+                )
+
+                let toTest = async () => tokenInst.methods.balanceOf(carl).call();
+                                
+                let [results, testResults, error] = await fakeMineTwo(
+                    governor,
+                    daoProxy, 
+                    proposal, 
+                    members,
+                    async () => token.rewardTokens(other, {from: owner}),
+                    toTest,
+                    proposalState,
+                    settings
+                )
+                
+                console.log(results[results.length - 1])
+                console.log(carl)
+                let [carlTokens] = testResults;
+                assert.equal(toUnit(carlTokens), 10, "does reward tokens");
+            });
+
+            it("rewards votes through proposal", async () => {
+                let proposal = new Proposal(
+                    govToken.address,
+                    govTokenInst.methods.rewardVotes(carl).encodeABI(),
+                    rewardVotesDesc
+                )
+
+                let toTest = async () => govToken.balanceOf(carl);                                
+                
+                let [results, testResults, error] = await fakeMineTwo(
+                    governor,
+                    daoProxy, 
+                    proposal, 
+                    members,
+                    async () => token.rewardTokens(other, {from: owner}),
+                    toTest,
+                    proposalState,
+                    settings
+                )
+
+                let [carlVotes] = testResults;
+                assert.isAbove(toUnit(carlVotes), 100, "does not slash votes of account");
+            }); 
+
+            it("it mints nfts through proposal", async () => {});
+        });       
     });
     
 })

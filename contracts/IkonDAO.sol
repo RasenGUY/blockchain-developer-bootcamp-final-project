@@ -129,8 +129,8 @@ contract IkonDAO is Constants, AccessControlEnumerableUpgradeable, ERC721HolderU
 
     /// @dev mints tokens to the proxy address
     /// @param amount amount of tokens that will be minted to proxy address
-    function mintUtilityTokens(uint256 amount) external onlyRole(ADMIN_ROLE) {
-        token.mint(address(this), amount * 10 ** token.decimals());
+    function mintUtilityTokens(uint256 amount, address to) external onlyRole(ADMIN_ROLE) {
+        token.mint(to, amount * 10 ** token.decimals());
     }
 
     /// @dev authorizes upgrades to this contract

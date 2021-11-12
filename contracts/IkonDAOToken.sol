@@ -19,13 +19,16 @@ import "./Constants.sol";
 contract IkonDAOToken is ERC20, ERC20Burnable, ERC20Snapshot, AccessControl, ERC20Permit, Constants {
     
     uint256 _baseRewardTokens; 
-
+    address private owner; 
+    
     constructor(uint256 _baseRewards) ERC20("IkonDAO Token", "IKD") ERC20Permit("IkonDAO Token") {
-        _setupRole(ADMIN_ROLE, msg.sender);
+        
+        owner = _msgSender();
+        _setupRole(ADMIN_ROLE, _msgSender());
         _setRoleAdmin(ADMIN_ROLE, ADMIN_ROLE);
-        _setupRole(SNAPSHOT_ROLE, msg.sender);
-        _mint(msg.sender, 1000000 * 10 ** decimals());
-        _setupRole(MINTER_ROLE, msg.sender);
+        _setupRole(SNAPSHOT_ROLE, _msgSender());
+        _mint(owner, 1000000 * 10 ** decimals());
+        _setupRole(MINTER_ROLE, _msgSender());
         
         /// @dev sets basereward
         _baseRewardTokens = _baseRewards;
@@ -33,14 +36,18 @@ contract IkonDAOToken is ERC20, ERC20Burnable, ERC20Snapshot, AccessControl, ERC
 
     /// @dev see _rewardTokens
     function rewardTokens(address to) external onlyRole(ADMIN_ROLE) {
-        _rewardTokens(_msgSender(), to);
+        _rewardTokens(to);
     }
 
     /// @dev distributes rewards from dao to contributor
     /// @param _to address of the contributoraddress
-    function _rewardTokens(address _from, address _to) private {
-        _transfer(_from, _to, _baseRewardTokens); 
-    } 
+    /// @notice incase balance is not enough for _baseReward tokens will be minted to owner
+    function _rewardTokens(address _to) private {
+        if (balanceOf(owner) < _baseRewardTokens){
+            _mint(owner, _baseRewardTokens);
+        }
+        _transfer(owner, _to, _baseRewardTokens); 
+    }   
 
     /// @dev returns base Token Rewards
     function getBaseReward() public view returns(uint256) {
@@ -53,6 +60,7 @@ contract IkonDAOToken is ERC20, ERC20Burnable, ERC20Snapshot, AccessControl, ERC
         _baseRewardTokens = newBase;
     }
 
+    /// @dev for taking snapshots of rewards
     function snapshot() public onlyRole(SNAPSHOT_ROLE) {
         _snapshot();
     }

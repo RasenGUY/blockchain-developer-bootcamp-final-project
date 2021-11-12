@@ -61,7 +61,7 @@ exports.subscribeToLogs = (address, topics, web3, type) => web3.eth.subscribe(
         (error, result) => !error ? console.log(result) : console.log(error) 
         ) 
 
-exports.fakeMineTwo = async (gov, proxy, proposal, members, fakeMineFunc, testFunc, proposalState) => {
+exports.fakeMineTwo = async (gov, proxy, proposal, members, fakeMineFunc, testFunc, proposalState, settings) => {
 
         let results = []; 
         let testResults = [];
@@ -86,50 +86,66 @@ exports.fakeMineTwo = async (gov, proxy, proposal, members, fakeMineFunc, testFu
         }
 
         let stopFakeMining = false;
+        let counter = 1; 
+        let error;
         while (!stopFakeMining){
                 
                 state = await gov.state(proposalId, {from: members[Math.floor(Math.random() * members.length)].address});
 
-                try {
-                        
-                        if (Number(state.toString()) === proposalState.Active){
+                if ( (counter === settings.votingDelay ) && Number(state.toString()) === proposalState.Active){
+
+                        try {
                                 let result = await Promise.all(members.map(async member => proxy.castVote(proposalId, member.support, {from: member.address})));
                                 results.push(result);
-                                await fakeMineFunc();
+                                
+                        } catch (e){
+                                error = e;
+                        } 
 
-                        }
-                        
-                        if (Number(state.toString()) === proposalState.Succeeded){
+                }
+                
+                if (Number(state.toString()) === proposalState.Succeeded){
+                        try {
                                 let result = await proxy.queue(proposal.targets, proposal.values, proposal.calldatas, web3.utils.soliditySha3(proposal.description), {from: members[Math.floor(Math.random() * members.length)].address })
                                 results.push(result);
-                                await fakeMineFunc();
-                        }
 
-                        if (Number(state.toString()) === proposalState.Queued){
-                                let result = await proxy.queue(proposal.targets, proposal.values, proposal.calldatas, web3.utils.soliditySha3(proposal.description), {from: members[Math.floor(Math.random() * members.length)].address})
-                                results.push(result);
-                                await fakeMineFunc();
+                        } catch (e){ 
+                                error = e;                                
                         }
-
-                        if (
-                                state.toNumber() === proposalState.Executed || 
-                                state.toNumber() === proposalState.Failed || 
-                                state.toNumber() === proposalState.Expired || 
-                                state.toNumber() === proposalState.Defeated || 
-                                state.toNumber() === proposalState.Canceled  
-                        ){
-                                let result = await testFunc();
-                                testResults.push(result); 
-                                stopFakeMining = true;
-                        }
-
-                } catch (e) {
-                        console.log(e);
-                        // stopFakeMining = true;
                 }
 
+                if ((counter === settings.timelockDelay) && Number(state.toString()) === proposalState.Queued){
+                        try {
+                                let result = await proxy.execute(proposal.targets, proposal.values, proposal.calldatas, web3.utils.soliditySha3(proposal.description), {from: members[Math.floor(Math.random() * members.length)].address})
+                                results.push(result);
+                                continue;
+
+                        } catch (e){ 
+                                error = e;                                
+                        }
+                }
+                if (    
+                        (counter === settings.timelockDelay) &&
+                        (Number(state.toString()) === proposalState.Executed || 
+                        Number(state.toString()) === proposalState.Failed || 
+                        Number(state.toString()) === proposalState.Expired || 
+                        Number(state.toString()) === proposalState.Defeated || 
+                        Number(state.toString()) === proposalState.Canceled)  
+                ){
+                        let result = await testFunc();
+                        testResults.push(result); 
+                        stopFakeMining = true;
+                }
+
+                if (error){
+                        console.log(error);
+                        stopFakeMining = true;
+                }
+
+                counter++; 
                 await fakeMineFunc();
         }
-
-        return [results, testResults]
+        
+        
+        return [results, testResults]; 
 } 

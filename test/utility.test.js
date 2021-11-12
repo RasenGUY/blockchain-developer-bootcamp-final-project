@@ -46,7 +46,7 @@ contract("IkonDAO (utility token)", accounts => {
         assert.equal(toUnit(baseReward), 10, "does not correctly set basereward");
     });
 
-    it("allows only owner to mint", async () => {
+    it("allows only minter to mint", async () => {
         await expect(token.mint(unitToBN(500), {from: alice})).to.be.rejected
     }); 
 })
