@@ -86,7 +86,6 @@ IkonDAO proposals
         - set votReward
         - set delay for timelock
         - change timelocker address
-        - 
 
     - low priority 
         - set voteWeightlimit

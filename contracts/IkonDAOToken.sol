@@ -27,8 +27,10 @@ contract IkonDAOToken is ERC20, ERC20Burnable, ERC20Snapshot, AccessControl, ERC
         _setupRole(ADMIN_ROLE, _msgSender());
         _setRoleAdmin(ADMIN_ROLE, ADMIN_ROLE);
         _setupRole(SNAPSHOT_ROLE, _msgSender());
+        _setRoleAdmin(SNAPSHOT_ROLE, ADMIN_ROLE);
         _mint(owner, 1000000 * 10 ** decimals());
         _setupRole(MINTER_ROLE, _msgSender());
+        _setRoleAdmin(MINTER_ROLE, ADMIN_ROLE);
         
         /// @dev sets basereward
         _baseRewardTokens = _baseRewards;

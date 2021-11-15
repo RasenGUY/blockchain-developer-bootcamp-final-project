@@ -148,4 +148,4 @@ exports.fakeMineTwo = async (gov, proxy, proposal, members, fakeMineFunc, testFu
         
         
         return [results, testResults]; 
-} 
+}

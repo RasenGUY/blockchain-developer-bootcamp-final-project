@@ -46,9 +46,12 @@ contract IkonDAOVectorCollectible is ERC721, ERC721Enumerable, ERC721URIStorage,
     event VectorMinted(uint256 tokenId, address receiver);
 
     constructor(address DAO) ERC721("IkonDAO Vector Collectible", "IKDVC") {
-        _setupRole(ADMIN_ROLE, msg.sender);
-        _setupRole(PAUSER_ROLE, msg.sender);
-        _setupRole(MINTER_ROLE, msg.sender);
+        _setupRole(ADMIN_ROLE, _msgSender());
+        _setRoleAdmin(ADMIN_ROLE, ADMIN_ROLE);
+        _setupRole(PAUSER_ROLE, _msgSender());
+        _setRoleAdmin(PAUSER_ROLE, ADMIN_ROLE);
+        _setupRole(MINTER_ROLE, _msgSender());
+        _setRoleAdmin(MINTER_ROLE, ADMIN_ROLE);
         _DAO = DAO;
     }
 
