@@ -6,7 +6,8 @@ import App from './App';
 import { AppContextProvider } from './AppContext';
 
 // css imports 
-import 'bootstrap/dist/css/bootstrap.min.css';
+import './styles/styles.css';
+// import 'bootstrap/dist/css/bootstrap.min.css';
 
 ReactDOM.render(
     <React.StrictMode>

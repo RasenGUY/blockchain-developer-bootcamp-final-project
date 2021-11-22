@@ -1,0 +1,54 @@
+// sass
+@use "sass:color";
+
+@import '../../../node_modules/bootstrap/scss/bootstrap.scss';
+@import '../../../node_modules/bootstrap/scss/_variables.scss';
+
+
+// main styles
+body, html {
+    margin: 0;
+    padding: 0;
+    box-sizing: 0;
+}
+
+// variables
+$complementary-color: #4D79D4;
+$theme-color: $teal-400; 
+
+.bg-teal {
+    background-color: $theme-color;
+}
+
+#ikondao-responsive-nabar {
+    .nav-link {
+        font-size: 1.5rem;
+        padding: 1.5rem 1.5rem 0rem 2.5rem;
+        // vertical-align: bottom;
+        color: $dark;
+        &:hover{
+            color: $gray-600; 
+        }
+    }
+}
+.navbar-toggler.collapsed .navbar-toggler-icon {
+    width: 2.5rem;
+    // background-color: $complementary-color;
+}
+
+.btn.connect-button {
+    background-color: rgba(0, 0, 0, 0);
+    // color: $complementary-color;
+    color: $dark;
+    font-size: 1.5rem;
+    padding: 0rem 2.5rem;
+    background-color: $complementary-color;
+    color: $light;
+    &:hover {
+        background-color: color.change($complementary-color, $lightness: 45%, $alpha: 0.7);
+    }
+    &:focus{
+        background-color: color.change($complementary-color, $lightness: 60%, $alpha: 0.7);
+        color: $gray-300; 
+    }
+}
