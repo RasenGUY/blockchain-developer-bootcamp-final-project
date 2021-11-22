@@ -1,12 +1,14 @@
-require('dotenv').config(); 
+require('dotenv').config({path: './.env'});
+const Dotenv = require('dotenv-webpack'); 
 const { merge } = require('webpack-merge'); 
 const { EnvironmentPlugin } = require('webpack'); 
-const { commonConfig } = require('./webpack.common.js');
+const config  = require('./webpack.common.js');
+// console.log('prod settings', process.env)
 
 const prodConfig = {
     mode: 'development',
     devtool: 'source-map',
-    plugin: [
+    plugins: [
         new EnvironmentPlugin({...process.env}), 
         new Dotenv({
             path: './.env',
@@ -18,4 +20,5 @@ const prodConfig = {
         }),
     ]
 }
-module.exports = merge(commonConfig, prodConfig);
+
+module.exports = merge(config, prodConfig);

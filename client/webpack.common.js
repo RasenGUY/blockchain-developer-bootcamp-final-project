@@ -1,18 +1,12 @@
 
-require('dotenv').config();
-
+const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const Dotenv = require('dotenv-webpack');
-const { ProvidePlugin, EnvironmentPlugin } = require('webpack');
+const { ProvidePlugin } = require('webpack');
 const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-let mode = "development";
-if (process.env.NODE_ENV === 'production'){
-    mode = "production"
-}
+const CopyPlugin = require('copy-webpack-plugin');
 
-module.exports = { 
-    mode: mode,
+const config = { 
     entry: './src/main.js',  
     output: {
         filename: 'main.js',
@@ -22,7 +16,7 @@ module.exports = {
         }
     },
     devServer: {
-        static: path.resolvle(__dirname, "build"),
+        static: path.resolve(__dirname, "build"),
         port: 3001,
         open: true,
         hot: true,
@@ -74,19 +68,16 @@ module.exports = {
             filename: 'index.html',
             inject: 'body'
         }),
-        new Dotenv({
-            path: './.env',
-            safe: true,
-            allowEmptyValues: true,
-            systemvars: true,
-            silent: true,
-            defaults: false
+        new CopyPlugin({
+            patterns: [
+                {from: './public/static', to: 'static'}
+            ]
         }),
         new ProvidePlugin({process: ['process/browser.js']}),
         new ProvidePlugin({Buffer: ['buffer', 'Buffer']}),
         new MiniCssExtractPlugin(),
         new ReactRefreshWebpackPlugin(),
-        new EnvironmentPlugin({...process.env})
     ]
-    // target: ['node', 'web', 'es6' ],
 }
+
+module.exports = config;
