@@ -1,15 +1,23 @@
 import React, { createContext, useReducer } from 'react';
 const initialContext = {
-  message: 'hello world',
-  updateMessage: () => {}
+  memberAddress: "some address",
+  memberVotes: "voting power of member",
+  memberTokens: "token balance of owner",  
+  setMemberTokens: () => {}, // fetches tokens of member
+  setMemberVotes: () => {} // fetches tokens of member
 };
 
 const appReducer = (state, { type, payload }) => {
   switch (type) {
-    case 'UPDATE_MESSAGE':
+    case 'UPDATE_VOTES':
       return {
         ...state, 
-        message: payload
+        memberVotes: payload
+      };
+    case 'UPDATE_TOKENS':
+      return {
+        ...state, 
+        memberTokens: payload
       };
     default:
       return state;
@@ -23,8 +31,11 @@ export const AppContextProvider = ({ children }) => {
   const [store, dispatch] = useReducer(appReducer, initialContext);
 
   const contextValue = {
-    message: store.message,
-    updateMessage: async (payload) => dispatch({type: "UPDATE_MESSAGE", payload})
+    memberAddress: store.memberAddress,
+    memberVotes: store.memberVotes,
+    memberTokens: store.memberTokens, 
+    setMemberVotes: async (payload) => dispatch({type: "UPDATE_VOTES", payload}), 
+    setMemberTokens: async (payload) => dispatch({type: "UPDATE_TOKENS", payload})
   };
 
   return <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>;

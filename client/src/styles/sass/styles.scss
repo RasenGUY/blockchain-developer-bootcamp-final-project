@@ -4,18 +4,20 @@
 @import '../../../node_modules/bootstrap/scss/bootstrap.scss';
 @import '../../../node_modules/bootstrap/scss/_variables.scss';
 
+// variables
+$complementary-color: #C92052;
+$theme-color: $teal-400; 
+$base-color: color.change($theme-color, $lightness: 85%, $alpha: 1); 
 
 // main styles
 body, html {
     margin: 0;
     padding: 0;
     box-sizing: 0;
+    background-color: $base-color;
 }
 
-// variables
-$complementary-color: #C92052;
-$theme-color: $teal-400; 
-$base-color: color.change($theme-color, $lightness: 85%, $alpha: 1); 
+
 
 .bg-teal {
     background-color: $theme-color;
@@ -66,15 +68,28 @@ $base-color: color.change($theme-color, $lightness: 85%, $alpha: 1);
 // }
 
 // pages
-#home {
-    height: 100vh;
-    background-color: $base-color;
-    & .card {
-        border: unset !important;
-        background-color: color.change($base-color, $blackness: 30%, $alpha: 0.15); 
+    #ikondaoNav {
+        background-color: $theme-color;
+    }
 
-        > * {
+    #home {
+        height: 100vh;
+        & .card {
             border: unset !important;
+            background-color: color.change($base-color, $blackness: 30%, $alpha: 0.15); 
+    
+            > * {
+                border: unset !important;
+            }
         }
     }
-}
+
+    #proposals {
+        background-color: $base-color;
+
+        .proposalItem {
+            background-color: $base-color;
+        }
+    }
+
+

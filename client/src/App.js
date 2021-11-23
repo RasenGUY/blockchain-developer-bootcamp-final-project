@@ -11,7 +11,6 @@ import ProposalsIndex from './pages/proposals/index';
 import NFTSIndex from './pages/nfts/index';
 import VectorsIndex from './pages/vectors/index';
 
-
 export default function App() {
     const message = useAppContext().message;
     return (

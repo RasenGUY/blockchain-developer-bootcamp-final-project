@@ -11122,6 +11122,7 @@ body, html {
   margin: 0;
   padding: 0;
   box-sizing: 0;
+  background-color: #c1f0e2;
 }
 
 .bg-teal {
@@ -11160,9 +11161,12 @@ body, html {
   box-shadow: 0 0 0.05rem 0.25rem #dc235a !important;
 }
 
+#ikondaoNav {
+  background-color: #4dd4ac;
+}
+
 #home {
   height: 100vh;
-  background-color: #c1f0e2;
 }
 #home .card {
   border: unset !important;
@@ -11170,6 +11174,13 @@ body, html {
 }
 #home .card > * {
   border: unset !important;
+}
+
+#proposals {
+  background-color: #c1f0e2;
+}
+#proposals .proposalItem {
+  background-color: #c1f0e2;
 }
 
 /*# sourceMappingURL=styles.css.map */

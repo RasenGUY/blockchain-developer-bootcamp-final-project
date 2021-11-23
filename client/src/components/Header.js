@@ -5,7 +5,7 @@ import logo from '../../public/static/logos/logo-1.png';
 export default function Header() {
     return (
         <Navbar expand='lg' fixed="top" bg="teal" variant="light">
-            <Container>
+            <Container id="ikondaoNav">
                 <Navbar.Brand style={{fontSize: "2.5rem"}} href="/">
                     <img 
                     style={{verticalAlign: 'bottom'}}
