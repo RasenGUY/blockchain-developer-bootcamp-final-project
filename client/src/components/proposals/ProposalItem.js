@@ -1,8 +1,10 @@
-import React from 'react'
+import React from 'react';
+import { NavLink } from 'react-router-dom'; 
 import { Card, Button, Badge, Container  } from 'react-bootstrap';
 
 export default function ProposalItem({id}) {
     // id will be used to fetch proposal info from app Context
+
     return (
         <Container className="proposalItem" style={{padding: "2rem 0rem"}}  as="div" fluid>
             <Card >
@@ -15,7 +17,7 @@ export default function ProposalItem({id}) {
                     <Card.Text>
                         proposal description goes here
                     </Card.Text>
-                    <Button className="callout-button">Cast a vote</Button>
+                    <NavLink to={`/proposals/${id}`}>Cast a Vote</NavLink>
                 </Card.Body>
             </Card>
         </Container>
