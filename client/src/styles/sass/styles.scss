@@ -13,8 +13,9 @@ body, html {
 }
 
 // variables
-$complementary-color: #4D79D4;
+$complementary-color: #C92052;
 $theme-color: $teal-400; 
+$base-color: color.change($theme-color, $lightness: 85%, $alpha: 1); 
 
 .bg-teal {
     background-color: $theme-color;
@@ -24,7 +25,6 @@ $theme-color: $teal-400;
     .nav-link {
         font-size: 1.5rem;
         padding: 1.5rem 1.5rem 0rem 2.5rem;
-        // vertical-align: bottom;
         color: $dark;
         &:hover{
             color: $gray-600; 
@@ -36,7 +36,7 @@ $theme-color: $teal-400;
     // background-color: $complementary-color;
 }
 
-.btn.connect-button {
+.btn.callout-button {
     background-color: rgba(0, 0, 0, 0);
     // color: $complementary-color;
     color: $dark;
@@ -44,11 +44,37 @@ $theme-color: $teal-400;
     padding: 0rem 2.5rem;
     background-color: $complementary-color;
     color: $light;
+    border-color: $complementary-color;
+    // box-shadow: unset !important;
     &:hover {
-        background-color: color.change($complementary-color, $lightness: 45%, $alpha: 0.7);
+        background-color: color.change($complementary-color, $blackness: 30%, $alpha: 1);
+        color: $gray-300;
     }
     &:focus{
-        background-color: color.change($complementary-color, $lightness: 60%, $alpha: 0.7);
-        color: $gray-300; 
+        background-color: color.change($complementary-color, $lightness: 40%, $alpha: 1);
+        color: $white; 
+        box-shadow: 0 0 0.05rem 0.25rem color.change($complementary-color, $lightness: 50%, $alpha: 1) !important;
+    }
+}
+
+// overlays
+// .container-overlay {
+//     position: absolute;
+//     right: 0;
+//     height: 100%;
+//     width: 100%;
+// }
+
+// pages
+#home {
+    height: 100vh;
+    background-color: $base-color;
+    & .card {
+        border: unset !important;
+        background-color: color.change($base-color, $blackness: 30%, $alpha: 0.15); 
+
+        > * {
+            border: unset !important;
+        }
     }
 }

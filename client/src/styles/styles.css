@@ -11141,20 +11141,35 @@ body, html {
   width: 2.5rem;
 }
 
-.btn.connect-button {
+.btn.callout-button {
   background-color: rgba(0, 0, 0, 0);
   color: #212529;
   font-size: 1.5rem;
   padding: 0rem 2.5rem;
-  background-color: #4D79D4;
+  background-color: #C92052;
   color: #f8f9fa;
+  border-color: #C92052;
 }
-.btn.connect-button:hover {
-  background-color: rgba(45, 90, 185, 0.7);
-}
-.btn.connect-button:focus {
-  background-color: rgba(91, 131, 215, 0.7);
+.btn.callout-button:hover {
+  background-color: #b3204b;
   color: #dee2e6;
+}
+.btn.callout-button:focus {
+  background-color: #b01c48;
+  color: #fff;
+  box-shadow: 0 0 0.05rem 0.25rem #dc235a !important;
+}
+
+#home {
+  height: 100vh;
+  background-color: #c1f0e2;
+}
+#home .card {
+  border: unset !important;
+  background-color: rgba(183, 183, 183, 0.15);
+}
+#home .card > * {
+  border: unset !important;
 }
 
 /*# sourceMappingURL=styles.css.map */

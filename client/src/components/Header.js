@@ -20,7 +20,7 @@ export default function Header() {
                         <Nav.Link href="/proposals">Proposals</Nav.Link>
                         <Nav.Link  href="/nfts">NFTs</Nav.Link>
                         <Nav.Link href="/vectors">Vectors</Nav.Link>
-                        <Button size="lg" className="connect-button">connect</Button>
+                        <Button size="lg" className="callout-button">connect</Button>
                     </Nav>
                 </Navbar.Collapse>
             </Container>        

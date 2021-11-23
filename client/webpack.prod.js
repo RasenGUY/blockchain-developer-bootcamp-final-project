@@ -6,7 +6,7 @@ const config  = require('./webpack.common.js');
 // console.log('prod settings', process.env)
 
 const prodConfig = {
-    mode: 'development',
+    mode: 'production',
     devtool: 'source-map',
     plugins: [
         new EnvironmentPlugin({...process.env}), 
