@@ -1,5 +1,5 @@
 import React from 'react'
-import { Card, ListGroup, ListGroupItem, Button, Col} from 'react-bootstrap';
+import { Card, ListGroup, ListGroupItem, Button } from 'react-bootstrap';
 
 export default function MemberCard() {
     return (

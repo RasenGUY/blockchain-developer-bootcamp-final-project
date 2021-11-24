@@ -5,14 +5,13 @@ import Helmet from 'react-helmet';
 
 export default function Home() {
     return (
-
+        <>
+        <Helmet>
+            <title>IkonDao</title>
+        </Helmet>
         <Container id="home" fluid>
-            <Helmet>
-                <title>IkonDao</title>
-            </Helmet>
-
-            
             <Hero />
         </Container>
+        </>
     )
 }
