@@ -1,4 +1,5 @@
-import React from 'react'
+import React from 'react';
+import { NavLink } from 'react-router-dom'; 
 import { Card, ListGroup, ListGroupItem, Button } from 'react-bootstrap';
 
 export default function MemberCard() {
@@ -13,7 +14,7 @@ export default function MemberCard() {
                 <ListGroupItem style={{padding: "1rem, 0rem"}} >member votes goes here</ListGroupItem>
                 <ListGroupItem style={{padding: "1rem, 0rem"}}>member tokens goes here</ListGroupItem>
             </ListGroup>
-            <Button className="callout-button">Create a proposal</Button>
+            <NavLink className="btn callout-button" to={"/proposals/create"}>Create a proposal</NavLink>
         </Card>
     )
 }

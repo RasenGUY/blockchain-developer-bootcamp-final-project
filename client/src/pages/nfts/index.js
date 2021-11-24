@@ -1,16 +1,17 @@
 import React from 'react'; 
-import Helmet from 'react-helmet';
-
-// import Hero from './components/nfts/NFTCard';
-// import Hero from './components/nfts/NFTList';
+import { Helmet } from 'react-helmet-async';
+import { Container } from 'react-bootstrap';
+import NFTList from '../../components/nfts/NFTList';
 
 export default function NFTSIndex() {
     return (
-        <div>
+        <>
             <Helmet>
-                <title>Proposals</title>
+                <title>Nfts</title>
             </Helmet>
-            <h1>This is the index page NFTs</h1>
-        </div>
+            <Container fluid style={{marginTop: "10rem"}}>
+                <NFTList /> 
+            </Container>
+        </>
     )
 }

@@ -1,16 +1,17 @@
 import React from 'react';
-import Helmet from 'react-helmet';
-
-// import Hero from './components/vectors/VectorCard';
-// import Hero from './components/vectors/VectorList';
+import { Helmet } from 'react-helmet-async';
+import { Container } from 'react-bootstrap'; 
+import VectorList from '../../components/vectors/VectorList';
 
 export default function VectorsIndex() {
     return (
-        <div>
+        <>
             <Helmet>
-                <title>Proposals</title>
+                <title>Vectors</title>
             </Helmet>
-            <h1>This is the index page Vectors</h1>
-        </div>
+            <Container fluid style={{marginTop: "10rem"}}>
+                <VectorList />
+            </Container>
+        </>
     )
 }

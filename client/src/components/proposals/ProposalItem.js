@@ -1,10 +1,9 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom'; 
-import { Card, Button, Badge, Container  } from 'react-bootstrap';
+import { Card, Badge, Container  } from 'react-bootstrap';
 
 export default function ProposalItem({id}) {
     // id will be used to fetch proposal info from app Context
-
     return (
         <Container className="proposalItem" style={{padding: "2rem 0rem"}}  as="div" fluid>
             <Card >
