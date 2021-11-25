@@ -1,14 +1,27 @@
 import React, { createContext, useReducer } from 'react';
 const initialContext = {
-  memberAddress: "some address",
+  userLoggedIn: true,
+  toggleLoggedIn: () => {},
+  memberAddress: null,
+  setMemberAddress: () => {},
   memberVotes: "voting power of member",
+  setMemberVotes: () => {}, // fetches tokens of member
   memberTokens: "token balance of owner",  
   setMemberTokens: () => {}, // fetches tokens of member
-  setMemberVotes: () => {} // fetches tokens of member
 };
 
 const appReducer = (state, { type, payload }) => {
   switch (type) {
+    case 'TOGGLE_USER_LOGGED_IN':
+      return {
+        ...state,
+        userLoggedIn: !state.userLoggedIn
+      }
+    case 'SET_MEMBER_ADDRESS': 
+      return {
+        ...state,
+        memberAddress: payload
+      }
     case 'UPDATE_VOTES':
       return {
         ...state, 
@@ -31,11 +44,14 @@ export const AppContextProvider = ({ children }) => {
   const [store, dispatch] = useReducer(appReducer, initialContext);
 
   const contextValue = {
+    userLoggedIn: store.userLoggedIn,
     memberAddress: store.memberAddress,
     memberVotes: store.memberVotes,
     memberTokens: store.memberTokens, 
-    setMemberVotes: async (payload) => dispatch({type: "UPDATE_VOTES", payload}), 
-    setMemberTokens: async (payload) => dispatch({type: "UPDATE_TOKENS", payload})
+    toggleUserLoggedIn: payload => dispatch({type: 'TOGGLE_USER_LOGGED_IN', payload}),
+    setMemberAddress: payload => dispatch({type: 'SET_MEMBER_ADDRESS', payload}),
+    setMemberVotes: payload => dispatch({type: "UPDATE_VOTES", payload}), 
+    setMemberTokens: payload => dispatch({type: "UPDATE_TOKENS", payload})
   };
 
   return <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>;
