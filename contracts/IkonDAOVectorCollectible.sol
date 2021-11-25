@@ -56,7 +56,7 @@ contract IkonDAOVectorCollectible is ERC721, ERC721Enumerable, ERC721URIStorage,
     }
 
     function _baseURI() internal pure override returns (string memory) {
-        return "https://localhost:3005/api/vectors/";
+        return "";
     }
 
     function pause() public onlyRole(PAUSER_ROLE) {

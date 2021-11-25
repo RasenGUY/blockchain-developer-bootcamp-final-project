@@ -45,7 +45,6 @@ contract IkonDAO is Constants, AccessControlEnumerableUpgradeable, ERC721HolderU
         governor = IIkonDAO(govAddress);
         timelocker = timelockerAddress;
         token = IIkonDAO(tokenAddress);
-        // votes = IIkonDAO(govTokenAddress);
                 
         /// @notice setRoles
         _setupRole(ADMIN_ROLE, _msgSender());

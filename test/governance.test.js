@@ -5,7 +5,7 @@ const expect = chai.expect;
 chai.use(chaiAsPromised);
 
 const BN = require("big.js");
-const { toUnit, unitToBN, toBN, toNumber } = require("./helpers");
+const { toUnit, unitToBN, toBN } = require("./helpers");
 const IkonDAOGovToken = artifacts.require('IkonDAOGovernanceToken');
 const util = require("util");
 
@@ -15,19 +15,25 @@ contract("IkonDAO (governance Token)", accounts => {
     let [ ,  , alice, bob, carl, david] = accounts;
     let daoGovToken;
     let weightLimit, balances;
+    
+    // govtoken inputs 
+    let weigthLimitFraction = toBN(49); 
+    let initialVotes = unitToBN(100);
+    let baseRewardVotes = unitToBN(100); 
+    let initialUsers = [alice, bob, carl, david ];
 
     beforeEach(async () => {
-        daoGovToken = await IkonDAOGovToken.deployed();
+        daoGovToken = await IkonDAOGovToken.new(weigthLimitFraction, initialUsers, initialVotes, baseRewardVotes, {from: owner});
     });
 
     /// governance token 
     it("initiates correctly", async() => {
 
         balances = Promise.all([
-            await daoGovToken.balanceOf(alice),
-            await daoGovToken.balanceOf(bob),
-            await daoGovToken.balanceOf(carl),
-            await daoGovToken.balanceOf(david)
+            daoGovToken.balanceOf(alice),
+            daoGovToken.balanceOf(bob),
+            daoGovToken.balanceOf(carl),
+            daoGovToken.balanceOf(david)
         ]).then(values => balances = values.map(value => toUnit(value)));
         await balances; 
         

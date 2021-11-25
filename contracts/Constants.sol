@@ -27,10 +27,4 @@ abstract contract Constants  {
     string constant REQUIRE_BANMEMBER_ONLY_MEMBERS = "IkonDAO: non members cannot be banned";
     string constant NFT_ALREADY_EXISTS = "IkonDAO Collectible: collectible must be unique";
 
-
-    /// @notice proposal types
-    string constant PROPOSAL_SYSTEM = "IkonDAO system propopal";
-    string constant PROPOSAL_ACCOUNTABILITY = "IkonDAO accountability proposal";
-    string constant PROPOSAL_DAO = "IkonDAO vector collectible mint proposal";
-
 }

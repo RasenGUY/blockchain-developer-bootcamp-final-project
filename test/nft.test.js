@@ -11,6 +11,7 @@ const IkonDAOToken = artifacts.require('IkonDAOToken');
 const IkonDAOGovernor = artifacts.require('IkonDAOGovernor');
 const IkonDAOTimelockController = artifacts.require('Timelock');
 const IkonDAOGovernanceToken = artifacts.require('IkonDAOGovernanceToken');
+const { unitToBN, toBN } = require("./helpers");
 // const web3 = require("web3"); 
 // const web3 = new Web
 
@@ -26,17 +27,35 @@ contract("IkonDao (nft)", accounts => {
 
     let nft, daoProxy, daoGovernor, daoToken, daoTimelock, daoGovToken;
 
+    // governor
+    let votingDelay = 3;
+    let votingPeriod = 10;
+
+    // utility token
+    let baseRewardUtility = unitToBN(5);
+
+    // timelocker 
+    let timelockDelay = 2;
+    let proposers = [owner]
+    let executors = [owner]
+
+    //govtoken 
+    let initialUsers = [alice, bob, carl, david, ed];
+    let weigthLimitFraction = toBN(49); 
+    let initialVotes = unitToBN(100);
+    let baseRewardVotes = unitToBN(100); 
+
     beforeEach(async ()=> {
-        daoGovernor= await IkonDAOGovernor.deployed();
-        daoToken= await IkonDAOToken.deployed(); 
-        daoTimelock = await IkonDAOTimelockController.deployed();
-        daoGovToken = await IkonDAOGovernanceToken.deployed();
-        daoProxy = await deployProxy(DAO, [daoGovernor.address, daoTimelock.address, daoToken.address], {kind: 'uups', initializer: '__IkonDAO_init', unsafeAllow: [ 'constructor', 'delegatecall']}, {from: owner});
+        daoToken= await IkonDAOToken.new(baseRewardUtility, {from: owner}); 
+        daoTimelock = await IkonDAOTimelockController.new(timelockDelay, proposers, executors);
+        daoGovToken = await IkonDAOGovernanceToken.new(weigthLimitFraction, initialUsers, initialVotes, baseRewardVotes, {from: owner});
+        daoGovernor= await IkonDAOGovernor.new(daoGovToken.address, daoTimelock.address, votingDelay, votingPeriod, {from: owner});
+        daoProxy = await DAO.new();
     })
 
     
     describe("Contract Initialization", () => {
-        
+
         beforeEach(async () => {
             nft = await IkonDAOVectorCollectible.new(daoProxy.address);
         })

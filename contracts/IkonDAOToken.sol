@@ -19,16 +19,16 @@ import "./Constants.sol";
 contract IkonDAOToken is ERC20, ERC20Burnable, ERC20Snapshot, AccessControl, ERC20Permit, Constants {
     
     uint256 _baseRewardTokens; 
-    address private owner; 
+    address private _owner; 
     
     constructor(uint256 _baseRewards) ERC20("IkonDAO Token", "IKD") ERC20Permit("IkonDAO Token") {
         
-        owner = _msgSender();
+        _owner = _msgSender();
         _setupRole(ADMIN_ROLE, _msgSender());
         _setRoleAdmin(ADMIN_ROLE, ADMIN_ROLE);
         _setupRole(SNAPSHOT_ROLE, _msgSender());
         _setRoleAdmin(SNAPSHOT_ROLE, ADMIN_ROLE);
-        _mint(owner, 1000000 * 10 ** decimals());
+        _mint(_owner, 1000000 * 10 ** decimals());
         _setupRole(MINTER_ROLE, _msgSender());
         _setRoleAdmin(MINTER_ROLE, ADMIN_ROLE);
         
@@ -41,14 +41,28 @@ contract IkonDAOToken is ERC20, ERC20Burnable, ERC20Snapshot, AccessControl, ERC
         _rewardTokens(to);
     }
 
+    /// @dev returns the owner of tokens
+    function owner() public view returns (address){
+        return _owner;
+    }
+
+    /// @dev changes ownership and transfers tokens to new owner
+    /// @param newOwner the address to which ownership of tokens will be transferred
+    /// @notice can only be initiated through proposal request
+    function transferOwnership(address newOwner) external onlyRole(ADMIN_ROLE) returns(bool){
+        _transfer(_owner, newOwner, balanceOf(_owner));
+        _owner = newOwner;
+        return true;
+    }
+
     /// @dev distributes rewards from dao to contributor
     /// @param _to address of the contributoraddress
     /// @notice incase balance is not enough for _baseReward tokens will be minted to owner
     function _rewardTokens(address _to) private {
-        if (balanceOf(owner) < _baseRewardTokens){
-            _mint(owner, _baseRewardTokens);
+        if (balanceOf(_owner) < _baseRewardTokens){
+            _mint(_owner, _baseRewardTokens);
         }
-        _transfer(owner, _to, _baseRewardTokens); 
+        _transfer(_owner, _to, _baseRewardTokens); 
     }   
 
     /// @dev returns base Token Rewards

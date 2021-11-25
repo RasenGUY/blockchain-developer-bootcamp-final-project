@@ -85,9 +85,6 @@ contract("IkonDAO (proxy)", accounts => {
         Abstain: 2
     }
 
-    /// events
-    let govEventSigMap, tokenEventSigMap, govTokenEventSigMap, timelockerEventSigMap, daoEventSigMap, nftEventSigMap; 
-        
     // for proposals
     function Proposal (targets, datas, description, values = undefined){
         this.targets = typeof(targets) != 'object' ? Array(targets) : targets;
@@ -96,7 +93,6 @@ contract("IkonDAO (proxy)", accounts => {
         this.description = description;
     }
 
-    
     beforeEach( async () => {
         
         // initiate new contracts before each describe 
@@ -128,14 +124,6 @@ contract("IkonDAO (proxy)", accounts => {
         await timelocker.grantRole(PROPOSER_ROLE, governor.address); // for queueing of proposals
         await timelocker.grantRole(EXECUTOR_ROLE, governor.address); // for executing transactions
                   
-        // events 
-        // map names to address and topics of sigs
-        govEventSigMap = generateMappingsFromSignatures(extractEventSignatures(governor.abi));
-        tokenEventSigMap = generateMappingsFromSignatures(extractEventSignatures(token.abi)); 
-        govTokenEventSigMap = generateMappingsFromSignatures(extractEventSignatures(govToken.abi)); 
-        timelockerEventSigMap = generateMappingsFromSignatures(extractEventSignatures(timelocker.abi)); 
-        daoEventSigMap = generateMappingsFromSignatures(extractEventSignatures(dao.abi));
-        nftEventSigMap = generateMappingsFromSignatures(extractEventSignatures(nft.abi));
 
     });    
         

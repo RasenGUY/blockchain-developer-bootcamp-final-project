@@ -1,5 +1,4 @@
 // load dependencies 
-const { deployProxy, upgradeProxy } = require('@openzeppelin/truffle-upgrades');
 const { assert } = require('chai');
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -7,19 +6,22 @@ const expect = chai.expect;
 chai.use(chaiAsPromised);
 
 const { toUnit, unitToBN } = require("./helpers");
-const DAO = artifacts.require('IkonDAO');
 const IkonDAOToken = artifacts.require('IkonDAOToken');
+
 
 
 contract("IkonDAO (utility token)", accounts => {
     let owner = accounts[0]; 
     let other = accounts[1];
     let alice = accounts[2];
-    let token;    
     
+    // utility token
+    let baseRewardUtility = unitToBN(5);
+    let token;    
+
     beforeEach(async ()=> {
         /// create contract insntance
-        token = await IkonDAOToken.deployed() 
+        token = await IkonDAOToken.new(baseRewardUtility, {from: owner}); 
     })
 
     // initializes correctly
