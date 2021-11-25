@@ -98,6 +98,5 @@ module.exports = async function (deployer, networks, accounts) {
   // timelocker initial roles
   await timelocker.grantRole(PROPOSER_ROLE, governor.address); // for queueing of proposals
   await timelocker.grantRole(EXECUTOR_ROLE, governor.address); // for executing transactions
-
 };
 
