@@ -4,80 +4,41 @@ import { Container, Navbar, Nav, Button} from 'react-bootstrap';
 import logo from '../../public/static/logos/logo-1.png';
 
 // for wallet connect workflow
-import Web3Modal from "web3modal";
+import { useWallet } from '@gimmixorg/use-wallet';
 import { settings } from '../providers'; 
-const ethers = require('ethers');
-const web3Modal = new Web3Modal(settings); // instantiaties web3modal 
+import { Web3Provider, WebSocketProvider} from '@ethersproject/providers';
+const Web3 = require('web3');
 
-// conext 
+
+// appContext 
 import { useAppContext } from '../AppContext';
 
-
 export default function Header() {
+    const { account, connect, disconnect, provider } = useWallet();
+    const { memberAddress, setMemberAddress, setInjectedProvider, injectedProvider } = useAppContext();
+    const [connected, setConnected] = useState();
     
-    const setAddress = useAppContext().setMemberAddress;
+    const login = ()=> {
+        connect(settings).catch(e => console.log(e));
+        setConnected(true);
+    } 
 
-    const [connected, setConnected] = useState(false);
-    const [ injectedProvider, setInjectedProvider ] = useState();
-    
-    // logs out of web3Modal 
-    const logoutOfWeb3Modal = async () => {
-    
-        await web3Modal.clearCachedProvider();
-
-        if (injectedProvider && typeof injectedProvider.disconnect == "function") {
-            await injectedProvider.disconnect();
-        }
-        if (injectedProvider && typeof injectedProvider.close == 'function'){
-            await injectedProvider.close();
-        } 
-        
+    const logout = ()=>{
+        disconnect();
         setConnected(false);
-
-        setTimeout(() => {
-            window.location.reload();
-        }, 1);
+        setInjectedProvider(undefined);
     }
     
-
-    // helps to connect to wallt
-    const loginToWeb3Modal = useCallback(async () => {
-        
-        var provider; 
-        try {
-            provider = await web3Modal.connect(); // connects to web3 rpc via modal
-            setConnected(true); // displays connect button
-            setAddress(provider.selectedAddress); // set the member address
-            
-        } catch (e){
-            // console.log("User denied connection request");
-            console.log(e); 
+    useEffect(()=>{
+        setMemberAddress(account);
+        if(!connected){
+            setInjectedProvider(undefined);
         }
-
         if (provider){
-            provider.on("chainChanged", chainId => {
-                console.log(`chain changed to ${chainId}! updating providers`);
-                setInjectedProvider(new ethers.providers.Web3Provider(provider));
-            });
-            provider.on("accountsChanged", () => {
-                console.log(`account changed!`);
-                setInjectedProvider(new ethers.providers.Web3Provider(provider));
-            });
-            provider.on("disconnect", (code, reason) => {
-                logoutOfWeb3Modal();
-                setConnected(true);
-            });
+            // setInjectedProvider(new Web3Provider(provider, "rinkeby"));
+            setInjectedProvider(new Web3(`https://rinkeby.infura.io/v3/${process.env.INFURA_RINKEBY_ID}`));
         }
-
-        
-    }, [setInjectedProvider]);
-
-    useEffect(() => { // loads web3modal if it is already provided
-        if (web3Modal.cachedProvider) {
-          loginToWeb3Modal();
-        }
-    }, [loginToWeb3Modal]);
-
+    }, [account, connected])
 
 
     return (
@@ -106,8 +67,8 @@ export default function Header() {
                         <Nav.Link as="li">
                             {
                             !connected 
-                            ? <Button onClick={loginToWeb3Modal}size="lg" className="callout-button">connect</Button> 
-                            : <Button onClick={logoutOfWeb3Modal}size="lg" className="callout-button">Disconnect</Button>
+                            ? <Button onClick={login}size="lg" className="callout-button">connect</Button> 
+                            : <Button onClick={logout}size="lg" className="callout-button">Disconnect</Button>
                             }
                         </Nav.Link>
                     </Nav>

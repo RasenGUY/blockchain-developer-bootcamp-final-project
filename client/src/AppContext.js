@@ -1,6 +1,8 @@
 import React, { createContext, useReducer } from 'react';
 const initialContext = {
   userLoggedIn: true,
+  injectedProvider: undefined,
+  setInjectedProvider: ()=>{}, 
   toggleLoggedIn: () => {},
   memberAddress: null,
   setMemberAddress: () => {},
@@ -12,6 +14,12 @@ const initialContext = {
 
 const appReducer = (state, { type, payload }) => {
   switch (type) {
+    case "SET_INJECTED_PROVIDER": 
+      console.log("setting injected Provider")
+      return {
+        ...state,
+        injectedProvider: payload
+      }
     case 'TOGGLE_USER_LOGGED_IN':
       return {
         ...state,
@@ -46,8 +54,10 @@ export const AppContextProvider = ({ children }) => {
   const contextValue = {
     userLoggedIn: store.userLoggedIn,
     memberAddress: store.memberAddress,
+    injectedProvider: store.injectedProvider,
     memberVotes: store.memberVotes,
     memberTokens: store.memberTokens, 
+    setInjectedProvider: payload => dispatch({type: 'SET_INJECTED_PROVIDER', payload}),
     toggleUserLoggedIn: payload => dispatch({type: 'TOGGLE_USER_LOGGED_IN', payload}),
     setMemberAddress: payload => dispatch({type: 'SET_MEMBER_ADDRESS', payload}),
     setMemberVotes: payload => dispatch({type: "UPDATE_VOTES", payload}), 

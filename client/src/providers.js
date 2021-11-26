@@ -5,7 +5,7 @@ import Authereum from "authereum";
 import WalletLink from "walletlink";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 
-// keys 
+// keys @ethersproject/contracts
 const INFURA_ID = process.env.INFURA_RINKEBY_ID;
 const PORTIS_ID = process.env.PORTIS_ID;
 const FORTMATIC_KEY = process.env.FORTMATIC_KEY; 
