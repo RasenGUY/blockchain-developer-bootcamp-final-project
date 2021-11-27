@@ -1,35 +1,45 @@
-import React, {useState, useEffect} from 'react'; 
+import React, {useState, useEffect} from 'react';
+import { NavLink } from 'react-router-dom'; 
 import { Card, Button } from 'react-bootstrap';
 
 // for making calls to proxy 
 import { useContract } from '../../hooks/useContract';
-import daoContract from '../../contracts/abis/IkonDAO.json';
-import { useAppContext } from '../../AppContext'; 
+import daoContract from '../../contracts/IkonDAO.json';
+// import { useAppContext } from '../../AppContext'; 
+import {callContract} from '../../helpers/transactor';
 
-// for finding out wheter is member
+// for finding out whether is member
 import { MEMBER_ROLE } from '../../contstants';
 
 
 export default function Register() {
     
     const cardStyle = { width: "75%" };
-    const {injectedProvider, memberAddress} = useAppContext();
-    // const [isMember, setIsMember] = useState();
-    if (memberAddress){
-        // const contractInst = useContract(process.env.PROXY_CONTRACT, JSON.parse(JSON.stringify(daoContract.abi)));
-        // const abi = JSON.stringify(daoContract.abi)
-        const prov = injectedProvider;
-        const cInst = new prov.eth.Contract(daoContract.abi, process.env.PROXY_CONTRACT);
-        
-        (async() => {
-            
-            console.log(await cInst.methods.hasRole(MEMBER_ROLE, memberAddress).call());
-        })()
-        // // console.log(contractInst);
-        // console.log(contractInst.provider);
-        // console.log(MEMBER_ROLE)
-        // contractInst.functions.hasRole(String(MEMBER_ROLE), String(memberAddress)).then(result => console.log(result));
-        // console.log(memberAddress)
+    const [isMember, setIsMember] = useState();
+    const cInst = useContract(process.env.PROXY_CONTRACT, daoContract.abi);
+    
+    useEffect(()=>{ 
+        if(window.ethereum.selectedAddress){
+            cInst.methods.hasRole(MEMBER_ROLE, window.ethereum.selectedAddress).call().then(res => setIsMember(res));   
+            window.ethereum.on("accountsChanged", ()=> {
+                cInst.methods.hasRole(MEMBER_ROLE, window.ethereum.selectedAddress).call().then(res => setIsMember(res));   
+            })
+        }
+    }, []);
+
+    
+    
+    const register = () => {
+        // register user
+        // user can be notified here on complettion
+        const data = cInst.methods.createMember().encodeABI(); 
+        (cInst.options.address, data); 
+        callContract(process.env.PROXY_CONTRACT, data)
+        .then(receipt => {
+            console.log(receipt);
+            // set account is member after transaction receipt
+            cInst.methods.hasRole(MEMBER_ROLE, window.ethereum.selectedAddress).call().then(res => setIsMember(res)); 
+        }).catch(e => console.log(e));
     }
 
 
@@ -49,8 +59,11 @@ export default function Register() {
                 <Card.Text style={{padding: "2rem", fontSize: "1.125rem"}}>
                     Our platform is based on openness and working towards the welbeing and of our members. It's not about self-interest but about social-interest. 
                 </Card.Text>
-                 {/* button should display if user is not member */}
-                <Button style={{padding: "0.5rem"}} size="lg" className="callout-button">Become A Member</Button>
+                {
+                    !isMember 
+                    ? <Button style={{padding: "0.5rem"}} size="lg" className="callout-button" onClick={register}>Become A Member</Button>
+                    : <NavLink to={`/proposals`} className="btn callout-button">Proposals</NavLink>
+                }
             </Card.Body>
         </Card>
     )

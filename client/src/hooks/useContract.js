@@ -4,23 +4,16 @@ import {
   // ContractInterface
 } from '@ethersproject/contracts';
 import { AddressZero } from '@ethersproject/constants';
-import { InfuraProvider } from '@ethersproject/providers';
-import { useAppContext } from '../AppContext';
+import Web3 from 'web3';
 
 export function useContract(contractAddress, ABI) {
-    
-    const { memberAddress, injectedProvider } = useAppContext();
 
     if (contractAddress === AddressZero) {
         throw Error(`Invalid 'contractAddress' parameter '${contractAddress}'.`);
     }
-
-    const signerOrProvider = memberAddress 
-    ? injectedProvider.getSigner(memberAddress) 
-    : injectedProvider;
-
-
+    
     return useMemo(() => {
-        return new Contract(contractAddress, ABI, signerOrProvider);
-    }, [contractAddress, ABI, injectedProvider, memberAddress]);
+        const provider = new Web3(`https://rinkeby.infura.io/v3/${process.env.INFURA_RINKEBY_ID}`);
+        return new provider.eth.Contract(ABI, contractAddress);
+    }, [ABI, contractAddress]);
 }

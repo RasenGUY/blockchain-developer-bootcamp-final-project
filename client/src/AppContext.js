@@ -15,7 +15,6 @@ const initialContext = {
 const appReducer = (state, { type, payload }) => {
   switch (type) {
     case "SET_INJECTED_PROVIDER": 
-      console.log("setting injected Provider")
       return {
         ...state,
         injectedProvider: payload

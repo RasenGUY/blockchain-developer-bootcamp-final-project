@@ -60,7 +60,8 @@ const config = {
             "https": require.resolve("https-browserify"),
             "stream": require.resolve("stream-browserify"),
             "buffer": require.resolve('buffer/'),
-            "crypto": require.resolve("crypto-browserify")
+            "crypto": require.resolve("crypto-browserify"),
+            "web3": require.resolve("web3")
         }
     },
     plugins: [

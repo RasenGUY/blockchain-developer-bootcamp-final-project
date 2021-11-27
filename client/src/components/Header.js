@@ -1,44 +1,31 @@
-import React, {useState, useEffect, useCallback } from 'react';
+import React, {useState, useEffect } from 'react';
 import { Link } from 'react-router-dom'; 
 import { Container, Navbar, Nav, Button} from 'react-bootstrap';
 import logo from '../../public/static/logos/logo-1.png';
 
 // for wallet connect workflow
 import { useWallet } from '@gimmixorg/use-wallet';
-import { settings } from '../providers'; 
-import { Web3Provider, WebSocketProvider} from '@ethersproject/providers';
-const Web3 = require('web3');
-
-
-// appContext 
-import { useAppContext } from '../AppContext';
+import { settings } from '../providers';
 
 export default function Header() {
-    const { account, connect, disconnect, provider } = useWallet();
-    const { memberAddress, setMemberAddress, setInjectedProvider, injectedProvider } = useAppContext();
+    const { connect, disconnect } = useWallet();
     const [connected, setConnected] = useState();
     
     const login = ()=> {
-        connect(settings).catch(e => console.log(e));
-        setConnected(true);
+        connect(settings).then(r => setConnected(true))
+        .catch(e => console.log(e));
     } 
 
     const logout = ()=>{
         disconnect();
         setConnected(false);
-        setInjectedProvider(undefined);
     }
     
     useEffect(()=>{
-        setMemberAddress(account);
-        if(!connected){
-            setInjectedProvider(undefined);
+        if (window.ethereum.selectedAddress){
+            setConnected(true);
         }
-        if (provider){
-            // setInjectedProvider(new Web3Provider(provider, "rinkeby"));
-            setInjectedProvider(new Web3(`https://rinkeby.infura.io/v3/${process.env.INFURA_RINKEBY_ID}`));
-        }
-    }, [account, connected])
+    }, [])
 
 
     return (

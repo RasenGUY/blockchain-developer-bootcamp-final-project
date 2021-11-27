@@ -6,7 +6,6 @@ import { Col, Container } from 'react-bootstrap';
 
 export default function ProposalList() {
     const ids = Array(10).fill('').map(item => 1 + Math.floor(Math.random() * 10 + 1)); // fake ids
-
     const fakeProposals = (ids.map(id => <ProposalItem key={Math.random()} 
     id={id} />))
 
