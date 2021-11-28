@@ -1,14 +1,14 @@
 import React, { useState } from 'react'; 
 import { InputGroup, FormControl } from 'react-bootstrap'; 
 
-export default function ProposalOptions({action, register}) { // creates a form box for inputs that users can choose
+export default function ProposalOptionsSystemProposals({action, register}) { // creates a form box for inputs that users can choose
     const getType = action => {
         // will add validation rules later
         switch(action){
             case 'upgradeTo':
                 return {type: 'text', placeholder: "New Address"};
             case 'updateTimelock':
-                return {type: 'text', placeholder: "New Address"};        
+                return {type: 'text', placeholder: "New Address"};
             default: 
                 return {type: 'number', placeholder: action.replace(/(set)|(update)/, "set ").toLowerCase()};
         }
@@ -20,7 +20,7 @@ export default function ProposalOptions({action, register}) { // creates a form 
             <>
                 <InputGroup className="mt-2">
                     <InputGroup.Text>Type</InputGroup.Text>
-                    <FormControl type={'textarea'} aria-label={'Type'} {...register('Type', 'System Proposal')} placeholder="System Proposal" value="System Proposal" disabled/>
+                    <FormControl type={'textarea'} aria-label={'Type'} placeholder="System Proposal" value="System Proposal" disabled/>
                 </InputGroup>
 
                 <InputGroup className="mt-2">

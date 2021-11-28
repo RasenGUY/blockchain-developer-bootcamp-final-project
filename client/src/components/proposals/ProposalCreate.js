@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import AccountabilityProposalForm from './AccountabilityProposalForm'; 
-import NftProposalForm from './NftProposalForm'; 
+import DAOProposalForm from './DAOProposalForm'; 
 import SystemProposalForm from './SystemProposalForm'; 
 import { Col, Row, Container, Card, ListGroup } from 'react-bootstrap';
 
@@ -11,7 +11,7 @@ export default function ProposalCreate() {
         <Container style={{marginTop: "10rem"}}>
             <Row className="d-flex flex-row">
                 <Col lg="9">
-                    {option === 'nft' &&  <NftProposalForm />}
+                    {option === 'dao' &&  <DAOProposalForm />}
                     {option === 'accountability' &&  <AccountabilityProposalForm />}
                     {option === 'system' &&  <SystemProposalForm />}
                 </Col>
@@ -20,7 +20,7 @@ export default function ProposalCreate() {
                         <ListGroup variant="flush">
                             <ListGroup.Item 
                                 onClick={e => setOption(String(e.target.textContent).toLowerCase())}
-                            >Nft
+                            >DAO
                             </ListGroup.Item>
                             <ListGroup.Item 
                                 onClick={e => setOption(String(e.target.textContent).toLowerCase())}

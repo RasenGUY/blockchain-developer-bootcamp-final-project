@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { Form, Button, InputGroup } from 'react-bootstrap';
 
 // for creating proposals
-import ProposalOptions from './ProposalOptions';
+import ProposalOptionsSystemProposals from './ProposalOptionsSystemProposals';
 import { createProposalAction, } from '../../helpers/createProposal';
 import { useContract } from '../../hooks/useContract';
 import governorArtifact from '../../contracts/IkonDAOGovernor.json';
@@ -17,7 +17,7 @@ import { useAppContext } from '../../AppContext';
 
 
 export default function SystemProposalForm() {
-    const {updateProposals: updateProposalsContext} = useAppContext(); 
+    const { updateProposals } = useAppContext(); 
     const { 
         control,
         register, 
@@ -57,7 +57,7 @@ export default function SystemProposalForm() {
         callContract(process.env.PROXY_CONTRACT, proposeCallData).then(async receipt => {
             console.log("transaction mined", receipt);
             console.log("stored proposal on ipfs")
-            updateProposalsContext(storageObject);
+            updateProposals(storageObject);
 
         }).catch(e=> console.log(e))
     }
@@ -83,7 +83,7 @@ export default function SystemProposalForm() {
             
             {/* display inputs based on proposal value */}
             <Form.Group className="mb-2"> 
-                <ProposalOptions action={watchAction} register={register}/>
+                <ProposalOptionsSystemProposals action={watchAction} register={register}/>
             </Form.Group> 
             
             <Button className="callout-button" type="submit">Propose</Button>

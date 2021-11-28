@@ -35,9 +35,9 @@ export default function ProposalList() {
                 <Container as="div" fluid>
                     {
                         loaded 
-                        ? proposals.map(proposal => 
+                        ? proposals.map((proposal, i) => 
                             <ProposalItem 
-                                key={proposal.id} 
+                                key={i} 
                                 id={proposal.id} 
                                 type={proposal.type}
                                 title={proposal.title} 

@@ -95,7 +95,7 @@ export function createProposalAction(action, inputs, description){ // returns an
         case "slashVotes":
             return new Proposal(
                 process.env.GOV_TOKEN_CONTRACT, // targets,
-                govToken.methods.slashVotes(unitToBN(Number(inputs))).encodeABI(),// calldatas
+                govToken.methods.slashVotes(inputs.target, unitToBN(Number(inputs.value))).encodeABI(),// calldatas
                 description // description
                 // values
             )

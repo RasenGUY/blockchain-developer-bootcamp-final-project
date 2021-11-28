@@ -33,7 +33,9 @@ export default function ProposalItem({id, type, title, description, value, propo
                     <Card.Text>
                         { description }
                         <br/>
-                        {`Proposed change: ${value}`}
+                        {
+                            typeof(value) !== 'object' ? `Proposed change: ${value}` : `Target: ${value[0]}, Value: ${value[1]}`
+                        }
                     </Card.Text>
 
                     <NavLink to={`/proposals/${id}`}>Cast a Vote</NavLink>
