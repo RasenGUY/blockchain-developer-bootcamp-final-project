@@ -1,13 +1,28 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import MemberCard from '../member/MemberCard'; 
 import ProposalItem from './ProposalItem';
 import { Col, Container } from 'react-bootstrap';
 
+// for loading the proposal intially
+import { useAppContext } from '../../AppContext';
+import { getProposals } from '../../web3-storage/ipfsStorage';
 
 export default function ProposalList() {
-    const ids = Array(10).fill('').map(item => 1 + Math.floor(Math.random() * 10 + 1)); // fake ids
-    const fakeProposals = (ids.map(id => <ProposalItem key={Math.random()} 
-    id={id} />))
+    const { updateProposals, proposals: contextProposals } = useAppContext();
+    const [loaded, setLoaded] = useState();
+    const [proposals, setProposals] = useState();
+
+    useEffect(()=> {
+        if(contextProposals){ // if the context contains data then use that
+            setProposals(contextProposals);
+            setLoaded(true);
+        } else { // if the context does not contain data then fetch
+            getProposals().then(data => {
+                setProposals(data);
+                setLoaded(true);
+            })
+        }
+    }, [])
 
     return (
         <Container className="d-flex flex-row" style={{marginTop: "10rem"}}>
@@ -18,7 +33,21 @@ export default function ProposalList() {
             </Col>
             <Col lg="9">
                 <Container as="div" fluid>
-                    {fakeProposals}
+                    {
+                        loaded 
+                        ? proposals.map(proposal => 
+                            <ProposalItem 
+                                key={proposal.id} 
+                                id={proposal.id} 
+                                type={proposal.type}
+                                title={proposal.title} 
+                                description={proposal.description}
+                                value={proposal.value}
+                                proposor={proposal.proposor}
+                            />
+                        ) 
+                        : <h1>...Loading</h1> 
+                    }
                 </Container>
             </Col>
         </Container>

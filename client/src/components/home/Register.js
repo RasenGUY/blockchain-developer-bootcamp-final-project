@@ -33,7 +33,6 @@ export default function Register() {
         // register user
         // user can be notified here on complettion
         const data = cInst.methods.createMember().encodeABI(); 
-        (cInst.options.address, data); 
         callContract(process.env.PROXY_CONTRACT, data)
         .then(receipt => {
             console.log(receipt);

@@ -26,11 +26,7 @@ contract IkonDAO is Constants, AccessControlEnumerableUpgradeable, ERC721HolderU
     IIkonDAO private governor;
     address private timelocker;    
     IIkonDAO private token; 
-    // IIkonDAO private votes;
-    // mapping(uint256 => Proposal) public proposals;
-    // mapping(address => uint256[]) private memberProposals;
-    // mapping(Avatar => IIkonDAO) private avatar;  
-
+    
     event MemberCreated(address indexed _member); 
     event MemberBanned(address indexed _member); 
     event Log(uint256 id, uint8 support);

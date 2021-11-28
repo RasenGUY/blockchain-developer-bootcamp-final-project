@@ -33,7 +33,7 @@ contract IkonDAOGovernanceToken is ERC20Burnable, ERC20Snapshot, AccessControl, 
     event VotingPowerSlashed(address _receiver, uint256 _amount, string message);
 
     constructor(uint256 _fraction, address[] memory _initialUsers, uint256 _initialVotes, uint256 _baseReward)
-        ERC20("IkonDAOGovernanceToken", " IKDG")
+        ERC20("IkonDAOGovernanceToken", "IKDG")
         ERC20Permit("IkonDAOGovernanceToken")
     {
 

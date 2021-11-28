@@ -12,8 +12,7 @@ import timelockerArtifact from '../contracts/Timelock.json';
 // utils 
 import { unitToBN  } from '../utils/utils';
 
-function Proposal (targets, datas, description, type, values = undefined){
-    this.type = type;
+function Proposal (targets, datas, description, values = undefined){
     this.targets = typeof(targets) != 'object' ? Array(targets) : targets;
     this.values = typeof(values) === 'undefined' ? [0] : values;
     this.calldatas = typeof(targets) != 'object' ? Array(datas) : datas;

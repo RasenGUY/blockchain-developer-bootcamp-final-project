@@ -47,7 +47,6 @@ export default function MemberCard() {
                 (async ()=> await handleVotingPower())();
             });
         }
-        return ()=>{console.log("unmounted")}
     }, []);
 
     return (

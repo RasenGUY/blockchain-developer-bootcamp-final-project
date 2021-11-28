@@ -1,4 +1,4 @@
-const toSha3 = require('ethers').utils.id
+import { toSha3 } from './utils/utils'; 
 
 export const [MEMBER_ROLE, ADMIN_ROLE, BANNED_ROLE, PAUSER_ROLE, MINTER_ROLE, TIMELOCK_ADMIN_ROLE, PROPOSER_ROLE, EXECUTOR_ROLE] = [
     toSha3("IKONDAO_MEMBER_ROLE"),

@@ -149,3 +149,4 @@ exports.fakeMineTwo = async (gov, proxy, proposal, members, fakeMineFunc, testFu
         
         return [results, testResults]; 
 }
+exports.toSha3 = (input) => web3.utils.soliditySha3(input);
