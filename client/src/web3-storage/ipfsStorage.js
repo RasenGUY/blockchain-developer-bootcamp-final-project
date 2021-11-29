@@ -138,14 +138,21 @@ async function updateData(folder, payload){
 
 // proposals 
 export async function getIpfsData(folder){
-    // console.log(folder)
+    
     let latestData = await getLatestData(folder);
-    return latestData;
+
+    // list data as mapping
+    let map = new Map();
+    if(folder === 'proposals' || folder === 'graphics')latestData.forEach(obj => map.set(obj.id, obj));
+    return folder === 'proposals' || folder === 'graphics' ? map : latestData;
 }
 export async function updateIpfsData(folder, proposal) {
     // find most recent data from folder
     let latestData = await updateData(folder, proposal);
     return latestData;   
+}
+export async function updateSingleEntry(folder, key, value){
+
 }
 
 

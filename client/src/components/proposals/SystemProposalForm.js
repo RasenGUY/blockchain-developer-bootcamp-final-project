@@ -38,7 +38,6 @@ export default function SystemProposalForm() {
     const onSubmit = async (data) => {
         // create a proposalAction
         const input = data[watchAction][watchAction.replace(/(set)|(update)/, "").toUpperCase()[0] + watchAction.replace(/(set)|(update)/, "").toLowerCase().slice(1)]
-        console.log(createProposalAction(watchAction, input, slug() + data.description))
         const {targets, description, calldatas, values} = createProposalAction(watchAction, input, slug() + data.description);
         
         // get proposal id from action values

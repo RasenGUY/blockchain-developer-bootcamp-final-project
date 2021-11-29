@@ -49,6 +49,7 @@ export default function DAOProposalForm() {
             let file = data[watchAction].uploadedFiles[0];
             
             vectorData.status = 1;
+            vectorData.type = 'freebie'; 
             vectorData.description = data[watchAction].ImageDescription 
             vectorData.image = await storeFiles([file], `${slug()}-file-${file.name}`);
             vectorData.external_url = `https://${vectorData.image}.ipfs.dweb.link`;
@@ -94,6 +95,9 @@ export default function DAOProposalForm() {
             : Object.entries(data[watchAction]), 
             proposor: window.ethereum.selectedAddress
         }
+        console.log(data);
+        console.log(proposalData);
+        console.log(vectorData);
         
         // propose workflow 
         let proposeCallData = proxy.methods.propose(targets, values, calldatas, description).encodeABI();

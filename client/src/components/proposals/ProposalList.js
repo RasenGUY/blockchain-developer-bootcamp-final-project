@@ -4,25 +4,31 @@ import ProposalItem from './ProposalItem';
 import { Col, Container } from 'react-bootstrap';
 
 // for loading the proposal intially
-import { useAppContext } from '../../AppContext';
-import { getIpfsData } from '../../web3-storage/ipfsStorage';
+import { useProposals } from '../../hooks/useProposals';
 
 export default function ProposalList() {
-    const { updateProposals, proposals: contextProposals } = useAppContext();
-    const [loaded, setLoaded] = useState();
-    const [proposals, setProposals] = useState();
+    const [loaded, setLoaded] = useState(); 
+    const proposals = useProposals(setLoaded);
+    const [renderItems, setRenderItems ] = useState();
 
-    useEffect(()=> {
-        if(contextProposals){ // if the context contains data then use that
-            setProposals(contextProposals);
-            setLoaded(true);
-        } else { // if the context does not contain data then fetch
-            getIpfsData('proposals').then(data => {
-                setProposals(data);
-                setLoaded(true);
+    useEffect(()=>{
+        if (proposals){
+            let list = [];
+            proposals.forEach((proposal, id) => {
+                list.push(
+                    <ProposalItem 
+                    key={id} 
+                    id={id} 
+                    type={proposal.type}
+                    title={proposal.title} 
+                    description={proposal.description}
+                    value={proposal.value}
+                    proposor={proposal.proposor}
+                />)
             })
+            setRenderItems(list);
         }
-    }, [])
+    }, [loaded])
 
     return (
         <Container className="d-flex flex-row" style={{marginTop: "10rem"}}>
@@ -34,18 +40,8 @@ export default function ProposalList() {
             <Col lg="9">
                 <Container as="div" fluid>
                     {
-                        loaded 
-                        ? proposals.map((proposal, i) => 
-                            <ProposalItem 
-                                key={i} 
-                                id={proposal.id} 
-                                type={proposal.type}
-                                title={proposal.title} 
-                                description={proposal.description}
-                                value={proposal.value}
-                                proposor={proposal.proposor}
-                            />
-                        ) 
+                        loaded && renderItems
+                        ? renderItems
                         : <h1>...Loading</h1> 
                     }
                 </Container>

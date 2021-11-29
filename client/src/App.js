@@ -1,5 +1,5 @@
 // modules
-import React from 'react'; 
+import React, { useEffect } from 'react'; 
 import { Routes, Route, BrowserRouter as Router} from 'react-router-dom';
 
 // pages 
@@ -11,9 +11,8 @@ import ProposalCreateIndex from './pages/proposals/ProposalCreateIndex';
 import NFTSIndex from './pages/nfts/index';
 import VectorsIndex from './pages/vectors/index';
 
-
 export default function App() {
-    // const message = useAppContext().message;
+
     return (
         <Router>
             <Header /> 

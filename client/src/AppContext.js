@@ -3,8 +3,10 @@ import { updateIpfsData, getIpfsData } from './web3-storage/ipfsStorage';
 
 const initialContext = {
   proposals: undefined,
+  setProposals: async () => {},
   updateProposals: async () => {},
   graphics: undefined,
+  setGraphics: async () => {},
   updateGraphics: async () => {}
   // nfts: undefined,
   // updateNfts: async () => {},
@@ -18,12 +20,22 @@ const appReducer = (state, { type, payload }) => {
     case "UPDATE_PROPOSALS": 
       return {
         ...state,
-        proposals: [...state.proposals, ...payload]
+        proposals: new Map([...state.proposals]).set(payload.id, payload)
       }
     case "UPDATE_GRAPHICS":
       return {
         ...state,
-        graphics: [...state.graphics, ...payload]
+        graphics: new Map([...state.proposals]).set(payload.id, payload)
+      }
+    case "SET_PROPOSALS": 
+      return {
+        ...state,
+        proposals: new Map([...payload])
+      }
+    case "SET_GRAPHICS": 
+      return {
+        ...state,
+        graphics: new Map([...payload])
       }
     default:
       return state;
@@ -43,13 +55,17 @@ export const AppContextProvider = ({ children }) => {
   
   const contextValue = {
     proposals: store.proposals,
+    setProposals: async () => {
+      let data = await getIpfsData('proposals');
+      dispatch({type: 'SET_PROPOSALS', payload: data})
+    },
     updateProposals: async payload => {
       let newData = await updateIpfsData('proposals', payload);
       dispatch({type: 'UPDATE_PROPOSALS', payload: newData }); // update appcontext
     },
     graphics: store.graphics,
     updateGraphics: async payload => {
-      let newData = await updateIpfsData('graphics', payload);
+      let newData = await updateIpfsData('graphics', payload); 
       dispatch({type: 'UPDATE_GRAPHICS', payload: newData }); // update appcontext
     }
   };
