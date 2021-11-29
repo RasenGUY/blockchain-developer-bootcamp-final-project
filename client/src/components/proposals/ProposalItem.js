@@ -32,9 +32,10 @@ export default function ProposalItem({id, type, title, description, value, propo
                     <Card.Title>{title}</Card.Title>
                     <Card.Text>
                         { description }
-                        <br/>
                         {
-                            typeof(value) !== 'object' ? `Proposed change: ${value}` : `Target: ${value[0]}, Value: ${value[1]}`
+                            value.map((v, i) => (
+                                <span clasName="mt-1" key={i}><bold>{v[0]}:</bold> {v[1]}</span>
+                            ))
                         }
                     </Card.Text>
 

@@ -45,13 +45,11 @@ export const AppContextProvider = ({ children }) => {
     proposals: store.proposals,
     updateProposals: async payload => {
       let newData = await updateIpfsData('proposals', payload);
-      alert("stored proposal on ipfs");
       dispatch({type: 'UPDATE_PROPOSALS', payload: newData }); // update appcontext
     },
     graphics: store.graphics,
     updateGraphics: async payload => {
       let newData = await updateIpfsData('graphics', payload);
-      alert("stored proposal on ipfs");
       dispatch({type: 'UPDATE_GRAPHICS', payload: newData }); // update appcontext
     }
   };
