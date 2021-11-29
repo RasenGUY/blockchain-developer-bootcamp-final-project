@@ -14,7 +14,7 @@ import { callContract } from '../../helpers/transactor';
 // for storage
 const slug = require('unique-slug');
 import { useAppContext } from '../../AppContext';
-
+import { initializeData, listUploads } from '../../web3-storage/ipfsStorage';
 
 export default function SystemProposalForm() {
     const { updateProposals } = useAppContext(); 
@@ -37,7 +37,9 @@ export default function SystemProposalForm() {
 
     const onSubmit = async (data) => {
         // create a proposalAction
-        const {targets, description, calldatas, values} = createProposalAction(watchAction, data[watchAction], slug() + data.description);
+        const input = data[watchAction][watchAction.replace(/(set)|(update)/, "").toUpperCase()[0] + watchAction.replace(/(set)|(update)/, "").toLowerCase().slice(1)]
+        console.log(createProposalAction(watchAction, input, slug() + data.description))
+        const {targets, description, calldatas, values} = createProposalAction(watchAction, input, slug() + data.description);
         
         // get proposal id from action values
         const proposalId = await governor.methods.hashProposal(targets, values, calldatas, toSha3(description)).call();
@@ -48,17 +50,23 @@ export default function SystemProposalForm() {
             type: data.type,
             title: data.title, 
             description: data.description, 
-            value: data[watchAction], 
+            value: Object.entries(data[watchAction]), 
             proposor: window.ethereum.selectedAddress
         }
         
         // propose workflow 
         let proposeCallData = proxy.methods.propose(targets, values, calldatas, description).encodeABI();
-        callContract(process.env.PROXY_CONTRACT, proposeCallData).then(async receipt => {
-            console.log("transaction mined", receipt);
-            console.log("stored proposal on ipfs")
-            updateProposals(storageObject);
-
+        callContract(process.env.PROXY_CONTRACT, proposeCallData).then(async ({transactionHash}) => {
+            let proposals = await listUploads('proposals');
+            alert(`transaction mined transaction hash: ${transactionHash}`);
+            if (proposals.length < 1){
+                alert("initializing ipfs storage for images");    
+                await initializeData('proposals', [storageObject]); 
+            } else {
+                alert("updating proposals on ipfs");    
+                updateProposals(storageObject);
+            }
+            alert("proposal created sucessfully");
         }).catch(e=> console.log(e))
     }
         
@@ -75,7 +83,7 @@ export default function SystemProposalForm() {
                     <option value="setVotingDelay">Change DAO Voting Delay</option>
                     <option value="setBaseReward">Change Token Rewards</option>
                     <option value="setRewardVotes">Change Reward For Votes</option>
-                    <option value="setTimelockDelay">Change Delay For The Timelocker</option>
+                    <option value="updateDelay">Change Delay For The Timelocker</option>
                     <option value="updateTimelock">Change Timelocker Address</option>
                     <option value="upgradeTo">Upgrade DAO To New Implementation</option>
                 </Form.Select>

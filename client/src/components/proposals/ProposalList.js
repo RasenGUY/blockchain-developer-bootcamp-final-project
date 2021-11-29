@@ -5,7 +5,7 @@ import { Col, Container } from 'react-bootstrap';
 
 // for loading the proposal intially
 import { useAppContext } from '../../AppContext';
-import { getProposals } from '../../web3-storage/ipfsStorage';
+import { getIpfsData } from '../../web3-storage/ipfsStorage';
 
 export default function ProposalList() {
     const { updateProposals, proposals: contextProposals } = useAppContext();
@@ -17,7 +17,7 @@ export default function ProposalList() {
             setProposals(contextProposals);
             setLoaded(true);
         } else { // if the context does not contain data then fetch
-            getProposals().then(data => {
+            getIpfsData('proposals').then(data => {
                 setProposals(data);
                 setLoaded(true);
             })

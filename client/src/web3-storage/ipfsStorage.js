@@ -25,7 +25,7 @@ async function checkStatus(cid){
 
 // @dev lists all uploaded 
 // @param folder api token to web3.account
-async function listUploads(folder) {  
+export async function listUploads(folder) {  
     const client = makeStorageClient();
     const uploads = [];
     for await (const upload of client.list()) {
@@ -104,7 +104,7 @@ async function storeWithProgress(files, name) {
     return client.put(files, { onRootCidReady, onStoredChunk, name: name})
 }
 
-async function storeFiles(files, name){
+export async function storeFiles(files, name){
     const client = makeStorageClient();
     const cid = await client.put(files, {name: name, wrapWithDirectory: false});
     console.log('stored files with cid: ', cid);
@@ -137,13 +137,14 @@ async function updateData(folder, payload){
     // updateData
 
 // proposals 
-export async function getProposals(){
-    let latestData = await getLatestData('proposals');
+export async function getIpfsData(folder){
+    // console.log(folder)
+    let latestData = await getLatestData(folder);
     return latestData;
 }
-export async function updateProposals(proposal) {
+export async function updateIpfsData(folder, proposal) {
     // find most recent data from folder
-    let latestData = await updateData('proposals', proposal);
+    let latestData = await updateData(folder, proposal);
     return latestData;   
 }
 
@@ -152,7 +153,6 @@ export async function updateProposals(proposal) {
 // initializes database
 export async function initializeData(folder, data){
     let jsonBlob = makeUploadFile(data);
-    console.log(jsonBlob);
     let cid = await storeFiles([jsonBlob], `${folder}-version-0.json`);
     console.log(`data stored succesfully at ${cid}`)
 }

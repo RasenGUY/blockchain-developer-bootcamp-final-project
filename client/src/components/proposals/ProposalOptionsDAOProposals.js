@@ -4,18 +4,24 @@ const slug = require('unique-slug');
 
 export default function ProposalOptionsDAOProposals({action, register}) { // creates a form box for inputs that users can choose
     const getType = action => {
-        // will add validation rules later
-        switch(action){
+        switch(action){ 
             case 'safeMintVector':
                 return [
-                    {type: 'text', placeholder: "Name of your vector", label: 'NftName'},
-                    {type: 'text', placeholder: "Description of Vector", label: 'NftDescription'},
-                    {type: 'text', placeholder: "Vector Category", label: 'NftCategory'},
-                    {type: 'text', placeholder: "Artist Handle", label: 'NftHandle'},
-                    {type: 'text', placeholder: "Address to whom to send Vote rewards", label: 'VotesRewardAddress'},
-                    {type: 'text', placeholder: "Address to whom to send token rewards", label: 'TokenRewardAddress'}                ];
+                    {type: 'text', placeholder: "The title of the image", label: 'ImageTitle'},
+                    {type: 'text', placeholder: "Description of the image", label: 'ImageDescription'},
+                    {type: 'text', placeholder: "Category of the image", label: 'ImageCategory'},
+                    {type: 'text', placeholder: "Artist Handle", label: 'Handle'},
+                    {type: 'text', placeholder: "Address to whom to send Vote and token rewards", label: 'RewardsAddress'}
+                ]
             default: 
-                return {type: 'text', placeholder: action.replace(/(set)|(update)/, "set target").toLowerCase()};
+                return [
+                    {
+                        type: 'text', 
+                        placeholder: action.replace(/(set)|(update)/, "").toUpperCase()[0] + action.replace(/((T|t)okens)|((V|v)otes)/, "").toLowerCase().slice(1) + "sAddress" 
+                        , 
+                        label: action.replace(/(set)|(update)/, "").toUpperCase()[0] + action.replace(/((T|t)okens)|((V|v)otes)/, "").toLowerCase().slice(1) + "sAddress" 
+                    }
+                ];
         }
     }
 
@@ -25,7 +31,7 @@ export default function ProposalOptionsDAOProposals({action, register}) { // cre
             <>
                 <InputGroup className="mt-2">
                     <InputGroup.Text>Type</InputGroup.Text>
-                    <FormControl type={'textarea'} aria-label={'Type'} placeholder="Accountabillity Proposal" value="Accountabillity Proposal" disabled/>
+                    <FormControl type={'textarea'} aria-label={'Type'} placeholder="DAO Proposal" value="DAO Proposal" disabled/>
                 </InputGroup>
 
                 <InputGroup className="mt-2">
@@ -39,51 +45,29 @@ export default function ProposalOptionsDAOProposals({action, register}) { // cre
                 </InputGroup>
                 
                 {
-                    action !== 'safeMintVector' 
-                    ?
-                    <InputGroup className="mt-2">
-                    
-                    <InputGroup.Text>
-                        {action.replace(/(set)|(update)/, "").toUpperCase()[0] + action.replace(/(set)|(update)/, "").toLowerCase().slice(1)}
-                    </InputGroup.Text>
-                        <FormControl 
-                            type={getType(action).type} 
-                            aria-label={action} 
-                            placeholder={getType(action).placeholder} 
-                            {...register(action)} 
-                        />
-
-                    </InputGroup>
-                    :
-                    [
-                        ...getType(action).map((item, i) => (
-                                <InputGroup key={i} className="mt-2">
-                                    <InputGroup.Text>
-                                        {item.label}
-                                    </InputGroup.Text>
-                                        <FormControl 
-                                            type={item.type} 
-                                            aria-label={item.label} 
-                                            placeholder={item.placeholder} 
-                                            {...register(`${String(action)+"."+String(item.label)}`)} 
-                                        />
-                                </InputGroup>
-                        )),
-                        <InputGroup key={slug()} className="mt-2">
-
+                    getType(action).map((item, i) => (
+                    <InputGroup key={i} className="mt-2">
+                        <InputGroup.Text>
+                            {item.label}
+                        </InputGroup.Text>
                             <FormControl 
-                                type="file" 
-                                multilple
-                                ref={React.createRef()} 
-                                {...register(`${String(action)+"."+"uploadedFiles"}`)} 
+                                type={item.type} 
+                                aria-label={item.label} 
+                                placeholder={item.placeholder} 
+                                {...register(`${String(action)+"."+String(item.label)}`)} 
                             />
-                        </InputGroup>
-                            
-                    ]
-                    // <InputGroup>{console.log(getType(action))}</InputGroup>
-
+                    </InputGroup>))
                 }
-                
+                {
+                    action === 'safeMintVector' 
+                    && <InputGroup key={slug()} className="mt-2">
+                        <FormControl 
+                        type="file" 
+                        ref={React.createRef()} 
+                        {...register(`${String(action)+"."+"uploadedFiles"}`)} />
+                    </InputGroup>
+                }
+
             </>
             :
             null

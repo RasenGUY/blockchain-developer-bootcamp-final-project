@@ -8,17 +8,17 @@ import { createProposalAction, } from '../../helpers/createProposal';
 import { useContract } from '../../hooks/useContract';
 import governorArtifact from '../../contracts/IkonDAOGovernor.json';
 import daoArtifact from '../../contracts/IkonDAO.json';
-import { toSha3 } from '../../utils/utils';
+import { toSha3, stringToHex } from '../../utils/utils';
 import { callContract } from '../../helpers/transactor';
 
 // for storage
 const slug = require('unique-slug');
 import { useAppContext } from '../../AppContext';
+import { storeFiles, initializeData, listUploads } from '../../web3-storage/ipfsStorage';
 
 export default function DAOProposalForm() {
-    const { updateProposals } = useAppContext(); 
+    const { updateProposals, updateGraphics } = useAppContext(); 
     const { 
-        control,
         register, 
         handleSubmit, 
         watch,
@@ -39,40 +39,88 @@ export default function DAOProposalForm() {
 
     const onSubmit = async (data) => {
         // create a proposalAction
-        console.log(data[watchAction]);
 
-        // let proposalData;
-        // if (watchAction === 'slashVotes'){
-        //     const inputs = {
-        //         target: data[watchAction].Member,
-        //         value: data[watchAction].Votes
-        //     };
-        //     proposalData = createProposalAction(watchAction, inputs, slug() + data.description);
-        // } else {
-        //     proposalData = createProposalAction(watchAction, data[watchAction], slug() + data.description)
-        // }
-        // const {targets, description, calldatas, values} = proposalData; 
+        let proposalData;
+        let vectorData;
+        if (watchAction === 'safeMintVector'){
+            // creates object to store vector data  
+            vectorData = {};
+            proposalData = {};
+            let file = data[watchAction].uploadedFiles[0];
+            
+            vectorData.status = 1;
+            vectorData.description = data[watchAction].ImageDescription 
+            vectorData.image = await storeFiles([file], `${slug()}-file-${file.name}`);
+            vectorData.external_url = `https://${vectorData.image}.ipfs.dweb.link`;
+            vectorData.name = data[watchAction].ImageTitle
+            vectorData.category = data[watchAction].ImageCategory
+            vectorData.artistHandle = data[watchAction].Handle; 
         
-        // // get proposal id from action values
-        // const proposalId = await governor.methods.hashProposal(targets, values, calldatas, toSha3(description)).call();
+            // create proposal information for blockchain storage 
+            proposalData = createProposalAction(
+                watchAction, 
+                {
+                    nft: {
+                        category: toSha3(vectorData.category),
+                        imageHash: vectorData.image, // update to accept imageHash as is instead of string type
+                    }, 
+                    proposer: data[watchAction].RewardsAddress
+                }, 
+                slug() + data.description
+            );
+            
+            // extracts proposalId for vectorData info
+            const {targets, values, calldatas, description} = proposalData;
+            const proposalId = await governor.methods.hashProposal(targets, values, calldatas, toSha3(description)).call(); 
+            vectorData.proposalId = proposalId;
 
-        // // // for storage of proposal 
-        // const storageObject = {
-        //     id: proposalId, 
-        //     type: data.type,
-        //     title: data.title, 
-        //     description: data.description, 
-        //     value: watchAction === 'slashVotes' ? [data[watchAction].Member, data[watchAction].Votes] : data[watchAction], 
-        //     proposor: window.ethereum.selectedAddress
-        // }
+        } else {
+            const input = watchAction.replace(/(set)|(update)/, "").toUpperCase()[0] + watchAction.replace(/((T|t)okens)|((V|v)otes)/, "").toLowerCase().slice(1) + "sAddress"
+            proposalData = createProposalAction(watchAction, data[watchAction][input], slug() + data.description)
+        }
+
+        // get proposal id from action values
+        const {targets, description, calldatas, values} = proposalData; 
+        const proposalId = await governor.methods.hashProposal(targets, values, calldatas, toSha3(description)).call();
         
-        // // propose workflow 
-        // let proposeCallData = proxy.methods.propose(targets, values, calldatas, description).encodeABI();
-        // callContract(process.env.PROXY_CONTRACT, proposeCallData).then(async receipt => {
-        //     console.log("transaction mined", receipt);
-        //     console.log("stored proposal on ipfs")
-        //     updateProposals(storageObject);
-        // }).catch(e=> console.log(e));
+        // for storage of proposal 
+        const storageObject = {
+            id: proposalId, 
+            type: data.type,
+            title: data.title, 
+            description: data.description, 
+            value: watchAction === 'safeMintVector' 
+            ? [['RewardsAddress', data[watchAction]['RewardsAddress']], [ 'Image url', vectorData.external_url ], ['CID', vectorData.image ] ]
+            : Object.entries(data[watchAction]), 
+            proposor: window.ethereum.selectedAddress
+        }
+        
+        // propose workflow 
+        let proposeCallData = proxy.methods.propose(targets, values, calldatas, description).encodeABI();
+        callContract(process.env.PROXY_CONTRACT, proposeCallData).then(async ({transactionHash}) => {
+            
+            let images = await listUploads('graphics');
+            let proposals = await listUploads('proposals');
+            alert(`transaction mined transaction hash: ${transactionHash}`);
+            if (watchAction === 'safeMintVector'){
+                
+                if (images.length < 1){
+                    alert("initializing ipfs storage for images");    
+                    await initializeData('graphics', [vectorData]);
+                } else {
+                    await updateGraphics(vectorData);
+                }
+                alert("stored vector information on ipfs");
+            }
+            if (proposals.length < 1){
+                alert("initializing ipfs storage for proposals");
+                await initializeData('proposals', storageObject);
+            } else {
+                await updateProposals(storageObject);
+            }
+            alert("proposal created sucessfully");
+
+        }).catch(e=> console.log(e));
     }
     return (
         <Form onSubmit={handleSubmit(onSubmit)}>

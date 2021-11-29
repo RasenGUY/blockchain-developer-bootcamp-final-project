@@ -1,9 +1,11 @@
 import React, { createContext, useReducer } from 'react';
-import { updateProposals, getProposals } from './web3-storage/ipfsStorage';
+import { updateIpfsData, getIpfsData } from './web3-storage/ipfsStorage';
 
 const initialContext = {
   proposals: undefined,
   updateProposals: async () => {},
+  graphics: undefined,
+  updateGraphics: async () => {}
   // nfts: undefined,
   // updateNfts: async () => {},
   // vectors: undefined,
@@ -18,17 +20,11 @@ const appReducer = (state, { type, payload }) => {
         ...state,
         proposals: [...state.proposals, ...payload]
       }
-
-    // case "UPDATE_NFTS":
-    //   return {
-    //     ...state,
-    //     nfts: [...state.nfts, ...payload]
-    //   }
-    // case 'UPDATE_VECTORS': 
-    //   return {
-    //     ...state,
-    //     vectors: [...state.vectors, ...payload]
-    //   }
+    case "UPDATE_GRAPHICS":
+      return {
+        ...state,
+        graphics: [...state.graphics, ...payload]
+      }
     default:
       return state;
   }
@@ -38,17 +34,25 @@ const AppContext = createContext(initialContext);
 export const useAppContext = () => React.useContext(AppContext);
 
 export const AppContextProvider = ({ children }) => {
-  // initialize  
-  getProposals().then(data => initialContext.proposals = data);
   
+  // initialize  
+  getIpfsData('proposals').then(data => initialContext.proposals = data);
+  // getIpfsData('graphics').then(data => initialContext.graphics = data);
+
   const [store, dispatch] = useReducer(appReducer, initialContext);
   
-
   const contextValue = {
     proposals: store.proposals,
     updateProposals: async payload => {
-      let newData = await updateProposals(payload);
-      dispatch({type: 'UPDATE_PROPOSALS', payload: newData }) // update appcontext
+      let newData = await updateIpfsData('proposals', payload);
+      alert("stored proposal on ipfs");
+      dispatch({type: 'UPDATE_PROPOSALS', payload: newData }); // update appcontext
+    },
+    graphics: store.graphics,
+    updateGraphics: async payload => {
+      let newData = await updateIpfsData('graphics', payload);
+      alert("stored proposal on ipfs");
+      dispatch({type: 'UPDATE_GRAPHICS', payload: newData }); // update appcontext
     }
   };
 

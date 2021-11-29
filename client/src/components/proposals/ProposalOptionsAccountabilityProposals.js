@@ -10,10 +10,8 @@ export default function ProposalOptionsAccountabilityProposals({action, register
                     {type: 'text', placeholder: "Member Address", label: 'Member'},
                     {type: 'number', placeholder: "Number of votes to take away", label: 'Votes'}
                 ];
-            case 'banMember':
-                return {type: 'text', placeholder: "Address to ban"};
             default: 
-                return {type: 'number', placeholder: action.replace(/(set)|(update)/, "set ").toLowerCase()};
+                return [{type: 'text', placeholder: "Address to ban", label: "Member"}];
         }
     }
 
@@ -37,23 +35,7 @@ export default function ProposalOptionsAccountabilityProposals({action, register
                 </InputGroup>
                 
                 {
-                    action === 'banMember' 
-                    ?
-                    <InputGroup className="mt-2">
-                    
-                    <InputGroup.Text>
-                        {action.replace(/(set)|(update)/, "").toUpperCase()[0] + action.replace(/(set)|(update)/, "").toLowerCase().slice(1)}
-                    </InputGroup.Text>
-                        <FormControl 
-                            type={getType(action).type} 
-                            aria-label={action} 
-                            placeholder={getType(action).placeholder} 
-                            {...register(action)} 
-                        />
-
-                    </InputGroup>
-                    :
-                    getType(action).map((item, i) => (
+                    [...getType(action).map((item, i) => (
                         <InputGroup key={i} className="mt-2">
                             <InputGroup.Text>
                                 {item.label}
@@ -65,9 +47,7 @@ export default function ProposalOptionsAccountabilityProposals({action, register
                                     {...register(`${String(action)+"."+String(item.label)}`)} 
                                 />
                         </InputGroup>
-                    ))
-                    // <InputGroup>{console.log(getType(action))}</InputGroup>
-
+                    ))]
                 }
                 
             </>

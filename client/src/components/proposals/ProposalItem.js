@@ -23,7 +23,7 @@ export default function ProposalItem({id, type, title, description, value, propo
         <Container className="proposalItem" style={{padding: "2rem 0rem"}}  as="div" fluid>
             <Card >
                 <Card.Header as='div'  className="d-flex flex-column justify-content-start">
-                        <Badge className="mt-2" bg={state ? proposalStatus[state].color : null} style={{width: "15%"}} >{state ? proposalStatus[state].text : null}</Badge>
+                        <Badge className="mt-2" bg={state ? proposalStatus[state].color : null} style={{width: "15%"}} >{state ? proposalStatus[state].text : "..loading"}</Badge>
                         <Badge className="mt-2" style={{width: "15%"}}>{type}</Badge>
                         <Badge className="mt-2" style={{width: "9.2%"}}>{shortenAddress(id)}</Badge>
                         <Badge className="mt-2" style={{width: "32.5%"}}>{proposor}</Badge>

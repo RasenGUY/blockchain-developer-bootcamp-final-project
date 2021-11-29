@@ -67,10 +67,10 @@ export function createProposalAction(action, inputs, description){ // returns an
                 // values
             )
 
-        case "setTimelockDelay":
+        case "updateDelay":
             return new Proposal(
                 process.env.TIMELOKCER_CONTRACT, // targets,
-                timelocker.methods.setTimelockDelay(Number(inputs)).encodeABI(),// calldatas
+                timelocker.methods.updateDelay(Number(inputs)).encodeABI(),// calldatas
                 description // description
                 // values
             )
@@ -120,7 +120,7 @@ export function createProposalAction(action, inputs, description){ // returns an
         case "rewardVotes":
             return new Proposal(
                 process.env.GOV_TOKEN_CONTRACT, // targets,
-                token.methods.rewardVotes(inputs).encodeABI(),// calldatas
+                govToken.methods.rewardVotes(inputs).encodeABI(),// calldatas
                 description // description
                 // values
             )
@@ -130,16 +130,12 @@ export function createProposalAction(action, inputs, description){ // returns an
                 [
                     process.env.NFT_CONTRACT,
                     process.env.GOV_TOKEN_CONTRACT,
-                    processe.env.UTILITY_TOKEN_CONTRACT
+                    process.env.UTILITY_TOKEN_CONTRACT
                 ], // targets,
                 [
                     nft.methods.safeMintVector(
-                        inputs.nft.name,
-                        inputs.nft.description,
-                        inputs.nft.externalLink,
                         inputs.nft.imageHash,
-                        inputs.nft.category,
-                        inputs.nft.handle
+                        inputs.nft.category
                     ).encodeABI(),
                     govToken.methods.rewardVotes(inputs.proposer).encodeABI(),
                     token.methods.rewardTokens(inputs.proposer).encodeABI()

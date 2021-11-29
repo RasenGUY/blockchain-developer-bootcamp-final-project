@@ -13,12 +13,12 @@ import { callContract } from '../../helpers/transactor';
 
 // for storage
 const slug = require('unique-slug');
+import { initializeData, listUploads } from '../../web3-storage/ipfsStorage';
 import { useAppContext } from '../../AppContext';
 
 export default function AccountabilityProposalForm() {
     const { updateProposals } = useAppContext(); 
     const { 
-        control,
         register, 
         handleSubmit, 
         watch,
@@ -30,16 +30,12 @@ export default function AccountabilityProposalForm() {
     });
 
     const watchAction = watch('action', "slashVotes"); 
-    // slashVotes
-    // banMember
 
     // create governorInst for hashing proposal and proxy inst for calling propose
     const governor = useContract(process.env.GOVERNOR_CONTRACT, governorArtifact.abi);
     const proxy  = useContract(process.env.PROXY_CONTRACT, daoArtifact.abi);
 
     const onSubmit = async (data) => {
-        // create a proposalAction
-
         let proposalData;
         if (watchAction === 'slashVotes'){
             const inputs = {
@@ -48,7 +44,7 @@ export default function AccountabilityProposalForm() {
             };
             proposalData = createProposalAction(watchAction, inputs, slug() + data.description);
         } else {
-            proposalData = createProposalAction(watchAction, data[watchAction], slug() + data.description)
+            proposalData = createProposalAction(watchAction, data[watchAction].Member, slug() + data.description)
         }
         const {targets, description, calldatas, values} = proposalData; 
         
@@ -61,16 +57,25 @@ export default function AccountabilityProposalForm() {
             type: data.type,
             title: data.title, 
             description: data.description, 
-            value: watchAction === 'slashVotes' ? [data[watchAction].Member, data[watchAction].Votes] : data[watchAction], 
+            value: Object.entries(data[watchAction]), 
             proposor: window.ethereum.selectedAddress
         }
-        
+
         // propose workflow 
         let proposeCallData = proxy.methods.propose(targets, values, calldatas, description).encodeABI();
-        callContract(process.env.PROXY_CONTRACT, proposeCallData).then(async receipt => {
-            console.log("transaction mined", receipt);
-            console.log("stored proposal on ipfs")
-            updateProposals(storageObject);
+        callContract(process.env.PROXY_CONTRACT, proposeCallData).then(async ({transactionHash}) => {
+            
+            let proposals = await listUploads('proposals');
+            alert(`transaction mined transaction hash: ${transactionHash}`);
+            if (proposals.length < 1){
+                alert("initializing ipfs storage for images");    
+                await initializeData('proposals', [storageObject]); 
+            } else {
+                alert("updating proposals on ipfs");    
+                updateProposals(storageObject);
+            }
+            alert("proposal created sucessfully");
+
         }).catch(e=> console.log(e));
     }
     return (

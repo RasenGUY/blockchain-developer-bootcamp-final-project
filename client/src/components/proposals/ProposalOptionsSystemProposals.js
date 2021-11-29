@@ -5,12 +5,23 @@ export default function ProposalOptionsSystemProposals({action, register}) { // 
     const getType = action => {
         // will add validation rules later
         switch(action){
-            case 'upgradeTo':
-                return {type: 'text', placeholder: "New Address"};
+            case 'upgradeTo': 
             case 'updateTimelock':
-                return {type: 'text', placeholder: "New Address"};
+                return [
+                    {
+                        type: 'text', 
+                        placeholder: "Upgrade Address ", 
+                        label: action.replace(/(set)|(update)/, "").toUpperCase()[0] + action.replace(/(set)|(update)/, "").toLowerCase().slice(1)
+                    }
+                ];
             default: 
-                return {type: 'number', placeholder: action.replace(/(set)|(update)/, "set ").toLowerCase()};
+                return [
+                    {
+                        type: 'number', 
+                        placeholder: action.replace(/(set)|(update)/, "set ").toLowerCase(), 
+                        label: action.replace(/(set)|(update)/, "").toUpperCase()[0] + action.replace(/(set)|(update)/, "").toLowerCase().slice(1)
+                    }
+                ];
         }
     }
 
@@ -33,17 +44,21 @@ export default function ProposalOptionsSystemProposals({action, register}) { // 
                     <FormControl type={'textarea'} aria-label={'Description'} placeholder={'describe your proposal'} {...register('description')} />
                 </InputGroup>
                 
-                <InputGroup className="mt-2">
-                    <InputGroup.Text>{
-                    action.replace(/(set)|(update)/, "").toUpperCase()[0] + action.replace(/(set)|(update)/, "").toLowerCase().slice(1) 
-                    }</InputGroup.Text>
-                    <FormControl 
-                        type={getType(action).type} 
-                        aria-label={action} 
-                        placeholder={getType(action).placeholder} 
-                        {...register(action)} 
-                    />
-                </InputGroup>
+                {
+                    [...getType(action).map((item, i) => (
+                        <InputGroup key={i} className="mt-2">
+                            <InputGroup.Text>
+                                {item.label}
+                            </InputGroup.Text>
+                                <FormControl 
+                                    type={item.type} 
+                                    aria-label={item.label} 
+                                    placeholder={item.placeholder} 
+                                    {...register(`${String(action)+"."+String(item.label)}`)} 
+                                />
+                        </InputGroup>
+                    ))]
+                }
             </>
             :
             null
