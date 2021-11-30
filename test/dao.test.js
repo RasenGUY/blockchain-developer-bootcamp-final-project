@@ -771,12 +771,8 @@ contract("IkonDAO (proxy)", accounts => {
             it("it mints nfts through proposal", async () => {
                 
                 let nftArgs = {
-                    name: web3.utils.utf8ToHex("test vector"),
-                    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua",
-                    externalLink: web3.utils.utf8ToHex("IkonDao.nfts.com"),
-                    imageHash: web3.utils.utf8ToHex("oidiuaerahdfaoi"),
+                    imageHash: "oidiuaerahdfaoi",
                     category: web3.utils.utf8ToHex("Things"),
-                    handle: web3.utils.utf8ToHex("rasguymedia")
                 }
                 
                 let proposal = new Proposal(
@@ -787,12 +783,8 @@ contract("IkonDAO (proxy)", accounts => {
                     ],
                     [
                         nftInst.methods.safeMintVector(
-                            nftArgs.name,
-                            nftArgs.description,
-                            nftArgs.externalLink,
                             nftArgs.imageHash,
-                            nftArgs.category,
-                            nftArgs.handle
+                            nftArgs.category
                         ).encodeABI(),
                         govTokenInst.methods.rewardVotes(carl).encodeABI(),
                         tokenInst.methods.rewardTokens(carl).encodeABI()
@@ -817,7 +809,6 @@ contract("IkonDAO (proxy)", accounts => {
                     proposalState,
                     settings
                 )
-
                 let [state] = testResults;
                 assert.isTrue(Number(state.toString()) === proposalState.Executed, "does not create nft on proposal execution");
             });

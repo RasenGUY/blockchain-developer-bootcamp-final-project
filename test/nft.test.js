@@ -11,7 +11,7 @@ const IkonDAOToken = artifacts.require('IkonDAOToken');
 const IkonDAOGovernor = artifacts.require('IkonDAOGovernor');
 const IkonDAOTimelockController = artifacts.require('Timelock');
 const IkonDAOGovernanceToken = artifacts.require('IkonDAOGovernanceToken');
-const { unitToBN, toBN } = require("./helpers");
+const { unitToBN, toBN, toSha3 } = require("./helpers");
 // const web3 = require("web3"); 
 // const web3 = new Web
 
@@ -106,8 +106,6 @@ contract("IkonDao (nft)", accounts => {
     describe("Minting", () => {
         let categoryOne = 'Things';
         let categoryTwo = 'Animals';
-        let desc = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua";
-        let externalLink = "IkonDao.nfts.com";
         let token1, token2, token3; 
         
         beforeEach( async () => {
@@ -115,28 +113,16 @@ contract("IkonDao (nft)", accounts => {
             nft = await IkonDAOVectorCollectible.new(daoProxy.address); 
         
             token1 = [
-                web3.utils.utf8ToHex("Lame Thing"),
-                desc,
-                web3.utils.utf8ToHex(externalLink),
-                web3.utils.utf8ToHex("iueroiarojdsf"),
-                web3.utils.utf8ToHex(categoryOne),
-                web3.utils.utf8ToHex("Ruben G")
+                "iueroiarojdsf",
+                web3.utils.utf8ToHex(categoryOne)
             ]
             token2 = [
-                web3.utils.utf8ToHex("Sad Bunny"),
-                desc,
-                web3.utils.utf8ToHex(externalLink),
-                web3.utils.utf8ToHex("OIUEWRQOJDFSS"),
-                web3.utils.utf8ToHex(categoryTwo),
-                web3.utils.utf8ToHex("Leroy G")
+                "OIUEWRQOJDFSS",
+                web3.utils.utf8ToHex(categoryTwo)
             ]
             token3 = [
-                web3.utils.utf8ToHex("Happy Bunny"),
-                desc,
-                web3.utils.utf8ToHex(externalLink),
-                web3.utils.utf8ToHex("kuhfiulsahfiuh"),
-                web3.utils.utf8ToHex(categoryTwo),
-                web3.utils.utf8ToHex("Fefe G")
+                "bafkreid6uin2lpoqoz46tvc…qfetbf5jksefe6nk4qutj24",
+                web3.utils.utf8ToHex(categoryTwo)
             ]
         });
             
@@ -144,24 +130,16 @@ contract("IkonDao (nft)", accounts => {
         it("allows only minter role to mint tokens", async () => {
             await expect(nft.safeMintVector(
                 token1[0], 
-                token1[1], 
-                token1[2], 
-                token1[3], 
-                token1[4], 
-                token1[5], 
+                token1[1],
+                 
                 {from: other}
             )).to.be.rejected; 
         });
         it("it pauses functionalities", async () => {
             await nft.pause({from: owner});
-
             await expect(nft.safeMintVector(
                 token1[0], 
                 token1[1], 
-                token1[2], 
-                token1[3], 
-                token1[4], 
-                token1[5], 
                 {from: owner}
             )).to.be.rejected;
             await nft.unpause({from: owner});
@@ -172,15 +150,16 @@ contract("IkonDao (nft)", accounts => {
         });
 
         it("it gives ownership of minted token to dao", async () => {
-            await nft.safeMintVector(
-                token2[0], 
-                token2[1], 
-                token2[2], 
-                token2[3], 
-                token2[4], 
-                token2[5], 
-                {from: owner}
-            );
+            try {
+                await nft.safeMintVector(
+                    token2[0], 
+                    token2[1], 
+                    {from: owner}
+                );
+
+            } catch (e){
+                console.log(e)
+            }
             
             let tokenOwner = await nft.ownerOf(0, {from: alice});
             assert.equal(tokenOwner, daoProxy.address, "dao should be owner of the token");
@@ -190,10 +169,6 @@ contract("IkonDao (nft)", accounts => {
             await nft.safeMintVector(
                 token1[0], 
                 token1[1], 
-                token1[2], 
-                token1[3], 
-                token1[4], 
-                token1[5], 
                 {from: owner}
             );
             let categories = await nft.getCategories();
@@ -205,28 +180,16 @@ contract("IkonDao (nft)", accounts => {
             await nft.safeMintVector(
                 token1[0], 
                 token1[1], 
-                token1[2], 
-                token1[3], 
-                token1[4], 
-                token1[5], 
                 {from: owner}
             )
             await nft.safeMintVector(
                 token2[0], 
                 token2[1], 
-                token2[2], 
-                token2[3], 
-                token2[4], 
-                token2[5], 
                 {from: owner}
             )
             await nft.safeMintVector(
                 token3[0], 
                 token3[1], 
-                token3[2], 
-                token3[3], 
-                token3[4], 
-                token3[5], 
                 {from: owner}
             )            
             
@@ -239,41 +202,35 @@ contract("IkonDao (nft)", accounts => {
             await nft.safeMintVector(
                 token2[0], 
                 token2[1], 
-                token2[2], 
-                token2[3], 
-                token2[4], 
-                token2[5],  
                 {from: owner}
             )
             
             let metadata = await nft.getMetadata(0);
 
-            assert.equal(web3.utils.hexToUtf8( metadata[0]), "Sad Bunny", "does not set correct metadata 'name'");            
-            assert.equal(metadata[1].toString(), desc, "does not set correct metadata 'description'");            
-            assert.equal(web3.utils.hexToUtf8(metadata[2]), externalLink, "does not set correct metadata 'external link'");            
-            assert.equal(web3.utils.hexToUtf8(metadata[3]), "OIUEWRQOJDFSS", "does not set correct metadata 'image'");            
-            assert.equal(web3.utils.hexToUtf8(metadata[4]), categoryTwo, "does not set correct metadata 'category'");            
-            assert.equal(web3.utils.hexToUtf8(metadata[5]), "Leroy G", "does not set correct metadata 'artist handle'");            
+            assert.equal(metadata[0], "OIUEWRQOJDFSS", "does not set correct metadata 'image'");            
+            assert.equal(web3.utils.hexToUtf8(metadata[1]), categoryTwo, "does not set correct metadata 'category'");            
+        });
+
+        it("retrieves token by sha of image hash", async () => {
+            await nft.safeMintVector(
+                token3[0], 
+                token3[1], 
+                {from: owner}
+            )
+            let tokenId = await nft.retrieveByHash(toSha3(token3[1]));
+            assert.equal(tokenId.toNumber(), 0, "does not set correct metadata 'category'");            
         });
 
         it("rejects minting of taken (image already exists) contracts", async ()=>{
             await nft.safeMintVector(
                 token2[0], 
                 token2[1], 
-                token2[2], 
-                token2[3], 
-                token2[4], 
-                token2[5],  
                 {from: owner}
             )
 
             await expect(nft.safeMintVector(
                 token2[0], 
                 token2[1], 
-                token2[2], 
-                token2[3], 
-                token2[4], 
-                token2[5],  
                 {from: owner}
             )).to.be.rejected 
 

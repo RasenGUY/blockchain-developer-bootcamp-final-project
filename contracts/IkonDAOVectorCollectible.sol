@@ -19,16 +19,11 @@ import "./Constants.sol";
 /// @custom:security-contact ftrouw@protonmail.com
 contract IkonDAOVectorCollectible is ERC721, ERC721Enumerable, ERC721URIStorage, Pausable, AccessControl, Constants {
     using Counters for Counters.Counter;
-
     Counters.Counter private _tokenIdCounter;
 
     struct Metadata {
-        bytes32 name;
-        string description;
-        bytes32 externalLink;
-        bytes32 image; 
+        string image; 
         bytes32 category;
-        bytes32 artistHandle;
     }
 
     struct Category {
@@ -38,7 +33,7 @@ contract IkonDAOVectorCollectible is ERC721, ERC721Enumerable, ERC721URIStorage,
     mapping(uint256 => Metadata) private tokenMetadata;
     Category[] private categoryList;
     mapping(bytes32 => bool) private isCategory; 
-    
+    mapping(bytes32 => uint256) private nftsByHash;
 
     address _DAO;  /// maps category to list of tokens that belong to it
 
@@ -67,47 +62,43 @@ contract IkonDAOVectorCollectible is ERC721, ERC721Enumerable, ERC721URIStorage,
         _unpause();
     }
 
-    function safeMint(address _to) private {
+    /// @dev retrieves nft's by sha of imageHash\
+    /// @param _shaImagehash hash to which token is mapped 
+    function retrieveByHash(bytes32 _shaImagehash) public view returns(uint256){
+        return nftsByHash[_shaImagehash];
+    }  
+
+    /// @dev mints nft to a receiver
+    /// @param _to nft receiver
+    /// @param _shaImageHash sha3 of image hash
+    function safeMint(address _to, bytes32 _shaImageHash) private {
         _safeMint(_to, _tokenIdCounter.current());
+        nftsByHash[_shaImageHash] = _tokenIdCounter.current();
         _tokenIdCounter.increment();
     }
 
     /// @dev mints vector token for the icon dao
-    /// @param _name of vector
-    /// @param _description description of token
-    /// @param _externalLink external link of vector
     /// @param _imageHash of vector      
-    /// @param _category category under which the vector falls      
-    /// @param _handle artist handle to give credit to artist
+    /// @param _category category under which the vector falls
     function safeMintVector(
-        bytes32 _name, 
-        string memory _description, 
-        bytes32 _externalLink, 
-        bytes32 _imageHash,
-        bytes32 _category, 
-        bytes32 _handle
+        string calldata _imageHash,
+        bytes32 _category
         ) external onlyRole(MINTER_ROLE) whenNotPaused {
         
         uint256 tokenId = _tokenIdCounter.current();
-
         if (tokenId != 0){ // only check after minting of the first token
             require(!isImageTaken(_imageHash), NFT_ALREADY_EXISTS); 
         } 
         
         /// metadata
         Metadata memory metadata = Metadata({
-            description: _description,
-            artistHandle: _handle, 
             category: _category,
-            externalLink: _externalLink,
-            image: _imageHash,
-            name: _name
+            image: _imageHash
         });
 
         if (!isCategory[_category]){ 
             
-            safeMint(_DAO); // mint new nft 
-            
+            safeMint(_DAO, keccak256(abi.encodePacked(_imageHash))); // mint new nft 
             Category memory category = Category({
                 name: _category
             }); // create new category 
@@ -118,8 +109,9 @@ contract IkonDAOVectorCollectible is ERC721, ERC721Enumerable, ERC721URIStorage,
 
         }  else {
 
-            safeMint(_DAO);
+            safeMint(_DAO, keccak256(abi.encodePacked(_imageHash)));
             tokenMetadata[tokenId] = metadata;
+
         }
 
         emit VectorMinted(tokenId, _DAO);
@@ -128,13 +120,14 @@ contract IkonDAOVectorCollectible is ERC721, ERC721Enumerable, ERC721URIStorage,
     /// @dev returns true image hash of a to-be-minted nft already exists
     /// @param imageHash ipfs hash of the image in in bytes32 format
     /// @notice this functions acts as an extra check to make sure that only unique vectors (i.e. they must have a unique image hash) can 
-    function isImageTaken(bytes32 imageHash) private view returns (bool exists) {
+    function isImageTaken(string calldata imageHash) private view returns (bool exists) {
         for (uint i = 0; i < _tokenIdCounter.current(); i++){
-            if (tokenMetadata[i].image == imageHash){
+            if (keccak256(abi.encodePacked(tokenMetadata[i].image)) == keccak256(abi.encodePacked(imageHash))){
                 exists = true;
             }
         }
     }
+
     function getCategories() external view returns (Category[] memory) {
         return(categoryList);
     }

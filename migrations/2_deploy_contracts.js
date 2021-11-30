@@ -42,7 +42,11 @@ module.exports = async function (deployer, networks, accounts) {
 
   // users and initial users for contract
   let owner = accounts[0]
-  let [alice, bob, carl, david] = [process.env.ALICE_ADDRESS, process.env.BOB_ADDRESS, process.env.CARL_ADDRESS, process.env.DAVID_ADDRESS]
+  let [alice, bob, carl, david] = networks !== 'development' 
+  ? [process.env.ALICE_ADDRESS, process.env.BOB_ADDRESS, process.env.CARL_ADDRESS, process.env.DAVID_ADDRESS]
+  : [accounts[2], accounts[3], accounts[4], accounts[5]]
+
+  
   let initialUsers = [owner, alice, bob, carl, david];
   let proposers = [owner]
   let executors = [owner]

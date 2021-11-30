@@ -10,11 +10,13 @@
     "@openzeppelin/truffle-upgrades": "^1.10.0",
     "@truffle/contract": "^4.3.38",
     "@truffle/hdwallet-provider": "^1.7.0",
+    "axios": "^0.24.0",
     "big.js": "^6.1.1",
     "bn.js": "^5.2.0",
     "dotenv": "^10.0.0",
     "ganache-core": "^2.13.2",
     "truffle-contract-size": "^2.0.1",
+    "unique-slug": "^2.0.2",
     "web3": "^1.6.0"
   }
 }
