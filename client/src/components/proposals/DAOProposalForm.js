@@ -113,19 +113,20 @@ export default function DAOProposalForm() {
                     alert("initializing ipfs storage for images");    
                     await initializeData('graphics', [vectorData]);
                 } else {
+                    alert("updating graphics on ipfs");    
                     await updateGraphics(vectorData);
+                    alert("graphics updated");    
                 }
                 alert("stored vector information on ipfs");
             }
             if (proposals.length < 1){
                 alert("initializing ipfs storage for proposals");
-                await initializeData('proposals', storageObject);
+                await initializeData('proposals', [storageObject]);
             } else {
                 await updateProposals(storageObject);
             }
             alert("proposal created sucessfully");
-
-        }).catch(e=> console.log(e));
+        });
     }
     return (
         <Form onSubmit={handleSubmit(onSubmit)}>

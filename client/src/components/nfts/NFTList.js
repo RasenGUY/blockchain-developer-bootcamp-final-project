@@ -8,7 +8,7 @@ import {useGraphics} from '../../hooks/useGraphics';
 export default function NFTList() {
     // retrieve nft's from web3.storage
     const [loaded, setLoaded] = useState(false);
-    // const graphics = useGraphics(setLoaded, loaded);
+    const graphics = useGraphics(setLoaded);
     // console.log(graphics);
     const nfts = {
         "asndfasdflkjsd 1" : {

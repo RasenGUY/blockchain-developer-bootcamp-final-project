@@ -6,7 +6,7 @@ import nftArtifact from '../contracts/IkonDAOVectorCollectible.json';
 import { useContract } from './useContract';
 import { mergeIpfsData } from '../web3-storage/ipfsStorage';
 
-export function useGraphics(setLoaded, loaded) {
+export function useGraphics(setLoaded) {
     const { setGraphics, graphics } = useAppContext();
     const nft = useContract(process.env.NFT_CONTRACT, nftArtifact.abi);
     
@@ -14,22 +14,25 @@ export function useGraphics(setLoaded, loaded) {
         if (!graphics){
             setGraphics();
         }
-        if(graphics && !loaded){
+        if(graphics){
                 nft.methods.totalSupply().call()
                 .then(tokens => {
                     for(let i = 0; i < tokens; i++){
                         nft.methods.getMetadata(i).call().then(async ({image}) => {
                             if(graphics.get(image) && graphics.get(image).type !== 'nft'){
-                                graphics.get(image).status = 0;
-                                graphics.get(image).type = 'nft';
+                                let nftObj = graphics.get(image);
+                                nftObj.status = 0; // sets status to processed 
+                                nftObj.type = 'nft'; // sets type to nft
+                                
                                 // merge  
-                                await mergeIpfsData('graphics', {image: image}, graphics.get(image));
-                                setGraphics();
+                                await mergeIpfsData('graphics', image, nftObj);
+                                // setGraphics();
+                                // setLoaded(true);
                             };
                         }).catch(e => console.log(e));
                     }
-                }).catch(e => console.log(e));            
-                setLoaded(true);
+                }).catch(e => console.log(e));
+                setLoaded(true);             
         }
     }, [graphics]);
 

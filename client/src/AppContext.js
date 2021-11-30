@@ -1,5 +1,5 @@
 import React, { createContext, useReducer } from 'react';
-import { updateIpfsData, recursivelyGetIpfsData } from './web3-storage/ipfsStorage';
+import { updateIpfsData, getIpfsData } from './web3-storage/ipfsStorage';
 
 const initialContext = {
   proposals: undefined,
@@ -23,6 +23,7 @@ const appReducer = (state, { type, payload }) => {
         proposals: new Map([...state.proposals]).set(payload.id, payload)
       }
     case "UPDATE_GRAPHICS":
+      console.log(state.graphics)
       return {
         ...state,
         graphics: new Map([...state.graphics]).set(payload.image, payload)
@@ -56,7 +57,7 @@ export const AppContextProvider = ({ children }) => {
   const contextValue = {
     proposals: store.proposals,
     setProposals: async () => {
-      let data = await recursivelyGetIpfsData('proposals');
+      let data = await getIpfsData('proposals');
       dispatch({type: 'SET_PROPOSALS', payload: data});
     },
     updateProposals: async payload => {
@@ -65,11 +66,11 @@ export const AppContextProvider = ({ children }) => {
     },
     graphics: store.graphics,
     setGraphics: async () => {
-      let data = await recursivelyGetIpfsData('graphics');
+      let data = await getIpfsData('graphics');
       dispatch({type: 'SET_GRAPHICS', payload: data});
     },
     updateGraphics: async payload => {
-      let newData = await updateIpfsData('graphics', payload); 
+      let newData = await updateIpfsData('graphics', payload); // update ipfs
       dispatch({type: 'UPDATE_GRAPHICS', payload: newData }); // update appcontext
     }
   };

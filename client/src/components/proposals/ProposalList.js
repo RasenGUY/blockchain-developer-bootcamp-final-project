@@ -9,7 +9,6 @@ import { useProposals } from '../../hooks/useProposals';
 export default function ProposalList() {
     const [loaded, setLoaded] = useState(); 
     const proposals = useProposals(setLoaded);
-    console.log(proposals)
 
     return (
         <Container className="d-flex flex-row" style={{marginTop: "10rem"}}>

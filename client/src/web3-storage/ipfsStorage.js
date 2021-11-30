@@ -127,11 +127,14 @@ async function updateData(folder, payload) {
     if (err) return oldData; // if eror just return the old data
     return newData; // returns list of inputs
 }
-async function mergeIpfsData(folder, keyPair, payload) {
+
+export async function mergeIpfsData(folder, imageHash, payload) {
     // retrieve latest db data
     let oldData = await getLatestData(folder);
-    let newData = oldData.filter(obj => obj[Object.keys(keyPair)] === keyPair.)
-    // let newData = [...oldData, payload];
+    let newData;
+    if(oldData.filter(obj => obj.image !== imageHash).length === 0)newData = [payload]
+    else newData = [...oldData.filter(obj => obj.image !== imageHash), payload];
+    console.log(newData)
     // let jsonBlob = makeUploadFile(newData);
     // let uploads = await listUploads(folder);
     // let err;
@@ -161,7 +164,7 @@ export async function getIpfsData(folder) {
     // list data as mapping
     let map = new Map();
     if (folder === 'proposals') latestData.forEach(obj => map.set(obj.id, obj));
-    if (folder === 'proposals') latestData.forEach(obj => map.set(obj.id, obj));
+    if (folder === 'graphics') latestData.forEach(obj => map.set(obj.image, obj));
     return folder === 'proposals' || folder === 'graphics' ? map : latestData;
 }
 export async function updateIpfsData(folder, proposal) {
