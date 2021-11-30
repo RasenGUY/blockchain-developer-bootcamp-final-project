@@ -1,9 +1,15 @@
-import React from 'react';
+import React, {useState} from 'react';
 import NFTCard from './NFTCard';
 import { Container } from 'react-bootstrap';
 
+// for retrieving nfts
+import {useGraphics} from '../../hooks/useGraphics';
+
 export default function NFTList() {
     // retrieve nft's from web3.storage
+    const [loaded, setLoaded] = useState(false);
+    // const graphics = useGraphics(setLoaded, loaded);
+    // console.log(graphics);
     const nfts = {
         "asndfasdflkjsd 1" : {
             name: "some nft name 1",
@@ -52,8 +58,8 @@ export default function NFTList() {
         }
     }
 
-    console.log(Object.entries(nfts)
-    .map(([hash, {name, description, externalLink, category, handle, tokenId}]) => [hash, name, description, externalLink, category, handle, tokenId]))
+    // console.log(Object.entries(nfts)
+    // .map(([hash, {name, description, externalLink, category, handle, tokenId}]) => [hash, name, description, externalLink, category, handle, tokenId]))
     
     return (
         <Container className="d-flex flex-wrap" fluid>

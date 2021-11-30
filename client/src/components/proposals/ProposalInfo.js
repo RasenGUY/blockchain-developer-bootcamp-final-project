@@ -27,7 +27,7 @@ export default function ProposalInfo() {
                 <h3>{proposals.get(proposalId).description || "No Description"}</h3>
             </div>
             <footer className="mt-5"> {/* footer */} 
-            <h5><small><b>Proposed:</b></small></h5>
+            <h5><small><b>Proposed Change:</b></small></h5>
                 {
                     proposals.get(proposalId).value.map((v, i) => (
                         !v[0].includes("Image") 

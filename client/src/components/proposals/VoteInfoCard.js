@@ -20,9 +20,9 @@ export default function VoteInfoCard() {
             <Card className="text-center" style={{padding: '2rem 0rem'}}>
                 <Card.Title>Information</Card.Title>
                 <Card.Body style={{textAlign: 'left'}}>
-                    <Card.Text><b>proposer: </b>{shortenAddress(proposals.get(proposalId).proposor)}</Card.Text>
+                    <Card.Text><b>Proposer: </b>{shortenAddress(proposals.get(proposalId).proposor)}</Card.Text>
                     <Card.Text><b>Start: </b><span style={{fontSize: '0.8rem'}}>{true && String(start)}</span></Card.Text>
-                    <Card.Text><b>end: </b><span style={{fontSize: '0.8rem'}}>{true && String(deadline)}</span></Card.Text>
+                    <Card.Text><b>End: </b><span style={{fontSize: '0.8rem'}}>{true && String(deadline)}</span></Card.Text>
                 </Card.Body>
             </Card>
     )

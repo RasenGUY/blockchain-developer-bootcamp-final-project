@@ -1,5 +1,5 @@
 export const options = {
-    Against: 0,
-    For: 1,
-    Abstain: 2
+    0: 'Against',
+    1: 'For',
+    2: 'Abstain'
 }

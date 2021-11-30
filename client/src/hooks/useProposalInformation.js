@@ -12,22 +12,22 @@ export function useProposalInformation(id){
     const [deadline, setDeadline] = useState();
     const [state, setState] = useState();
     const [votes, setVotes] = useState();
-
+    
     useEffect(()=> {
         
         // returns startDate of votes 
         governor.methods.proposalSnapshot(id).call()
         .then(
             res => provider.eth.getBlock(Number(res))
-            .then(block => setStart(new Date(block.timestamp * 1000)))
+            .then(block => {setStart(new Date(block.timestamp * 1000))}).catch(e => console.log(e))
         );
         governor.methods.proposalDeadline(id).call()
         .then(
             res => provider.eth.getBlock(Number(res))
-            .then(block => setDeadline(new Date(block.timestamp * 1000)))
+            .then(block => setDeadline(new Date(block.timestamp * 1000))).catch(e => console.log(e))
         );
-        governor.methods.proposalVotes(id).call().then(res => setVotes(res));
-        governor.methods.state(id).call().then(res => setState(res));
+        governor.methods.proposalVotes(id).call().then(res => setVotes(res)).catch(e => console.log(e));
+        governor.methods.state(id).call().then(res => setState(res)).catch(e => console.log(e));
         
     }, [id]);
     return {start: start, deadline: deadline, state: state, votes: votes};

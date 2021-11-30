@@ -30,8 +30,6 @@ export default function DAOProposalForm() {
     });
 
     const watchAction = watch('action', "safeMintVector"); 
-    // slashVotes
-    // banMember
 
     // create governorInst for hashing proposal and proxy inst for calling propose
     const governor = useContract(process.env.GOVERNOR_CONTRACT, governorArtifact.abi);
@@ -93,11 +91,14 @@ export default function DAOProposalForm() {
             value: watchAction === 'safeMintVector' 
             ? [['RewardsAddress', data[watchAction]['RewardsAddress']], [ 'Image url', vectorData.external_url ], ['CID', vectorData.image ] ]
             : Object.entries(data[watchAction]), 
-            proposor: window.ethereum.selectedAddress
+            proposor: window.ethereum.selectedAddress,
+            call: {
+                targets: targets, 
+                calldatas: calldatas, 
+                values: values, 
+                descriptionHash: toSha3(description)
+            }
         }
-        console.log(data);
-        console.log(proposalData);
-        console.log(vectorData);
         
         // propose workflow 
         let proposeCallData = proxy.methods.propose(targets, values, calldatas, description).encodeABI();

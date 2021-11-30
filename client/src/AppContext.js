@@ -1,5 +1,5 @@
 import React, { createContext, useReducer } from 'react';
-import { updateIpfsData, getIpfsData } from './web3-storage/ipfsStorage';
+import { updateIpfsData, recursivelyGetIpfsData } from './web3-storage/ipfsStorage';
 
 const initialContext = {
   proposals: undefined,
@@ -25,7 +25,7 @@ const appReducer = (state, { type, payload }) => {
     case "UPDATE_GRAPHICS":
       return {
         ...state,
-        graphics: new Map([...state.proposals]).set(payload.id, payload)
+        graphics: new Map([...state.graphics]).set(payload.image, payload)
       }
     case "SET_PROPOSALS": 
       return {
@@ -48,7 +48,7 @@ export const useAppContext = () => React.useContext(AppContext);
 export const AppContextProvider = ({ children }) => {
   
   // initialize  
-  getIpfsData('proposals').then(data => initialContext.proposals = data);
+  // getIpfsData('proposals').then(data => initialContext.proposals = data);
   // getIpfsData('graphics').then(data => initialContext.graphics = data);
 
   const [store, dispatch] = useReducer(appReducer, initialContext);
@@ -56,14 +56,18 @@ export const AppContextProvider = ({ children }) => {
   const contextValue = {
     proposals: store.proposals,
     setProposals: async () => {
-      let data = await getIpfsData('proposals');
-      dispatch({type: 'SET_PROPOSALS', payload: data})
+      let data = await recursivelyGetIpfsData('proposals');
+      dispatch({type: 'SET_PROPOSALS', payload: data});
     },
     updateProposals: async payload => {
       let newData = await updateIpfsData('proposals', payload);
       dispatch({type: 'UPDATE_PROPOSALS', payload: newData }); // update appcontext
     },
     graphics: store.graphics,
+    setGraphics: async () => {
+      let data = await recursivelyGetIpfsData('graphics');
+      dispatch({type: 'SET_GRAPHICS', payload: data});
+    },
     updateGraphics: async payload => {
       let newData = await updateIpfsData('graphics', payload); 
       dispatch({type: 'UPDATE_GRAPHICS', payload: newData }); // update appcontext

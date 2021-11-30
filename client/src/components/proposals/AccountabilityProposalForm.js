@@ -58,7 +58,13 @@ export default function AccountabilityProposalForm() {
             title: data.title, 
             description: data.description, 
             value: Object.entries(data[watchAction]), 
-            proposor: window.ethereum.selectedAddress
+            proposor: window.ethereum.selectedAddress,
+            call: {
+                targets: targets, 
+                calldatas: calldatas, 
+                values: values, 
+                descriptionHash: toSha3(description)
+            }
         }
 
         // propose workflow 
@@ -68,7 +74,7 @@ export default function AccountabilityProposalForm() {
             let proposals = await listUploads('proposals');
             alert(`transaction mined transaction hash: ${transactionHash}`);
             if (proposals.length < 1){
-                alert("initializing ipfs storage for images");    
+                alert("initializing ipfs storage for proposals");    
                 await initializeData('proposals', [storageObject]); 
             } else {
                 alert("updating proposals on ipfs");    

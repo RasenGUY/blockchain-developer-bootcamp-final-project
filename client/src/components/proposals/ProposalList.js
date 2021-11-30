@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useState } from 'react';
 import MemberCard from '../member/MemberCard'; 
 import ProposalItem from './ProposalItem';
 import { Col, Container } from 'react-bootstrap';
@@ -9,6 +9,7 @@ import { useProposals } from '../../hooks/useProposals';
 export default function ProposalList() {
     const [loaded, setLoaded] = useState(); 
     const proposals = useProposals(setLoaded);
+    console.log(proposals)
 
     return (
         <Container className="d-flex flex-row" style={{marginTop: "10rem"}}>
