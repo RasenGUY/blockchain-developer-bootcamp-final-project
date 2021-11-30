@@ -5,8 +5,6 @@ import VoteInfoCard from './VoteInfoCard';
 import VoteCurrentResults from './VoteCurrentResults';
 import CastVote from './CastVote';
 
-
-
 export default function ProposalSingle() {
     
 

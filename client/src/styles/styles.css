@@ -11183,4 +11183,8 @@ body, html {
   background-color: #c1f0e2;
 }
 
+#castVote > * {
+  margin-top: 2rem;
+}
+
 /*# sourceMappingURL=styles.css.map */

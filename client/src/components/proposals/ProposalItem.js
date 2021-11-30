@@ -2,12 +2,12 @@ import React from 'react';
 import { NavLink } from 'react-router-dom'; 
 import { Card, Badge, Container  } from 'react-bootstrap';
 import { shortenAddress } from '../../utils/shortenAddress'; 
-import { useProposalState } from '../../hooks/useProposalState';
+import { useProposalInformation } from '../../hooks/useProposalInformation';
 import { proposalStates } from '../../helpers/proposalStates';
 
 export default function ProposalItem({id, type, title, description, value, proposor }) {
     const states = proposalStates;
-    const state = useProposalState(id);
+    const {state} = useProposalInformation(id);
     
     return (
         <Container className="proposalItem" style={{padding: "2rem 0rem"}}  as="div" fluid>

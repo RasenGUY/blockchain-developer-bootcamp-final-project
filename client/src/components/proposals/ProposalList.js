@@ -9,26 +9,6 @@ import { useProposals } from '../../hooks/useProposals';
 export default function ProposalList() {
     const [loaded, setLoaded] = useState(); 
     const proposals = useProposals(setLoaded);
-    const [renderItems, setRenderItems ] = useState();
-
-    useEffect(()=>{
-        if (proposals){
-            let list = [];
-            proposals.forEach((proposal, id) => {
-                list.push(
-                    <ProposalItem 
-                    key={id} 
-                    id={id} 
-                    type={proposal.type}
-                    title={proposal.title} 
-                    description={proposal.description}
-                    value={proposal.value}
-                    proposor={proposal.proposor}
-                />)
-            })
-            setRenderItems(list);
-        }
-    }, [loaded])
 
     return (
         <Container className="d-flex flex-row" style={{marginTop: "10rem"}}>
@@ -40,8 +20,17 @@ export default function ProposalList() {
             <Col lg="9">
                 <Container as="div" fluid>
                     {
-                        loaded && renderItems
-                        ? renderItems
+                        proposals && loaded
+                        ? [...proposals.entries()].map(kvp => (
+                            <ProposalItem 
+                            key={kvp[0]} 
+                            id={kvp[0]} 
+                            type={kvp[1].type} 
+                            title={kvp[1].title} 
+                            description={kvp[1].description}
+                            value={kvp[1].value}
+                            proposor={kvp[1].proposor}
+                        />))
                         : <h1>...Loading</h1> 
                     }
                 </Container>

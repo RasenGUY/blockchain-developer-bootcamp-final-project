@@ -92,4 +92,10 @@ body, html {
         }
     }
 
+    #castVotes {
+        & > * {
+            margin-top: 2rem;
+        } 
+    }
+
 
