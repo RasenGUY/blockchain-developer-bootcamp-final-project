@@ -1,5 +1,5 @@
-the contracts below are deployed to the RINKEBY rpc network 
-Addresses
+
+network rinkeby
 - goverance token: 0xbD5e679D716148000EB2712676A1FCBDAB916313
 - utility token: 0x4a159649CB08aC68fA8856753754decc67FCFe85
 - timelocker: 0x4075B994B91f809cD589A8b953BcE41031E47EC4

@@ -4,6 +4,7 @@ IkonDAO a dao for creatives e.g. graphic design, Icons and vecto design artists.
 This platform that enables cooperative contributions from digital art creatives and fascilitates the (automatic) administration of the rewards attributed to their contributions. (note: this is an mvp, core functionalities are implemented, however the project is pre-alpha version thus a lot of work still needs to be done).
 
 Hosted on Vercel [Demo Here](https://blockchain-developer-bootcamp-final-project-drab.vercel.app/)
+WalkThrough [Youtube](https://youtu.be/iG6d8sCN1rQ)
 
 Ethereum Address: 0x3AB9cb1244aa19aA727f33BBE1cfC6a6E09eC0D3
 
