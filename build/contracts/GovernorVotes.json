@@ -1618,7 +1618,7 @@
   },
   "networks": {},
   "schemaVersion": "3.4.3",
-  "updatedAt": "2021-11-29T11:18:00.039Z",
+  "updatedAt": "2021-11-30T23:49:45.025Z",
   "devdoc": {
     "details": "Extension of {Governor} for voting weight extraction from an {ERC20Votes} token. _Available since v4.3._",
     "kind": "dev",

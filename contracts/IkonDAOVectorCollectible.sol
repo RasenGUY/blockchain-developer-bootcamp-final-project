@@ -33,7 +33,6 @@ contract IkonDAOVectorCollectible is ERC721, ERC721Enumerable, ERC721URIStorage,
     mapping(uint256 => Metadata) private tokenMetadata;
     Category[] private categoryList;
     mapping(bytes32 => bool) private isCategory; 
-    mapping(bytes32 => uint256) private nftsByHash;
 
     address _DAO;  /// maps category to list of tokens that belong to it
 
@@ -62,18 +61,11 @@ contract IkonDAOVectorCollectible is ERC721, ERC721Enumerable, ERC721URIStorage,
         _unpause();
     }
 
-    /// @dev retrieves nft's by sha of imageHash\
-    /// @param _shaImagehash hash to which token is mapped 
-    function retrieveByHash(bytes32 _shaImagehash) public view returns(uint256){
-        return nftsByHash[_shaImagehash];
-    }  
 
     /// @dev mints nft to a receiver
     /// @param _to nft receiver
-    /// @param _shaImageHash sha3 of image hash
-    function safeMint(address _to, bytes32 _shaImageHash) private {
+    function safeMint(address _to) private {
         _safeMint(_to, _tokenIdCounter.current());
-        nftsByHash[_shaImageHash] = _tokenIdCounter.current();
         _tokenIdCounter.increment();
     }
 
@@ -98,7 +90,7 @@ contract IkonDAOVectorCollectible is ERC721, ERC721Enumerable, ERC721URIStorage,
 
         if (!isCategory[_category]){ 
             
-            safeMint(_DAO, keccak256(abi.encodePacked(_imageHash))); // mint new nft 
+            safeMint(_DAO); // mint new nft 
             Category memory category = Category({
                 name: _category
             }); // create new category 
@@ -109,7 +101,7 @@ contract IkonDAOVectorCollectible is ERC721, ERC721Enumerable, ERC721URIStorage,
 
         }  else {
 
-            safeMint(_DAO, keccak256(abi.encodePacked(_imageHash)));
+            safeMint(_DAO);
             tokenMetadata[tokenId] = metadata;
 
         }

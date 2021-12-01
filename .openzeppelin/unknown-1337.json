@@ -180,12 +180,17 @@
       "address": "0x0CC376EA1028F16f0a39f1e399517Fba2Eb9a840",
       "txHash": "0x95916b318d8147886fe4eecef7759b83fe7c37c3945c03aa0af3645b4d1541d2",
       "kind": "uups"
+    },
+    {
+      "address": "0x3b8e20800f68c8bB27E4d45E22bdf4C33093659E",
+      "txHash": "0x5f6562304d2b6a0348c41b05f4eda8272a4b62f4b8841f0abc91ab53779b915c",
+      "kind": "uups"
     }
   ],
   "impls": {
     "8c296e2e41ad1954966feae25cc0f2e57fee5043419a0822f46c868e1b7e833b": {
-      "address": "0x9f0C9f6A8445Ce8b9C54DC3fcD992E693Fb3339e",
-      "txHash": "0x3a71a5426ec3be8cd309e5435e4afaeb14f50fac347c17957ecd810800e84ff6",
+      "address": "0x3E22bDfBB9959002FE684d3Ee515971831b5aed2",
+      "txHash": "0xe3024c6a6d7bfaa19b3034fa72d3e678227bb3aeb972a048f96976eca32dfa92",
       "layout": {
         "storage": [
           {

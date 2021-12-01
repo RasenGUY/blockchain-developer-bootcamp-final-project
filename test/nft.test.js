@@ -211,15 +211,6 @@ contract("IkonDao (nft)", accounts => {
             assert.equal(web3.utils.hexToUtf8(metadata[1]), categoryTwo, "does not set correct metadata 'category'");            
         });
 
-        it("retrieves token by sha of image hash", async () => {
-            await nft.safeMintVector(
-                token3[0], 
-                token3[1], 
-                {from: owner}
-            )
-            let tokenId = await nft.retrieveByHash(toSha3(token3[1]));
-            assert.equal(tokenId.toNumber(), 0, "does not set correct metadata 'category'");            
-        });
 
         it("rejects minting of taken (image already exists) contracts", async ()=>{
             await nft.safeMintVector(
