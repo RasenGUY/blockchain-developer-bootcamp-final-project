@@ -30,6 +30,8 @@ export default function ProposalList() {
                             description={proposal.description}
                             value={proposal.value}
                             proposor={proposal.proposor}
+                            proposals={proposals}
+                            setLoaded={setLoaded}
 
                         />))
                         : <h1>...Loading</h1> 

@@ -10,15 +10,15 @@ import daoArtifact from '../../contracts/IkonDAO.json';
 import { useContract } from '../../hooks/useContract';
 import { callContract } from '../../helpers/transactor';
 
-export default function ProposalItem({id, type, title, description, value, proposor }) {
+export default function ProposalItem({id, type, title, description, value, proposor, proposals, setLoaded }) {
+    
     const states = proposalStates;
     const { state } = useProposalInformation(id);
     const proxy = useContract(process.env.PROXY_CONTRACT, daoArtifact.abi);
-
+    
     const handleQueue = () => {
         // handleExecute
         const {targets, calldatas, values, descriptionHash } = proposals.get(id).call;
-
         const queCallData = proxy.methods.queue(targets, values, calldatas, descriptionHash).encodeABI();
         alert(`queueing proposal with id ${shortenAddress(id)}`);
         callContract(process.env.PROXY_CONTRACT, queCallData).then(({transactionHash}) => {
