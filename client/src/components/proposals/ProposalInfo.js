@@ -28,20 +28,21 @@ export default function ProposalInfo() {
             </div>
             <footer className="mt-5"> {/* footer */} 
             <h5><small><b>Proposed Change:</b></small></h5>
-                {
-                    proposals.get(proposalId).value.map((v, i) => (
+                { state ? 
+                    proposals.get(proposalId).value.map((v) => (
                         !v[0].includes("Image") 
-                        ? <p key={i} style={{display: "block", fontSize: '0.8rem'}} key={i}>
+                        ? <p key={v[1]} style={{display: "block", fontSize: '0.8rem'}} >
                             <em><b>{v[0]}:</b></em> {v[1]}
                         </p>
                         : 
                         <div style={{width: "7.5rem"}}>
-                            <p key={i} style={{display: "block", fontSize: '0.8rem'}} key={i}>
+                            <p key={v[1]} style={{display: "block", fontSize: '0.8rem'}}>
                                 <em><b>Nft image:</b></em>
                             </p>
                             <img src={v[1]} width="100%"/> 
                         </div>
-                    ))
+                    )):
+                    <h2>...gathering data</h2>
                 }
             </footer>                
         </article>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { NavLink } from 'react-router-dom'; 
 import { Card, Badge, Container, Button  } from 'react-bootstrap';
 import { shortenAddress } from '../../utils/shortenAddress'; 
@@ -9,15 +9,10 @@ import { proposalStates } from '../../helpers/proposalStates';
 import daoArtifact from '../../contracts/IkonDAO.json';
 import { useContract } from '../../hooks/useContract';
 import { callContract } from '../../helpers/transactor';
-import { toBN } from '../../utils/utils';
-import { useAppContext } from '../../AppContext';
 
 export default function ProposalItem({id, type, title, description, value, proposor }) {
     const states = proposalStates;
-    const { proposals } = useAppContext(); 
     const { state } = useProposalInformation(id);
-    const [reload, setReload] = useState(false);
-
     const proxy = useContract(process.env.PROXY_CONTRACT, daoArtifact.abi);
 
     const handleQueue = () => {
@@ -31,7 +26,7 @@ export default function ProposalItem({id, type, title, description, value, propo
             alert(`hash: ${transactionHash}`);   
             alert("proposal queued!");   
         }).catch(e => alert(`code: ${e.code}, message: ${e.message}`));
-        setReload(true);
+        setLoaded(false);
     }
     
     const handleExecute = ()=>{
@@ -45,20 +40,15 @@ export default function ProposalItem({id, type, title, description, value, propo
             alert(`hash: ${transactionHash}`);
             alert("proposal executed!");   
         }).catch(e => alert(`code: ${e.code}, message: ${e.message}`));
-        setReload(true);
+        setLoaded(false);
     }
 
-    useEffect(()=>{
-        // just for rerendering components after actions
-        if(reload){
-            setReload(false);
-        } 
-    }, [reload]);
 
     return (
         <Container className="proposalItem" style={{padding: "2rem 0rem"}}  as="div" fluid>
-            
-            <Card >
+            {
+                state ? 
+                <Card >
                 <Card.Header as='div'  className="d-flex">
                         <div className="d-flex flex-column justify-content-start">
                             <Badge className="mt-2" bg={state ? states[state].color : null} style={{width: "85%"}} >{state ? states[state].text : "..loading"}</Badge>
@@ -84,17 +74,20 @@ export default function ProposalItem({id, type, title, description, value, propo
                 <div>
                 <h6>Proposed Change: </h6>
                 {
-                    value.map((v, i) => (
+                    value ? value.map((v, i) => (
                         <span style={{display: "block", fontSize: '0.8rem'}} key={i}>
                             <b>{v[0]}:</b> {v[1]}
                         </span>
                     ))
+                    : null 
                 }
                 </div>
 
                     <NavLink to={`/proposals/${id}`}>Info</NavLink>
                 </Card.Body>
             </Card>
+            : <h2>...gathering data</h2>
+        }
         
         </Container>
     )

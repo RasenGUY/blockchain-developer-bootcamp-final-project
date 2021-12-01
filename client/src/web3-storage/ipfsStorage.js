@@ -134,18 +134,17 @@ export async function mergeIpfsData(folder, imageHash, payload) {
     let newData;
     if(oldData.filter(obj => obj.image !== imageHash).length === 0)newData = [payload]
     else newData = [...oldData.filter(obj => obj.image !== imageHash), payload];
-    console.log(newData)
-    // let jsonBlob = makeUploadFile(newData);
-    // let uploads = await listUploads(folder);
-    // let err;
-    // try {
-    //     await storeFiles([jsonBlob], `${folder}-version-${uploads.length}.json`);
-    // } catch (e) {
-    //     console.log(e);
-    //     err = e;
-    // }
-    // if (err) return oldData; // if eror just return the old data
-    // return newData; // returns list of inputs
+    let jsonBlob = makeUploadFile(newData);
+    let uploads = await listUploads(folder);
+    let err;
+    try {
+        await storeFiles([jsonBlob], `${folder}-version-${uploads.length}.json`);
+    } catch (e) {
+        console.log(e);
+        err = e;
+    }
+    if (err) return oldData; // if eror just return the old data
+    return newData; // returns list of inputs
 }
 
 
@@ -183,7 +182,7 @@ export async function initializeData(folder, data) {
     console.log(`data stored succesfully at ${cid}`)
 }
 
-export async function recursivelyGetIpfsData(folder) {
+export async function repetitivelyGetIpfsData(folder) {
     let data;
     let Err = true;
     while (Err) {

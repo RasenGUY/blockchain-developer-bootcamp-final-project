@@ -1,17 +1,18 @@
 import {useState, useEffect} from 'react';
 import { useAppContext } from '../AppContext';
 
-export function useProposals(setLoaded) {
+export function useProposals(loaded, setLoaded) {
     const { setProposals, proposals } = useAppContext();
     
     useEffect(()=> {
-        if (!proposals){
+        if (!proposals || !loaded){
             setProposals();
+            setLoaded(true);
         }
         if(proposals){
             setLoaded(true);
         }
-    }, [proposals]);
+    }, [proposals, setLoaded]);
 
     return proposals; 
 }

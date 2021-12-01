@@ -8,8 +8,8 @@ import { useProposals } from '../../hooks/useProposals';
 
 export default function ProposalList() {
     const [loaded, setLoaded] = useState(); 
-    const proposals = useProposals(setLoaded);
-
+    const proposals = useProposals(loaded, setLoaded);
+    
     return (
         <Container className="d-flex flex-row" style={{marginTop: "10rem"}}>
             <Col lg="3">
@@ -21,15 +21,16 @@ export default function ProposalList() {
                 <Container as="div" fluid>
                     {
                         proposals && loaded
-                        ? [...proposals.entries()].map(kvp => (
+                        ? [...proposals.entries()].map(([id, proposal]) => (
                             <ProposalItem 
-                            key={kvp[0]} 
-                            id={kvp[0]} 
-                            type={kvp[1].type} 
-                            title={kvp[1].title} 
-                            description={kvp[1].description}
-                            value={kvp[1].value}
-                            proposor={kvp[1].proposor}
+                            key={id} 
+                            id={id} 
+                            type={proposal.type} 
+                            title={proposal.title} 
+                            description={proposal.description}
+                            value={proposal.value}
+                            proposor={proposal.proposor}
+
                         />))
                         : <h1>...Loading</h1> 
                     }

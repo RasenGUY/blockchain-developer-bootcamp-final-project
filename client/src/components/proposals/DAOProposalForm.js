@@ -14,10 +14,14 @@ import { callContract } from '../../helpers/transactor';
 // for storage
 const slug = require('unique-slug');
 import { useAppContext } from '../../AppContext';
+import { useGraphics } from '../../hooks/useGraphics';
 import { storeFiles, initializeData, listUploads } from '../../web3-storage/ipfsStorage';
 
 export default function DAOProposalForm() {
     const { updateProposals, updateGraphics } = useAppContext(); 
+    const [loaded, setLoaded] = useState();
+    const graphics = useGraphics(setLoaded); // initially load graphics, but only for dao proposals
+
     const { 
         register, 
         handleSubmit, 
@@ -28,6 +32,7 @@ export default function DAOProposalForm() {
             type: 'DAO Proposal'
         }
     });
+
 
     const watchAction = watch('action', "safeMintVector"); 
 
@@ -112,8 +117,11 @@ export default function DAOProposalForm() {
                 if (images.length < 1){
                     alert("initializing ipfs storage for images");    
                     await initializeData('graphics', [vectorData]);
+                    alert("graphics initialized");    
+
                 } else {
                     alert("updating graphics on ipfs");    
+                    if(!loaded) await setGraphics();
                     await updateGraphics(vectorData);
                     alert("graphics updated");    
                 }
