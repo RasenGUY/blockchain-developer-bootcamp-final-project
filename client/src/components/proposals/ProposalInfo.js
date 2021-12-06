@@ -3,18 +3,16 @@ import { useParams } from 'react-router-dom';
 import { Badge } from 'react-bootstrap';
 
 // for retrieving proposal information
-import { useAppContext } from '../../AppContext';
 import { useProposalInformation } from '../../hooks/useProposalInformation';
 
 // for displaying information 
 import { proposalStates as states } from '../../helpers/proposalStates';
 
-export default function ProposalInfo() {
-    // fetch more state with the given id
-    const { proposals } = useAppContext();
+export default function ProposalInfo({proposals}) {
     const { proposalId } = useParams();
-    const { state } = useProposalInformation(proposalId); 
+    const { state } = useProposalInformation(proposalId);
 
+    
     return (
         <article className="proposal-info">
             <div className="banner">

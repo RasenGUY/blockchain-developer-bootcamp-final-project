@@ -7,7 +7,7 @@ import {useGraphics} from '../../hooks/useGraphics';
 
 export default function VectorList() {
     const [loaded, setLoaded] = useState(false);
-    const graphics = useGraphics(setLoaded) 
+    const graphics = useGraphics(loaded,    setLoaded) 
 
     return (
             <Container className="d-flex flex-wrap" fluid>

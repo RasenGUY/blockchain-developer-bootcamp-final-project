@@ -8,7 +8,7 @@ import {useGraphics} from '../../hooks/useGraphics';
 export default function NFTList() {
     // retrieve nft's from web3.storage
     const [loaded, setLoaded] = useState(false);
-    const graphics = useGraphics(setLoaded);
+    const graphics = useGraphics(loaded, setLoaded);
         
     return (
         <Container className="d-flex flex-wrap" fluid>

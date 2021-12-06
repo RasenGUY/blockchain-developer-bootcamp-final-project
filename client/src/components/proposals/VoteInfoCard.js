@@ -9,12 +9,9 @@ import { useProposalInformation } from '../../hooks/useProposalInformation';
 // for displaying proposal information
 import { shortenAddress } from '../../utils/shortenAddress';
 
-export default function VoteInfoCard() {
+export default function VoteInfoCard({proposals}) {
     const { proposalId }= useParams();
-    const { proposals } = useAppContext();
     const {start, deadline} = useProposalInformation(proposalId); 
-
-    const address = `address of proposer`;
     return (
         
             <Card className="text-center" style={{padding: '2rem 0rem'}}>

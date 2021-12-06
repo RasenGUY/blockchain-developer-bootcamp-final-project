@@ -5,7 +5,7 @@ export function useProposals(loaded, setLoaded) {
     const { setProposals, proposals } = useAppContext();
     
     useEffect(()=> {
-        if (!proposals || !loaded){
+        if (!proposals){
             setProposals();
             setLoaded(true);
         }
@@ -13,6 +13,5 @@ export function useProposals(loaded, setLoaded) {
             setLoaded(true);
         }
     }, [proposals, setLoaded]);
-
     return proposals; 
 }

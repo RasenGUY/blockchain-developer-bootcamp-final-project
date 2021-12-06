@@ -5,18 +5,16 @@ import { Card, Button } from 'react-bootstrap';
 // for making calls to proxy 
 import { useContract } from '../../hooks/useContract';
 import daoContract from '../../contracts/IkonDAO.json';
-// import { useAppContext } from '../../AppContext'; 
 import {callContract} from '../../helpers/transactor';
 
 // for finding out whether is member
 import { MEMBER_ROLE } from '../../contstants';
 
-
 export default function Register() {
-    
     const cardStyle = { width: "75%" };
     const [isMember, setIsMember] = useState();
     const cInst = useContract(process.env.PROXY_CONTRACT, daoContract.abi);
+
     
     useEffect(()=>{ 
         if(window.ethereum.selectedAddress){
@@ -25,10 +23,8 @@ export default function Register() {
                 cInst.methods.hasRole(MEMBER_ROLE, window.ethereum.selectedAddress).call().then(res => setIsMember(res));   
             })
         }
-    }, []);
+    }, [window.ethereum.selectedAddress]);
 
-    
-    
     const register = () => {
         // register user
         // user can be notified here on complettion
@@ -36,7 +32,6 @@ export default function Register() {
         callContract(process.env.PROXY_CONTRACT, data)
         .then(receipt => {
             console.log(receipt);
-            // set account is member after transaction receipt
             cInst.methods.hasRole(MEMBER_ROLE, window.ethereum.selectedAddress).call().then(res => setIsMember(res)); 
         }).catch(e => console.log(e));
     }

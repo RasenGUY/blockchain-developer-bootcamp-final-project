@@ -3,7 +3,6 @@ import { useContract } from "./useContract";
 import { useProvider } from './useProvider'; 
 import governorArtifact from "../contracts/IkonDAOGovernor.json";
  
-
 // retireves all information related to a proposal;
 export function useProposalInformation(id){
     const provider = useProvider(id);
@@ -14,7 +13,6 @@ export function useProposalInformation(id){
     const [votes, setVotes] = useState();
     
     useEffect(()=> {
-        
         if(id){
             // returns startDate of votes 
             governor.methods.proposalSnapshot(id).call()
@@ -28,10 +26,8 @@ export function useProposalInformation(id){
                 .then(block => setDeadline(new Date(block.timestamp * 1000))).catch(e => console.log(e))
             );
             governor.methods.proposalVotes(id).call().then(res => setVotes(res)).catch(e => console.log(e));
-            governor.methods.state(id).call().then(res => setState(res)).catch(e => console.log(e));
-            
+            governor.methods.state(id).call().then(res => setState(res)).catch(e => console.log(e));   
         }
-
     }, [id]);
     return id ? {start: start, deadline: deadline, state: state, votes: votes} : {start: undefined, deadline:undefined,  state: undefined, votes: undefined};
 }

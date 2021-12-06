@@ -16,11 +16,11 @@ const config = {
         }
     },
     devServer: {
-        static: path.resolve(__dirname, "build"),
+        historyApiFallback: true, 
+        static: "./",
         port: 3001,
         open: true,
         hot: true,
-        historyApiFallback: true, 
     },
     module: {
         rules:[

@@ -5,7 +5,7 @@ import VoteInfoCard from './VoteInfoCard';
 import VoteCurrentResults from './VoteCurrentResults';
 import CastVote from './CastVote';
 
-export default function ProposalSingle() {
+export default function ProposalSingle({proposals}) {
     
 
     return (            
@@ -13,14 +13,14 @@ export default function ProposalSingle() {
             <Row className="d-flex flex-row">
                 <Col lg="9">
                     <Container as="div" fluid>
-                        <ProposalInfo />
+                        <ProposalInfo proposals={proposals}/>
                     </Container>
                     <Container className="text-center" as="div" fluid>
                         <CastVote />
                     </Container>
                 </Col>
                 <Col lg="3">
-                    <VoteInfoCard />
+                    <VoteInfoCard proposals={proposals}/>
                     <VoteCurrentResults />
                 </Col>
             </Row>

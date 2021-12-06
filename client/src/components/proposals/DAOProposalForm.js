@@ -20,7 +20,7 @@ import { storeFiles, initializeData, listUploads } from '../../web3-storage/ipfs
 export default function DAOProposalForm() {
     const { updateProposals, updateGraphics } = useAppContext(); 
     const [loaded, setLoaded] = useState();
-    const graphics = useGraphics(setLoaded); // initially load graphics, but only for dao proposals
+    const graphics = useGraphics(loaded, setLoaded); // initially load graphics, but only for dao proposals
 
     const { 
         register, 

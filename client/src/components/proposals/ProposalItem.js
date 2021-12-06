@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom'; 
+import { Link } from 'react-router-dom'; 
 import { Card, Badge, Container, Button  } from 'react-bootstrap';
 import { shortenAddress } from '../../utils/shortenAddress'; 
 import { useProposalInformation } from '../../hooks/useProposalInformation';
@@ -45,6 +45,7 @@ export default function ProposalItem({id, type, title, description, value, propo
 
 
     return (
+
         <Container className="proposalItem" style={{padding: "2rem 0rem"}}  as="div" fluid>
             {
                 state ? 
@@ -82,8 +83,7 @@ export default function ProposalItem({id, type, title, description, value, propo
                     : null 
                 }
                 </div>
-
-                    <NavLink to={`/proposals/${id}`}>Info</NavLink>
+                    <Link to={`/proposals/${id}`} state={{proposals: proposals}} >Info</Link>
                 </Card.Body>
             </Card>
             : <h2>...gathering data</h2>
