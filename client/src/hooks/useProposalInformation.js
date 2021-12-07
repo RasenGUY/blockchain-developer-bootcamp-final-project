@@ -4,7 +4,7 @@ import { useProvider } from './useProvider';
 import governorArtifact from "../contracts/IkonDAOGovernor.json";
  
 // retireves all information related to a proposal;
-export function useProposalInformation(id){
+export function useProposalInformation(id) {
     const provider = useProvider(id);
     const governor = useContract(process.env.GOVERNOR_CONTRACT, governorArtifact.abi);
     const [start, setStart] = useState();

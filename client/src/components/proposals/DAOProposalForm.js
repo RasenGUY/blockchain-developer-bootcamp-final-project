@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from 'react'
 import { useForm } from 'react-hook-form';
 import { Form, Button } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
  
 // for creating proposals
 import ProposalOptionsDAOProposals from './ProposalOptionsDAOProposals';
@@ -8,32 +9,29 @@ import { createProposalAction, } from '../../helpers/createProposal';
 import { useContract } from '../../hooks/useContract';
 import governorArtifact from '../../contracts/IkonDAOGovernor.json';
 import daoArtifact from '../../contracts/IkonDAO.json';
-import { toSha3, stringToHex } from '../../utils/utils';
+import { toSha3 } from '../../utils/utils';
 import { callContract } from '../../helpers/transactor';
 
 // for storage
 const slug = require('unique-slug');
 import { useAppContext } from '../../AppContext';
-import { useGraphics } from '../../hooks/useGraphics';
 import { storeFiles, initializeData, listUploads } from '../../web3-storage/ipfsStorage';
 
 export default function DAOProposalForm() {
-    const { updateProposals, updateGraphics } = useAppContext(); 
-    const [loaded, setLoaded] = useState();
-    const graphics = useGraphics(loaded, setLoaded); // initially load graphics, but only for dao proposals
+    const { proposals, updateProposals, updateGraphics, graphics, setGraphics } = useAppContext(); 
+    const navigate = useNavigate(); 
+    const [isSuccessfull, setIsSuccessfull] = useState();
 
     const { 
         register, 
         handleSubmit, 
         watch,
-        formState: { errors, isSubmitting },
+        formState: { errors, isSubmitting, isSubmitSuccessful },
     } = useForm({
         defaultValues: {
             type: 'DAO Proposal'
         }
     });
-
-
     const watchAction = watch('action', "safeMintVector"); 
 
     // create governorInst for hashing proposal and proxy inst for calling propose
@@ -46,11 +44,11 @@ export default function DAOProposalForm() {
         let proposalData;
         let vectorData;
         if (watchAction === 'safeMintVector'){
+
             // creates object to store vector data  
             vectorData = {};
             proposalData = {};
             let file = data[watchAction].uploadedFiles[0];
-            
             vectorData.status = 1;
             vectorData.type = 'freebie'; 
             vectorData.description = data[watchAction].ImageDescription 
@@ -121,7 +119,6 @@ export default function DAOProposalForm() {
 
                 } else {
                     alert("updating graphics on ipfs");    
-                    if(!loaded) await setGraphics();
                     await updateGraphics(vectorData);
                     alert("graphics updated");    
                 }
@@ -134,9 +131,20 @@ export default function DAOProposalForm() {
                 await updateProposals(storageObject);
             }
             alert("proposal created sucessfully");
+
         });
     }
+
+    useEffect(async ()=>{
+        // make sure graphics and proposals are loaded before page is loaded
+        if(!graphics || !proposals){
+            await setGraphics();
+            await setProposals();
+        }
+    }, []);
+
     return (
+        graphics || proposals ?  
         <Form onSubmit={handleSubmit(onSubmit)}>
             <Form.Group>
                 <h2>DAO Proposal</h2>
@@ -155,8 +163,7 @@ export default function DAOProposalForm() {
             <Form.Group className="mb-2"> 
                 <ProposalOptionsDAOProposals action={watchAction} register={register}/>
             </Form.Group> 
-            
-            <Button className="callout-button" type="submit">Propose</Button>
-        </Form>    
+            <Button className="callout-button" type="submit">{isSubmitting && !isSuccessfull ? isSuccessfull ? "Success" : "...Loading" : "Propose"}</Button>
+        </Form>  : <h1>...Loading</h1>
     )
 }

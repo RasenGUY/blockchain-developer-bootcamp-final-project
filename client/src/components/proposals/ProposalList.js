@@ -5,19 +5,26 @@ import { Col, Container } from 'react-bootstrap';
 
 // for loading the proposal intially
 import { useProposals } from '../../hooks/useProposals';
+import { useAppContext } from '../../AppContext';
 
 export default function ProposalList() {
     const [loaded, setLoaded] = useState(); 
+    
     const proposals = useProposals(loaded, setLoaded);
+    const { injectedProvider } = useAppContext();
     
     return (
         <Container className="d-flex flex-row" style={{marginTop: "10rem"}}>
-            <Col lg="3">
-                <Container as="div" fluid>
-                    <MemberCard />
-                </Container>
-            </Col>
-            <Col lg="9">
+            {
+                injectedProvider 
+                ? <Col lg="3">
+                        <Container as="div" fluid>
+                            <MemberCard />
+                        </Container>
+                    </Col>
+                : null
+            }
+            <Col lg={injectedProvider ? "9" : "12"}>
                 <Container as="div" fluid>
                     {
                         proposals && loaded

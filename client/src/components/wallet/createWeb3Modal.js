@@ -5,10 +5,13 @@ import Authereum from "authereum";
 import WalletLink from "walletlink";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 
+import Web3Modal from 'web3modal';
+
 // keys @ethersproject/contracts
 const INFURA_ID = process.env.INFURA_RINKEBY_ID;
 const PORTIS_ID = process.env.PORTIS_ID;
 const FORTMATIC_KEY = process.env.FORTMATIC_KEY; 
+
 
 // Coinbase walletLink init
 const walletLink = new WalletLink({
@@ -16,9 +19,9 @@ const walletLink = new WalletLink({
 });
 
 // WalletLink provider
-const walletLinkProvider = walletLink.makeWeb3Provider(`https://mainnet.infura.io/v3/${INFURA_ID}`, 1);
+const walletLinkProvider = walletLink.makeWeb3Provider(`https://rinkeby.infura.io/v3/${INFURA_ID}`, 1);
 
-export const settings = { 
+export const createWeb3Modal = () => new Web3Modal({ 
   cacheProvider: true, // optional
   theme: "light", // optional. Change to "dark" for a dark theme.
   providerOptions: {
@@ -69,5 +72,5 @@ export const settings = {
       package: Authereum, // required
     },
   }
-}
+})
 

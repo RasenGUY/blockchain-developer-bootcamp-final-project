@@ -7,7 +7,9 @@ const initialContext = {
   updateProposals: async () => {},
   graphics: undefined,
   setGraphics: async () => {},
-  updateGraphics: async () => {}
+  updateGraphics: async () => {},
+  injectedProvider: undefined, 
+  setInjectedProvider: () => {} 
   // nfts: undefined,
   // updateNfts: async () => {},
   // vectors: undefined,
@@ -36,6 +38,11 @@ const appReducer = (state, { type, payload }) => {
       return {
         ...state,
         graphics: new Map([...payload])
+      }
+    case "SET_INJECTED_PROVIDER": 
+      return {
+        ...state,
+        injectedProvider: payload
       }
     default:
       return state;
@@ -68,10 +75,15 @@ export const AppContextProvider = ({ children }) => {
       let data = await repetitivelyGetIpfsData('graphics');
       dispatch({type: 'SET_GRAPHICS', payload: data});
     },
-    updateGraphics: async payload => {
-      let newData = await updateIpfsData('graphics', payload); // update ipfs
+    updateGraphics: async oldData => {
+      let newData = await updateIpfsData('graphics', oldData); // update ipfs
       dispatch({type: 'UPDATE_GRAPHICS', payload: newData }); // update appcontext
+    },
+    injectedProvider: store.injectedProvider,
+    setInjectedProvider: provider => {
+      dispatch({type: 'SET_INJECTED_PROVIDER', payload: provider })
     }
+
   };
 
   return <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>;

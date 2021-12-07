@@ -17,6 +17,8 @@ export function useGetTokenId(imageHash) {
                 })
             }
         });
+
+        
     }, [imageHash]);
     return tokenId; 
 }

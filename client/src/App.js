@@ -11,7 +11,9 @@ import ProposalCreateIndex from './pages/proposals/ProposalCreateIndex';
 import NFTSIndex from './pages/nfts/index';
 import VectorsIndex from './pages/vectors/index';
 
-import { useAppContext } from './AppContext';
+import { useAppContext } from './AppContext';// provider options
+
+// for wallet connect workflow
 
 export default function App() {
 
