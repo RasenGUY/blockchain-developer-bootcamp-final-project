@@ -66,18 +66,18 @@ export const AppContextProvider = ({ children }) => {
       let data = await repetitivelyGetIpfsData('proposals');
       dispatch({type: 'SET_PROPOSALS', payload: data});
     },
-    updateProposals: async payload => {
-      let newData = await updateIpfsData('proposals', payload);
-      dispatch({type: 'UPDATE_PROPOSALS', payload: newData }); // update appcontext
+    updateProposals: async newProposal => {
+      await updateIpfsData('proposals', newProposal); // updates proposal on ipfs
+      dispatch({type: 'UPDATE_PROPOSALS', payload: newProposal }); // update appcontext
     },
     graphics: store.graphics,
     setGraphics: async () => {
       let data = await repetitivelyGetIpfsData('graphics');
       dispatch({type: 'SET_GRAPHICS', payload: data});
     },
-    updateGraphics: async oldData => {
-      let newData = await updateIpfsData('graphics', oldData); // update ipfs
-      dispatch({type: 'UPDATE_GRAPHICS', payload: newData }); // update appcontext
+    updateGraphics: async newGraphic => {
+      await updateIpfsData('graphics', newGraphic); // updates graphic on ipfs
+      dispatch({type: 'UPDATE_GRAPHICS', payload: newGraphic }); // update appcontext
     },
     injectedProvider: store.injectedProvider,
     setInjectedProvider: provider => {

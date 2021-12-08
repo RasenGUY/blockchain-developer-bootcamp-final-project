@@ -41,7 +41,7 @@ export default function ProposalList() {
                             setLoaded={setLoaded}
 
                         />))
-                        : <h1>...Loading</h1> 
+                        : <h1>...fetching proposals from ipfs</h1> 
                     }
                 </Container>
             </Col>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Form, Button } from 'react-bootstrap';
+import { Form, Button, Spinner } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useProposalInformation } from '../../hooks/useProposalInformation';
@@ -17,16 +17,25 @@ export default function CastVote() {
 
     // for casting votes
     const proxy = useContract(process.env.PROXY_CONTRACT, daoArtifact.abi);
-    const {register, handleSubmit } = useForm();
+    const {register, handleSubmit, formState: {erros, isSubmitting, isSubmitted} } = useForm();
+    const [isSuccessfull, setIsSuccessfull] = useState();
+
     const onSubmit = async (data) => { 
         const support = Number(data['option']);
         const callCastVote = proxy.methods.castVote(toBN(proposalId), support).encodeABI(); 
         
         // // cast votes workflow
         alert(`casting vote with support: ${options[data['option']]}`);
-        callContract(process.env.PROXY_CONTRACT, callCastVote).then(async ({transactionHash}) => {
+        
+        try {
+            let {transactionHash} = await callContract(process.env.PROXY_CONTRACT, callCastVote);
             alert(`Vote casted sucessfully. Transaction hash ${transactionHash}`);
-        }).catch(e => alert(`code: ${e.code}: ${e.message}`));
+            setIsSuccessfull(true);
+            window.location.reload();
+
+        } catch(e){
+            alert(`code: ${e.code}: ${e.message}`); 
+        }
     } 
 
     return (
@@ -48,9 +57,14 @@ export default function CastVote() {
                         </Form.Select>
                     </Form.Group>
 
-                    <Button className="callout-button" type="submit">
-                    Vote
-                    </Button>
+                    {!isSubmitted && !isSubmitting && <Button className="callout-button" type="submit">Vote</Button> }
+                    { 
+                        isSubmitting && !isSuccessfull
+                        ? <Button className="callout-button" disabled> 
+                            <Spinner as="span" animation="grow" size="lg" role="status" aria-hidden="true"/>{' '} Loading... 
+                        </Button> 
+                        : isSubmitted ? <Button className="callout-button" type="submit" disabled>Success</Button> : null 
+                    } 
                 </> : 
                 <h1>Cannot cast votes on { proposalStates[state].text.toLowerCase() } proposal </h1>
             }

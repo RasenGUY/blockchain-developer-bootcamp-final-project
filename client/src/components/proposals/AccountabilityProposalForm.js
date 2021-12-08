@@ -1,6 +1,7 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect} from 'react'; 
+import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { Form, Button } from 'react-bootstrap';
+import { Form, Button, Spinner } from 'react-bootstrap';
  
 // for creating proposals
 import ProposalOptionsAccountabilityProposals from './ProposalOptionsAccountabilityProposals';
@@ -17,18 +18,21 @@ import { initializeData, listUploads } from '../../web3-storage/ipfsStorage';
 import { useAppContext } from '../../AppContext';
 
 export default function AccountabilityProposalForm() {
-    const { updateProposals } = useAppContext(); 
+    const { updateProposals, setProposals, proposals, injectedProvider } = useAppContext(); 
+    const navigate = useNavigate(); 
+    const [isSuccessfull, setIsSuccessfull] = useState();
+
     const { 
         register, 
         handleSubmit, 
-        watch,
-        formState: { errors, isSubmitting },
+        watch,  
+        formState: { errors, isSubmitting, isSubmitted },
     } = useForm({
         defaultValues: {
             type: 'Accountability Proposal'
         }
     });
-
+    // start selected option with at slashVotes
     const watchAction = watch('action', "slashVotes"); 
 
     // create governorInst for hashing proposal and proxy inst for calling propose
@@ -58,7 +62,7 @@ export default function AccountabilityProposalForm() {
             title: data.title, 
             description: data.description, 
             value: Object.entries(data[watchAction]), 
-            proposor: window.ethereum.selectedAddress,
+            proposor: injectedProvider.selectedAddress,
             call: {
                 targets: targets, 
                 calldatas: calldatas, 
@@ -69,25 +73,47 @@ export default function AccountabilityProposalForm() {
 
         // propose workflow 
         let proposeCallData = proxy.methods.propose(targets, values, calldatas, description).encodeABI();
-        callContract(process.env.PROXY_CONTRACT, proposeCallData).then(async ({transactionHash}) => {
-            
-            let proposals = await listUploads('proposals');
-            alert(`transaction mined transaction hash: ${transactionHash}`);
-            if (proposals.length < 1){
-                alert("initializing ipfs storage for proposals");    
-                await initializeData('proposals', [storageObject]); 
-            } else {
-                alert("updating proposals on ipfs");    
-                updateProposals(storageObject);
-            }
-            alert("proposal created sucessfully");
+        let { transactionHash } = await callContract(process.env.PROXY_CONTRACT, proposeCallData);
+        let proposals = await listUploads('proposals');
 
-        }).catch(e=> console.log(e));
+        if (proposals.length > 0){
+            try {
+                alert("updating proposal information on ipfs");
+                await updateProposals(storageObject);
+                setIsSuccessfull(true);
+                alert(`proposal created sucessfully transaction hash: ${transactionHash}`);
+                return setTimeout(() => {
+                    navigate("/proposals");
+                }, 500);
+            } catch(e){
+                console.log(e) // notification goes here
+            }   
+        }
+
+        try { // initializes the data on web3storage if data wasn't initialized yet
+            alert("initializing ipfs storage for proposals");    
+            await initializeData('proposals', [storageObject]);
+            setIsSuccessfull(true);
+            alert(`proposal created sucessfully transaction hash: ${transactionHash}`);
+            return setTimeout(() => {
+                navigate("/proposals");
+            }, 500);
+        } catch (e){
+            console.log(e); // notification goes here
+        }
     }
+
+    useEffect(async () => {
+        // make sure proposals are loaded before page is loaded
+        if(!proposals){
+            await setProposals();
+        }
+    }, []);
+
     return (
         <Form onSubmit={handleSubmit(onSubmit)}>
             <Form.Group>
-                <h2>Accountability Proposals </h2>
+                <h2>Accountability Proposals</h2>
             </Form.Group>
 
             <Form.Group>
@@ -103,7 +129,15 @@ export default function AccountabilityProposalForm() {
                 <ProposalOptionsAccountabilityProposals action={watchAction} register={register}/>
             </Form.Group> 
             
-            <Button className="callout-button" type="submit">Propose</Button>
+            {!isSubmitted && !isSubmitting && <Button className="callout-button" type="submit">Propose</Button> }
+            { 
+                isSubmitting && !isSuccessfull
+                ? <Button className="callout-button" disabled> 
+                    <Spinner as="span" animation="grow" size="lg" role="status" aria-hidden="true"/>{' '} Loading... 
+                </Button> 
+                : isSubmitted ? <Button className="callout-button" type="submit" disabled>Success</Button> : null 
+            } 
+
         </Form>    
     )
 }

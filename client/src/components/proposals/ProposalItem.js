@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect} from 'react';
 import { Link } from 'react-router-dom'; 
-import { Card, Badge, Container, Button  } from 'react-bootstrap';
+import { Card, Badge, Container, Button, Spinner, Form } from 'react-bootstrap';
 import { shortenAddress } from '../../utils/shortenAddress'; 
 import { useProposalInformation } from '../../hooks/useProposalInformation';
 import { proposalStates } from '../../helpers/proposalStates';
+import { useForm } from 'react-hook-form';
 
 // for handling queueing and execution of proposal
 import daoArtifact from '../../contracts/IkonDAO.json';
@@ -15,34 +16,48 @@ export default function ProposalItem({id, type, title, description, value, propo
     const states = proposalStates;
     const { state } = useProposalInformation(id);
     const proxy = useContract(process.env.PROXY_CONTRACT, daoArtifact.abi);
+    const [queueClicked, setQueueClicked] = useState();
+    const [executeClicked, setExecuteClicked] = useState();
+    const [isSuccessfull, setIsSuccessfull] = useState();
+    const [queueRejected, setQueueRejected] = useState();
+    const [executeRejected, setExecuteRejected] = useState();
+    const { handleSubmit, formState: { isSubmitting, isSubmitted }} = useForm();
     
-    const handleQueue = () => {
-        // handleExecute
+    const handleQueue = async () => {
+        // handleExecuted
+        setQueueClicked(true);
         const {targets, calldatas, values, descriptionHash } = proposals.get(id).call;
         const queCallData = proxy.methods.queue(targets, values, calldatas, descriptionHash).encodeABI();
         alert(`queueing proposal with id ${shortenAddress(id)}`);
-        callContract(process.env.PROXY_CONTRACT, queCallData).then(({transactionHash}) => {
-            alert("transaction mined!");   
-            alert(`hash: ${transactionHash}`);   
-            alert("proposal queued!");   
-        }).catch(e => alert(`code: ${e.code}, message: ${e.message}`));
-        setLoaded(false);
+        try {
+            let { transactionHash } = await callContract(process.env.PROXY_CONTRACT, queCallData);
+            alert(`proposal queued with transaction hash ${transactionHash}`);   
+            setLoaded(false);
+            setIsSuccessfull(true);
+        } catch(e){
+            alert(`code: ${e.code}, message: ${e.message}`);
+            setQueueRejected(true);
+        }
+        window.location.reload();
     }
     
-    const handleExecute = ()=>{
+    const handleExecute = async () => {
         // handleExecute 
+        setExecuteClicked(true);
         const {targets, calldatas, values, descriptionHash } = proposals.get(id).call;
-
         const executeCallData = proxy.methods.execute(targets, values, calldatas, descriptionHash).encodeABI();
         alert(`executing proposal with id ${shortenAddress(id)}`);
-        callContract(process.env.PROXY_CONTRACT, executeCallData).then(({transactionHash}) => {
-            alert("transaction mined!");   
-            alert(`hash: ${transactionHash}`);
-            alert("proposal executed!");   
-        }).catch(e => alert(`code: ${e.code}, message: ${e.message}`));
-        setLoaded(false);
+        try { 
+            let {transactionHash} = await callContract(process.env.PROXY_CONTRACT, executeCallData);
+            alert(`proposal executed with transaction hash ${transactionHash}`);   
+            setLoaded(false);
+            setIsSuccessfull(true);
+        } catch (e){
+            alert(`code: ${e.code}, message: ${e.message}`);
+            setExecuteRejected(true);
+        }
+        window.location.reload();
     }
-
 
     return (
 
@@ -57,15 +72,80 @@ export default function ProposalItem({id, type, title, description, value, propo
                             <Badge className="mt-2" >{shortenAddress(id)}</Badge>
                             <Badge className="mt-2" >{proposor}</Badge>
                         </div>
-                        <div style={{width: "100%", height: "40%"}} className="d-flex justify-content-end">
-                            { state && proposalStates[state].text === 'Succeeded' || state && proposalStates[state].text === 'Queued'?  
+                        <div style={{width: "100%", height: "40%"}} className="d-flex justify-content-end" >
+                            { state && proposalStates[state].text === 'Succeeded' || state && proposalStates[state].text === 'Queued'
+                            ?  
                                 <div className="d-flex">
-                                    <Button onClick={handleQueue} className="me-3" variant="info" disabled={state && proposalStates[state].text === 'Succeeded' ? false : true}>Queue Proposal</Button> 
-                                    <Button onClick={handleExecute} variant="success" disabled={state && proposalStates[state].text === 'Queued' ? false : true}>Execute Proposal </Button> 
-                                </div> :
-                                null
+                                        <Form onSubmit={handleSubmit(handleQueue)}> 
+                                            {
+                                                !queueClicked && !isSubmitted && !isSubmitted &&
+                                                    <Button 
+                                                        className="me-3" 
+                                                        variant="info" 
+                                                        disabled={state && proposalStates[state].text === 'Succeeded' ? false : true }
+                                                        type='submit'
+                                                        >Queue Proposal
+                                                    </Button> 
+                                            }
+                                            { 
+                                                queueClicked && isSubmitting && !isSuccessfull
+                                                ? <Button 
+                                                    className="me-3" 
+                                                    variant="info" 
+                                                    disabled
+                                                    > 
+                                                        <Spinner as="span" animation="border" role="status" aria-hidden="true"/>{' '} Loading... 
+                                                    </Button> 
+                                                : queueClicked && isSubmitted 
+                                                    ? !queueRejected ? <Button 
+                                                        className="me-3" 
+                                                        variant="info" 
+                                                        disabled> Success </Button>
+                                                        : <Button 
+                                                        className="me-3"
+                                                        variant="danger" 
+                                                        disabled>Error</Button>
+                                                    : null 
+                                            } 
+                                        </Form>
+
+                                        <Form onSubmit={handleSubmit(handleExecute)}> 
+                                        {
+                                            !executeClicked && !isSubmitted && !isSubmitted &&  
+                                            <Button 
+                                                variant="success" 
+                                                disabled={state && proposalStates[state].text === 'Queued' ? false : true}
+                                                type='submit'
+                                                >Execute Proposal 
+                                            </Button>
+                                        }
+                                        { 
+                                                executeClicked && isSubmitting && !isSuccessfull
+                                                ? <Button 
+                                                    className="me-3" 
+                                                    variant="success" 
+                                                    disabled
+                                                    > 
+                                                        <Spinner as="span" animation="border" role="status" aria-hidden="true"/>{' '} Loading... 
+                                                    </Button> 
+                                                : executeClicked && isSubmitted 
+                                                    ? !executeRejected ? <Button 
+                                                        className="me-3" 
+                                                        variant="success" 
+                                                        disabled
+                                                        > Success </Button>
+                                                        : <Button className="me-3" variant="danger" disabled>Error</Button>
+                                                    : null 
+                                            } 
+                                        </Form>      
+                                </div> 
+                            :
+                            
+                            null
+                            
                             }
                         </div>
+                      
                 </Card.Header>
                 <Card.Body className="mt-2">
                     <Card.Title>{title}</Card.Title>
@@ -83,7 +163,7 @@ export default function ProposalItem({id, type, title, description, value, propo
                     : null 
                 }
                 </div>
-                    <Link to={`/proposals/${id}`} state={{proposals: proposals}} >Info</Link>
+                    <Link to={`/proposals/${id}`} state={{proposals: proposals}}>Info</Link>
                 </Card.Body>
             </Card>
             : <h2>...gathering data</h2>

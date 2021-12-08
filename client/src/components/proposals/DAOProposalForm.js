@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react'
 import { useForm } from 'react-hook-form';
-import { Form, Button } from 'react-bootstrap';
+import { Form, Button, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
  
 // for creating proposals
@@ -18,7 +18,7 @@ import { useAppContext } from '../../AppContext';
 import { storeFiles, initializeData, listUploads } from '../../web3-storage/ipfsStorage';
 
 export default function DAOProposalForm() {
-    const { proposals, updateProposals, updateGraphics, graphics, setGraphics } = useAppContext(); 
+    const { setProposals, proposals, updateProposals, updateGraphics, graphics, setGraphics, injectedProvider } = useAppContext(); 
     const navigate = useNavigate(); 
     const [isSuccessfull, setIsSuccessfull] = useState();
 
@@ -26,7 +26,7 @@ export default function DAOProposalForm() {
         register, 
         handleSubmit, 
         watch,
-        formState: { errors, isSubmitting, isSubmitSuccessful },
+        formState: { errors, isSubmitting, isSubmitted },
     } = useForm({
         defaultValues: {
             type: 'DAO Proposal'
@@ -94,7 +94,7 @@ export default function DAOProposalForm() {
             value: watchAction === 'safeMintVector' 
             ? [['RewardsAddress', data[watchAction]['RewardsAddress']], [ 'Image url', vectorData.external_url ], ['CID', vectorData.image ] ]
             : Object.entries(data[watchAction]), 
-            proposor: window.ethereum.selectedAddress,
+            proposor: injectedProvider.selectedAddress,
             call: {
                 targets: targets, 
                 calldatas: calldatas, 
@@ -105,34 +105,50 @@ export default function DAOProposalForm() {
         
         // propose workflow 
         let proposeCallData = proxy.methods.propose(targets, values, calldatas, description).encodeABI();
-        callContract(process.env.PROXY_CONTRACT, proposeCallData).then(async ({transactionHash}) => {
-            
-            let images = await listUploads('graphics');
-            let proposals = await listUploads('proposals');
-            alert(`transaction mined transaction hash: ${transactionHash}`);
-            if (watchAction === 'safeMintVector'){
-                
-                if (images.length < 1){
+        let { transactionHash } = await callContract(process.env.PROXY_CONTRACT, proposeCallData); 
+        let images = await listUploads('graphics');
+        let proposals = await listUploads('proposals');
+
+        // updates vector information on ipfs if action is a minting a vector
+        if (watchAction === 'safeMintVector'){ 
+
+            try { // updates graphics
+                if (images.length < 1) {
                     alert("initializing ipfs storage for images");    
                     await initializeData('graphics', [vectorData]);
-                    alert("graphics initialized");    
-
                 } else {
                     alert("updating graphics on ipfs");    
                     await updateGraphics(vectorData);
-                    alert("graphics updated");    
                 }
-                alert("stored vector information on ipfs");
-            }
-            if (proposals.length < 1){
-                alert("initializing ipfs storage for proposals");
-                await initializeData('proposals', [storageObject]);
-            } else {
+            } catch(e){
+                console.log(e);
+            }        
+            alert("stored graphics on ipfs");
+        }
+        if (proposals.length > 0){
+            try {
+                alert("updating proposal information on ipfs");
                 await updateProposals(storageObject);
+                setIsSuccessfull(true);
+                alert(`proposal created sucessfully transaction hash: ${transactionHash}`);
+                return setTimeout(() => {
+                    navigate("/proposals");
+                }, 500);
+            } catch(e){
+                console.log(e); // notification goes here
             }
-            alert("proposal created sucessfully");
-
-        });
+        } 
+        try { // initializes the data on web3storage if data wasn't initialized yet
+            alert("initializing ipfs storage for proposals");
+            await initializeData('proposals', [storageObject]);
+            setIsSuccessfull(true);
+            alert(`proposal created sucessfully transaction hash: ${transactionHash}`);
+            return setTimeout(() => {
+                navigate("/proposals");
+            }, 500);
+        } catch(e){
+            console.log(e); // notification goes here
+        }
     }
 
     useEffect(async ()=>{
@@ -163,7 +179,14 @@ export default function DAOProposalForm() {
             <Form.Group className="mb-2"> 
                 <ProposalOptionsDAOProposals action={watchAction} register={register}/>
             </Form.Group> 
-            <Button className="callout-button" type="submit">{isSubmitting && !isSuccessfull ? isSuccessfull ? "Success" : "...Loading" : "Propose"}</Button>
-        </Form>  : <h1>...Loading</h1>
+            {!isSubmitted && !isSubmitting && <Button className="callout-button" type="submit">Propose</Button> }
+            { 
+                isSubmitting && !isSuccessfull
+                ? <Button className="callout-button" disabled> 
+                    <Spinner as="span" animation="grow" size="lg" role="status" aria-hidden="true"/>{' '} Loading... 
+                </Button> 
+                : isSubmitted ? <Button className="callout-button" type="submit" disabled>Success</Button> : null 
+            } 
+        </Form> : <h1>...fetching data from ipfs</h1>
     )
 }
